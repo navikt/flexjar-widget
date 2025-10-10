@@ -23,12 +23,20 @@ import { useAutoCloseOnSuccess } from "./useAutoCloseOnSuccess.js";
 import { useRatingGate } from "./useRatingGate.js";
 import type { FlexJarRenderQuestionProps } from "../../types.js";
 
+export interface FlexJarSurveyConfig {
+  rating: RatingQuestion;
+  mainQuestion: FlexJarMainQuestion;
+  followUpQuestions?: FlexJarFollowUpQuestion[];
+}
+
+export type FlexJarFollowUpQuestion = Exclude<FlexJarQuestion, { type: "rating" }>;
+export type FlexJarMainQuestion = Extract<FlexJarQuestion, { type: "text" }>;
+
 export interface FlexJarModalProps {
   open: boolean;
   onClose: () => void;
   feedbackId: string;
-  ratingQuestion: RatingQuestion;
-  followUpQuestions?: Array<Exclude<FlexJarQuestion, { type: "rating" }>>;
+  survey: FlexJarSurveyConfig;
   transport: FlexJarTransport;
   events?: FlexJarEvents;
   context?: Record<string, unknown>;
@@ -55,7 +63,7 @@ const DEFAULT_COPY = {
   submitLabel: "Send",
   submitPendingLabel: "Sender…",
   cancelLabel: "Avbryt",
-  validationErrorMessage: "Svar på obligatoriske spørsmål.",
+  validationErrorMessage: "Du må svare på spørsmålet.",
   transportErrorMessage: "Kunne ikke sende tilbakemeldingen. Prøv igjen senere.",
   successTitle: "Takk for tilbakemeldingen!",
   successBody: "Vi bruker svarene dine for å forbedre løsningen.",
@@ -76,9 +84,8 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
     const {
       open,
       onClose,
-      feedbackId,
-  ratingQuestion,
-  followUpQuestions = [],
+    feedbackId,
+    survey,
       transport,
       events,
       context,
@@ -104,21 +111,29 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
     const formId = useId();
     const headingId = useId();
 
+    const ratingQuestion = survey.rating;
+    const mainQuestion = survey.mainQuestion;
+    const followUpQuestions: FlexJarFollowUpQuestion[] =
+      survey.followUpQuestions ?? [];
+
     const sanitizedFollowUps = useMemo(
-      () => followUpQuestions.filter((question) => question.id !== ratingQuestion.id),
-      [followUpQuestions, ratingQuestion.id],
+      () =>
+        followUpQuestions.filter(
+          (question) =>
+            question.id !== ratingQuestion.id && question.id !== mainQuestion.id,
+        ),
+      [followUpQuestions, mainQuestion.id, ratingQuestion.id],
     );
 
     const orderedQuestions = useMemo(
-      () => [ratingQuestion, ...sanitizedFollowUps],
-      [ratingQuestion, sanitizedFollowUps],
+      () => [ratingQuestion, mainQuestion, ...sanitizedFollowUps],
+      [mainQuestion, ratingQuestion, sanitizedFollowUps],
     );
 
     const { answers, status, error, setAnswer, submit, reset } = useFlexJar({
       feedbackId,
       questions: orderedQuestions,
       transport,
-      events,
       context,
     });
 

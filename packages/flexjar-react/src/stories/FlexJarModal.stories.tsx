@@ -5,9 +5,10 @@ import type { FlexJarQuestion, RatingQuestion } from "@navikt/flexjar-core";
 import {
   FlexJarModal,
   type FlexJarModalProps,
+  type FlexJarMainQuestion,
+  type FlexJarFollowUpQuestion,
+  type FlexJarSurveyConfig,
 } from "../components/FlexJarModal/index.js";
-
-type FollowUpQuestion = Exclude<FlexJarQuestion, { type: "rating" }>;
 
 const RATING_QUESTION: RatingQuestion = {
   id: "rating",
@@ -17,14 +18,16 @@ const RATING_QUESTION: RatingQuestion = {
   required: true,
 };
 
-const FOLLOW_UP_QUESTIONS: FollowUpQuestion[] = [
-  {
-    id: "text",
-    type: "text",
-    prompt: "Hvordan kan vi forbedre Flexjar for teamet ditt?",
-    description: "Del så mange detaljer du vil.",
-    placeholder: "For eksempel: støtte for egne tema",
-  },
+const MAIN_QUESTION: FlexJarMainQuestion = {
+  id: "main",
+  type: "text",
+  prompt: "Hvordan kan vi forbedre Flexjar for teamet ditt?",
+  description: "Del så mange detaljer du vil.",
+  placeholder: "For eksempel: støtte for egne tema",
+  required: true,
+};
+
+const FOLLOW_UP_QUESTIONS: FlexJarFollowUpQuestion[] = [
   {
     id: "usage",
     type: "singleChoice",
@@ -54,6 +57,12 @@ const TRANSPORT: FlexJarModalProps["transport"] = {
   },
 };
 
+const SURVEY: FlexJarSurveyConfig = {
+  rating: RATING_QUESTION,
+  mainQuestion: MAIN_QUESTION,
+  followUpQuestions: FOLLOW_UP_QUESTIONS,
+};
+
 const meta: Meta<typeof FlexJarModal> = {
   title: "Components/FlexJarModal",
   component: FlexJarModal,
@@ -62,8 +71,7 @@ const meta: Meta<typeof FlexJarModal> = {
   },
   args: {
     feedbackId: "storybook-feedback",
-  ratingQuestion: RATING_QUESTION,
-  followUpQuestions: FOLLOW_UP_QUESTIONS,
+    survey: SURVEY,
     transport: TRANSPORT,
     submitLabel: "Send",
     cancelLabel: "Lukk",

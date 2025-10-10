@@ -16,15 +16,16 @@ npm run build
 
 ### 1. Describe your survey
 
-Every Flexjar flow starts with a mandatory rating question. Pass it as the dedicated `ratingQuestion` prop and list any follow-up questions separately in `followUpQuestions`.
+Every Flexjar flow starts with a mandatory rating question. Group it with any follow-ups in a `survey` object so the widget can enforce gating rules.
 
 ```tsx
-import { FlexJarModal } from "@navikt/flexjar-react";
-import type {
-	FlexJarTransport,
-	RatingQuestion,
-	FlexJarQuestion,
-} from "@navikt/flexjar-core";
+import {
+	FlexJarModal,
+	type FlexJarFollowUpQuestion,
+	type FlexJarMainQuestion,
+	type FlexJarSurveyConfig,
+} from "@navikt/flexjar-react";
+import type { FlexJarTransport, RatingQuestion } from "@navikt/flexjar-core";
 
 const ratingQuestion: RatingQuestion = {
 	id: "experience",
@@ -36,13 +37,15 @@ const ratingQuestion: RatingQuestion = {
 	maximumLabel: "Svært bra",
 };
 
-const followUpQuestions: Array<Exclude<FlexJarQuestion, { type: "rating" }>> = [
-	{
-		id: "improvement",
-		type: "text",
-		prompt: "Hva kan forbedres?",
-		minRows: 3,
-	},
+const mainQuestion: FlexJarMainQuestion = {
+	id: "feedback",
+	type: "text",
+	prompt: "Hva tenker du om denne tjenesten?",
+	minRows: 3,
+	required: true,
+};
+
+const followUpQuestions: FlexJarFollowUpQuestion[] = [
 	{
 		id: "channel",
 		type: "singleChoice",
@@ -53,6 +56,12 @@ const followUpQuestions: Array<Exclude<FlexJarQuestion, { type: "rating" }>> = [
 		],
 	},
 ];
+const survey: FlexJarSurveyConfig = {
+	rating: ratingQuestion,
+	mainQuestion,
+	followUpQuestions,
+};
+
 ```
 
 ### 2. Inject the transport handler
@@ -90,8 +99,7 @@ const Example = () => {
 				open={open}
 				onClose={() => setOpen(false)}
 				feedbackId="oppfolgingsplan"
-				ratingQuestion={ratingQuestion}
-				followUpQuestions={followUpQuestions}
+				survey={survey}
 				transport={transport}
 				title="Gi tilbakemelding"
 				intro="Svarene dine brukes til videre forbedringsarbeid."
@@ -108,4 +116,43 @@ const Example = () => {
 - **Events**: pass an `events` object (see `FlexJarEvents`) to react to lifecycle hooks like `onViewModal`, `onSubmitSuccess`, or validation failures.
 - **Success handling**: enable `autoCloseOnSuccess` and tune `successCloseDelayMs` if you want the modal to close automatically after feedback is sent.
 
+Flexjar’s backend expects three core fields: `feedbackId`, `svar` (the rating), and `feedback` (the main text answer). The modal enforces those requirements by always rendering the rating question first and requiring a `mainQuestion` in the survey configuration; any extra questions are delivered alongside those core values.
+
 The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencies. Consumers stay in full control of network transport, analytics, and question configuration.
+
+### FlexJarModal props
+
+| Prop | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `open` | `boolean` | Yes | – | Controls whether the modal is visible. |
+| `onClose` | `() => void` | Yes | – | Called when the modal requests to close (overlay click, escape key, close button). |
+| `feedbackId` | `string` | Yes | – | Identifier included with the submission payload and analytics callbacks. |
+| `survey` | `FlexJarSurveyConfig` | Yes | – | Bundles the mandatory rating + main question along with optional follow-ups. |
+| `transport` | `FlexJarTransport` | Yes | – | Implementation responsible for persisting a submission. |
+| `events` | `FlexJarEvents` | No | – | Optional lifecycle callbacks for analytics and debugging. |
+| `context` | `Record<string, unknown>` | No | – | Extra metadata merged into the submission payload. |
+| `title` | `string` | No | `"Gi tilbakemelding"` | Heading rendered in the modal header. |
+| `intro` | `React.ReactNode` | No | – | Introductory text shown above the question list. |
+| `submitLabel` | `string` | No | `"Send"` | Text for the primary submit button when idle. |
+| `submitPendingLabel` | `string` | No | `"Sender…"` | Text for the primary button while a submission is pending. |
+| `cancelLabel` | `string` | No | `"Avbryt"` | Text for the secondary cancel button. |
+| `validationErrorMessage` | `string` | No | `"Svar på obligatoriske spørsmål."` | Message displayed when required answers are missing. |
+| `transportErrorMessage` | `string` | No | `"Kunne ikke sende tilbakemeldingen. Prøv igjen senere."` | Message displayed when the transport throws. |
+| `successTitle` | `string` | No | `"Takk for tilbakemeldingen!"` | Title shown after a successful submission. |
+| `successBody` | `React.ReactNode` | No | `"Vi bruker svarene dine for å forbedre løsningen."` | Body text in the success view. |
+| `successPrimaryLabel` | `string` | No | `"Lukk"` | Label for the button in the success view. |
+| `className` | `string` | No | – | Optional class applied to the underlying `Modal`. |
+| `renderQuestion` | `(props: FlexJarRenderQuestionProps) => React.ReactNode` | No | – | Custom renderer if you want to override the default question components. |
+| `resetOnClose` | `boolean` | No | `true` | Reset answers when the modal closes. |
+| `autoCloseOnSuccess` | `boolean` | No | `false` | Close the modal automatically after a successful submission. |
+| `successCloseDelayMs` | `number` | No | `1600` | Delay (ms) before auto-closing when `autoCloseOnSuccess` is enabled. |
+| `showPersonalDataNotice` | `boolean` | No | `true` | Toggle the default personal-data warning beneath the form. |
+| `personalDataNotice` | `React.ReactNode` | No | Default warning element | Custom content for the personal-data warning. |
+
+### FlexJarSurveyConfig
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `rating` | `RatingQuestion` | Yes | Primary entry question; modal is gated on an answer here. |
+| `mainQuestion` | `FlexJarMainQuestion` | Yes | Captures the main feedback text that Flexjar expects in the `feedback` field. |
+| `followUpQuestions` | `FlexJarFollowUpQuestion[]` | No | Additional questions rendered after the rating has been answered. |
