@@ -1,0 +1,35 @@
+{
+  "name": "flexjar-workspace",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=@navikt/flexjar-core && npm run build --workspace=@navikt/flexjar-react",
+    "test": "npm run test --workspace=@navikt/flexjar-core && npm run test --workspace=@navikt/flexjar-react",
+    "lint": "eslint packages --ext .ts,.tsx",
+    "storybook": "npm run storybook --workspace=@navikt/flexjar-react",
+  "build-storybook": "npm run build-storybook --workspace=@navikt/flexjar-react"
+  },
+  "devDependencies": {
+    "@navikt/ds-react": "^5.0.0",
+    "@types/node": "^22.5.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@testing-library/react": "^15.0.0",
+    "eslint": "^8.57.0",
+    "jsdom": "^24.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "prettier": "^3.3.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsup": "^8.2.4",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}

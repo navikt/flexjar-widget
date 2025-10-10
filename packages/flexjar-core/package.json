@@ -1,0 +1,30 @@
+{
+  "name": "@navikt/flexjar-core",
+  "version": "0.1.0",
+  "description": "Core logic and types for the NAV Flexjar survey widget.",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+  "test": "vitest run --passWithNoTests",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "react": "^18.3.1"
+  },
+  "keywords": [
+    "nav",
+    "flexjar",
+    "survey"
+  ],
+  "license": "MIT"
+}

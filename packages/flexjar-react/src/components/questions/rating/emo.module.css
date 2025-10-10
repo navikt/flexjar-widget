@@ -1,0 +1,90 @@
+.emojiRow {
+  display: flex;
+  gap: var(--a-spacing-4);
+  align-items: flex-end;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow-x: hidden;
+  padding: var(--a-spacing-2) var(--a-spacing-4);
+  margin: var(--a-spacing-1) 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.emobutton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+  color: var(--a-gray-900);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  min-width: 6rem;
+  padding: var(--a-spacing-2);
+  transition: color 0.2s ease, transform 0.2s ease;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.emobutton:focus-visible {
+  outline: none;
+  border-radius: var(--a-border-radius-large);
+  box-shadow: 0 0 0 3px var(--a-border-focus);
+  z-index: 1;
+}
+
+.active {
+  transform: translateY(-2px);
+}
+
+.emobutton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.sinnaButton:hover {
+  color: var(--a-red-500);
+}
+
+.leiButton:hover {
+  color: var(--a-orange-500);
+}
+
+.noytralButton:hover {
+  color: var(--a-blue-500);
+}
+
+.gladButton:hover {
+  color: var(--a-green-400);
+}
+
+.veldigGladButton:hover {
+  color: var(--a-green-700);
+}
+
+.legend {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.errorMessage {
+  color: var(--a-text-danger);
+}
+
+.range {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--a-font-size-small);
+}
