@@ -1,20 +1,23 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Button, VStack } from "@navikt/ds-react";
-import type { FlexJarQuestion } from "@navikt/flexjar-core";
+import type { FlexJarQuestion, RatingQuestion } from "@navikt/flexjar-core";
 import {
   FlexJarModal,
   type FlexJarModalProps,
 } from "../components/FlexJarModal/index.js";
 
-const QUESTIONS: FlexJarQuestion[] = [
-  {
-    id: "rating",
-    type: "rating",
-    prompt: "Hvor fornøyd er du med Flexjar-widgeten?",
-    description: "Velg ansiktet som passer best til opplevelsen din.",
-    required: true,
-  },
+type FollowUpQuestion = Exclude<FlexJarQuestion, { type: "rating" }>;
+
+const RATING_QUESTION: RatingQuestion = {
+  id: "rating",
+  type: "rating",
+  prompt: "Hvor fornøyd er du med Flexjar-widgeten?",
+  description: "Velg ansiktet som passer best til opplevelsen din.",
+  required: true,
+};
+
+const FOLLOW_UP_QUESTIONS: FollowUpQuestion[] = [
   {
     id: "text",
     type: "text",
@@ -59,7 +62,8 @@ const meta: Meta<typeof FlexJarModal> = {
   },
   args: {
     feedbackId: "storybook-feedback",
-    questions: QUESTIONS,
+  ratingQuestion: RATING_QUESTION,
+  followUpQuestions: FOLLOW_UP_QUESTIONS,
     transport: TRANSPORT,
     submitLabel: "Send",
     cancelLabel: "Lukk",

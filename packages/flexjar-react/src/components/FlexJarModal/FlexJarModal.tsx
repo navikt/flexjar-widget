@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId } from "react";
+import React, { useCallback, useEffect, useId, useMemo } from "react";
 import {
   Alert,
   BodyLong,
@@ -15,6 +15,7 @@ import type {
   FlexJarEvents,
   FlexJarQuestion,
   FlexJarTransport,
+  RatingQuestion,
 } from "@navikt/flexjar-core";
 import { SuccessContent } from "./SuccessContent.js";
 import { DefaultQuestionRenderer } from "../questions/index.js";
@@ -26,7 +27,8 @@ export interface FlexJarModalProps {
   open: boolean;
   onClose: () => void;
   feedbackId: string;
-  questions: FlexJarQuestion[];
+  ratingQuestion: RatingQuestion;
+  followUpQuestions?: Array<Exclude<FlexJarQuestion, { type: "rating" }>>;
   transport: FlexJarTransport;
   events?: FlexJarEvents;
   context?: Record<string, unknown>;
@@ -75,7 +77,8 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
       open,
       onClose,
       feedbackId,
-      questions,
+  ratingQuestion,
+  followUpQuestions = [],
       transport,
       events,
       context,
@@ -101,9 +104,19 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
     const formId = useId();
     const headingId = useId();
 
+    const sanitizedFollowUps = useMemo(
+      () => followUpQuestions.filter((question) => question.id !== ratingQuestion.id),
+      [followUpQuestions, ratingQuestion.id],
+    );
+
+    const orderedQuestions = useMemo(
+      () => [ratingQuestion, ...sanitizedFollowUps],
+      [ratingQuestion, sanitizedFollowUps],
+    );
+
     const { answers, status, error, setAnswer, submit, reset } = useFlexJar({
       feedbackId,
-      questions,
+      questions: orderedQuestions,
       transport,
       events,
       context,
@@ -129,11 +142,10 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
       onClose: handleClose,
     });
 
-    const {
+    const { shouldDeferQuestion, isSubmitBlocked } = useRatingGate(
       ratingQuestion,
-      shouldDeferQuestion,
-      isSubmitBlocked,
-    } = useRatingGate(questions, answers);
+      answers,
+    );
 
     const handleSubmit = useCallback(
       async (event: React.FormEvent<HTMLFormElement>) => {
@@ -171,7 +183,7 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
             <form id={formId} onSubmit={handleSubmit} noValidate>
               <VStack gap="6">
                 {intro && <BodyLong>{intro}</BodyLong>}
-                {questions.map((question: FlexJarQuestion) => {
+                {orderedQuestions.map((question: FlexJarQuestion) => {
                   if (shouldDeferQuestion(question)) {
                     return null;
                   }
@@ -220,7 +232,7 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
                   </Alert>
                 )}
 
-                {showPersonalDataNotice && (!ratingQuestion || !isSubmitBlocked) && (
+                {showPersonalDataNotice && !isSubmitBlocked && (
                   <Alert variant="warning" className="flexjar-personal-data-alert">
                     {personalDataNotice ?? DEFAULT_PERSONAL_DATA_NOTICE}
                   </Alert>
