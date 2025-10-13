@@ -6,11 +6,11 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspace=@navikt/flexjar-core && npm run build --workspace=@navikt/flexjar-react",
-    "test": "npm run test --workspace=@navikt/flexjar-core && npm run test --workspace=@navikt/flexjar-react",
+    "build": "npm run build --workspace=@navikt/flexjar-widget",
+    "test": "npm run test --workspace=@navikt/flexjar-widget",
     "lint": "eslint packages --ext .ts,.tsx",
-    "storybook": "npm run storybook --workspace=@navikt/flexjar-react",
-  "build-storybook": "npm run build-storybook --workspace=@navikt/flexjar-react"
+    "storybook": "npm run storybook --workspace=@navikt/flexjar-widget",
+    "build-storybook": "npm run build-storybook --workspace=@navikt/flexjar-widget"
   },
   "devDependencies": {
     "@navikt/ds-react": "^5.0.0",
@@ -22,6 +22,7 @@
     "@typescript-eslint/parser": "^7.18.0",
     "@testing-library/react": "^15.0.0",
     "eslint": "^8.57.0",
+  "eslint-plugin-storybook": "^9.1.10",
     "jsdom": "^24.0.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react-hooks": "^5.0.0",

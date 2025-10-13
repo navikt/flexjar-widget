@@ -1,9 +1,8 @@
 # Flexjar Widget
 
-This workspace hosts the upcoming Flexjar widget packages:
-
-- `@navikt/flexjar-core` – transport-agnostic hooks, validation, and shared types
-- `@navikt/flexjar-react` – Aksel-based components that render configurable Flexjar surveys
+This workspace hosts `@navikt/flexjar-widget` – the React-based Flexjar survey
+widget. The package bundles the modal UI, hooks, and shared types you need to
+collect feedback with a configurable question set.
 
 ## Getting started
 
@@ -21,15 +20,13 @@ Every Flexjar flow starts with a mandatory rating question. Group it with any fo
 ```tsx
 import {
 	FlexJarModal,
+	createRatingLabels,
 	type FlexJarFollowUpQuestion,
 	type FlexJarMainQuestion,
 	type FlexJarSurveyConfig,
-} from "@navikt/flexjar-react";
-import {
-	createRatingLabels,
 	type FlexJarTransport,
 	type RatingQuestion,
-} from "@navikt/flexjar-core";
+} from "@navikt/flexjar-widget";
 
 const ratingQuestion: RatingQuestion = {
 	id: "experience",
