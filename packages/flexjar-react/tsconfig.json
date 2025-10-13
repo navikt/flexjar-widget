@@ -2,7 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDirs": [
+      "src",
+      "../flexjar-core/src"
+    ],
     "declaration": true,
     "emitDeclarationOnly": false,
     "types": ["vitest", "@testing-library/jest-dom"]

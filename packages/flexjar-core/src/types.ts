@@ -21,8 +21,6 @@ export interface RatingScaleLabel {
 export interface RatingQuestion extends FlexJarQuestionBase<"rating"> {
   scale?: number;
   labels?: RatingScaleLabel[];
-  minimumLabel?: string;
-  maximumLabel?: string;
 }
 
 export interface TextQuestion extends FlexJarQuestionBase<"text"> {
@@ -52,12 +50,19 @@ export type FlexJarQuestion =
 
 export type FlexJarAnswerValue = string | number | string[];
 
+export type FlexJarTransportPayload = {
+  feedbackId: string;
+  svar?: number;
+  feedback?: string;
+} & Record<string, FlexJarAnswerValue>;
+
 export interface FlexJarSubmission {
   feedbackId: string;
   answers: Record<string, FlexJarAnswerValue>;
   startedAt: string;
   submittedAt: string;
   context?: Record<string, unknown>;
+  transportPayload: FlexJarTransportPayload;
 }
 
 export interface FlexJarTransport {

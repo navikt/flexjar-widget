@@ -9,6 +9,7 @@ import type {
   FlexJarStatus,
   FlexJarSubmitResult,
   FlexJarSubmission,
+  FlexJarTransportPayload,
   FlexJarTransport,
   FlexJarValidationError,
   RatingQuestion,
@@ -21,6 +22,10 @@ export interface UseFlexJarOptions {
   events?: FlexJarEvents;
   context?: Record<string, unknown>;
   initialAnswers?: Record<string, FlexJarAnswerValue>;
+  coreQuestionIds?: {
+    rating: string;
+    main: string;
+  };
 }
 
 export interface UseFlexJarReturn {
@@ -39,8 +44,15 @@ export interface UseFlexJarReturn {
 const DEFAULT_SCALE = 5;
 
 export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
-  const { feedbackId, questions, transport, events, context, initialAnswers } =
-    options;
+  const {
+    feedbackId,
+    questions,
+    transport,
+    events,
+    context,
+    initialAnswers,
+    coreQuestionIds,
+  } = options;
 
   const initialAnswersRef = useRef<Record<string, FlexJarAnswerValue>>(
     initialAnswers ? cloneAnswers(initialAnswers) : {},
@@ -115,12 +127,18 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     setStatus("submitting");
     setError(null);
 
+    const answerSnapshot = cloneAnswers(answers);
     const submission: FlexJarSubmission = {
       feedbackId,
-      answers: cloneAnswers(answers),
+      answers: answerSnapshot,
       startedAt: startedAtRef.current,
       submittedAt: new Date().toISOString(),
       context: context ? { ...context } : undefined,
+      transportPayload: buildTransportPayload(
+        feedbackId,
+        answerSnapshot,
+        coreQuestionIds,
+      ),
     };
 
     events?.onSubmitStart?.(submission);
@@ -204,6 +222,63 @@ function cloneAnswers(
     }
   }
   return copy;
+}
+
+function buildTransportPayload(
+  feedbackId: string,
+  answers: Record<string, FlexJarAnswerValue>,
+  coreQuestionIds?: { rating: string; main: string },
+): FlexJarTransportPayload {
+  const payload: FlexJarTransportPayload = {
+    feedbackId,
+    ...answers,
+  };
+
+  if (coreQuestionIds) {
+    const ratingValue = answers[coreQuestionIds.rating];
+    const mainValue = answers[coreQuestionIds.main];
+
+    const svar = coerceRatingAnswer(ratingValue);
+    if (svar !== undefined) {
+      payload.svar = svar;
+    }
+
+    const feedback = coerceFeedbackAnswer(mainValue);
+    if (feedback !== undefined) {
+      payload.feedback = feedback;
+    }
+  }
+
+  return payload;
+}
+
+function coerceRatingAnswer(
+  value: FlexJarAnswerValue | undefined,
+): number | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  if (typeof value === "number") {
+    return value;
+  }
+
+  const numeric = Number(value);
+  return Number.isNaN(numeric) ? undefined : numeric;
+}
+
+function coerceFeedbackAnswer(
+  value: FlexJarAnswerValue | undefined,
+): string | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  if (Array.isArray(value)) {
+    return value.join(", ");
+  }
+
+  return String(value);
 }
 
 function isAnswerPresent(

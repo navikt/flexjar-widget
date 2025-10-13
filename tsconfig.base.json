@@ -12,6 +12,11 @@
     "verbatimModuleSyntax": true,
     "allowSyntheticDefaultImports": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@navikt/flexjar-core": ["packages/flexjar-core/src"],
+      "@navikt/flexjar-core/*": ["packages/flexjar-core/src/*"]
+    }
   }
 }

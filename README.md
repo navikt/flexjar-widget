@@ -25,17 +25,31 @@ import {
 	type FlexJarMainQuestion,
 	type FlexJarSurveyConfig,
 } from "@navikt/flexjar-react";
-import type { FlexJarTransport, RatingQuestion } from "@navikt/flexjar-core";
+import {
+	createRatingLabels,
+	type FlexJarTransport,
+	type RatingQuestion,
+} from "@navikt/flexjar-core";
 
 const ratingQuestion: RatingQuestion = {
 	id: "experience",
 	type: "rating",
 	prompt: "Hvordan var opplevelsen?",
 	required: true,
-	scale: 5,
-	minimumLabel: "Svært dårlig",
-	maximumLabel: "Svært bra",
+	labels: createRatingLabels([
+		"Svært dårlig",
+		"Ganske dårlig",
+		"Helt greit",
+		"Ganske bra",
+		"Svært bra",
+	]),
 };
+
+// Omit `labels` to use the built-in emoji captions ("Veldig dårlig" →
+// "Veldig bra"). Supply your own array via `createRatingLabels` to
+// customise the text for each step while keeping the same icons. The
+// component automatically shows the first and last captions beneath the
+// emoji row for additional context.
 
 const mainQuestion: FlexJarMainQuestion = {
 	id: "feedback",
@@ -70,11 +84,11 @@ Flexjar never performs HTTP calls for you. Provide a `transport` object that kno
 
 ```tsx
 const transport: FlexJarTransport = {
-	async submit(payload) {
+	async submit(submission) {
 		const response = await fetch("/api/flexjar", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(payload),
+			body: JSON.stringify(submission.transportPayload),
 		});
 
 		if (!response.ok) {
@@ -117,6 +131,19 @@ const Example = () => {
 - **Success handling**: enable `autoCloseOnSuccess` and tune `successCloseDelayMs` if you want the modal to close automatically after feedback is sent.
 
 Flexjar’s backend expects three core fields: `feedbackId`, `svar` (the rating), and `feedback` (the main text answer). The modal enforces those requirements by always rendering the rating question first and requiring a `mainQuestion` in the survey configuration; any extra questions are delivered alongside those core values.
+
+Every call to your `transport.submit` handler receives a `submission` object with a ready-to-send `transportPayload`:
+
+```ts
+submission.transportPayload satisfies {
+	feedbackId: string;
+	svar?: number;
+	feedback?: string;
+	[key: string]: string | number | string[];
+};
+```
+
+Send that payload directly to the Flexjar backend, or transform it further if you need to enrich the request.
 
 The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencies. Consumers stay in full control of network transport, analytics, and question configuration.
 

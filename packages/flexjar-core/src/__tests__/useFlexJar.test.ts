@@ -10,18 +10,23 @@ import type {
 
 const requiredQuestions: FlexJarQuestion[] = [
   {
-    id: "satisfaction",
+    id: "rating",
     type: "rating",
     prompt: "Hvor fornøyd er du?",
     required: true,
     scale: 5,
-    minimumLabel: "Svært dårlig",
-    maximumLabel: "Svært bra",
+  },
+  {
+    id: "feedback",
+    type: "text",
+    prompt: "Hva kan vi forbedre?",
+    required: true,
+    maxLength: 500,
   },
   {
     id: "free-text",
     type: "text",
-    prompt: "Hva kan forbedres?",
+    prompt: "Andre kommentarer?",
     required: false,
     maxLength: 500,
   },
@@ -53,6 +58,10 @@ describe("useFlexJar", () => {
         feedbackId: FEEDBACK_ID,
         questions: requiredQuestions,
         transport,
+        coreQuestionIds: {
+          rating: "rating",
+          main: "feedback",
+        },
       }),
     );
 
@@ -70,7 +79,7 @@ describe("useFlexJar", () => {
     if (!submission.ok) {
       expect(submission.error.type).toBe("validation");
       if (submission.error.type === "validation") {
-        expect(submission.error.missing).toEqual(["satisfaction"]);
+  expect(submission.error.missing).toEqual(["rating", "feedback"]);
       }
     }
 
@@ -89,12 +98,17 @@ describe("useFlexJar", () => {
         feedbackId: FEEDBACK_ID,
         questions: requiredQuestions,
         transport,
+        coreQuestionIds: {
+          rating: "rating",
+          main: "feedback",
+        },
       }),
     );
 
     await act(() => {
-      result.current.setAnswer("satisfaction", 4);
-      result.current.setAnswer("free-text", "Alt fungerer fint");
+  result.current.setAnswer("rating", 4);
+  result.current.setAnswer("feedback", "Alt fungerer fint");
+  result.current.setAnswer("free-text", "Alt fungerer fint");
     });
 
     vi.setSystemTime(SUBMIT_TIME);
@@ -109,9 +123,15 @@ describe("useFlexJar", () => {
 
     expect(payload.feedbackId).toBe(FEEDBACK_ID);
     expect(payload.answers).toEqual({
-      satisfaction: 4,
+      rating: 4,
+      feedback: "Alt fungerer fint",
       "free-text": "Alt fungerer fint",
     });
+  expect(payload.transportPayload.feedbackId).toBe(FEEDBACK_ID);
+  expect(payload.transportPayload.svar).toBe(4);
+  expect(payload.transportPayload.feedback).toBe("Alt fungerer fint");
+  expect(payload.transportPayload.rating).toBe(4);
+  expect(payload.transportPayload["free-text"]).toBe("Alt fungerer fint");
     expect(payload.startedAt).toBe(INITIAL_TIME.toISOString());
     expect(payload.submittedAt).toBe(SUBMIT_TIME.toISOString());
 
@@ -122,7 +142,7 @@ describe("useFlexJar", () => {
 
     expect(submission.ok).toBe(true);
     if (submission.ok) {
-      expect(submission.submission).toEqual(payload);
+  expect(submission.submission).toEqual(payload);
     }
 
     expect(result.current.status).toBe("success");

@@ -184,6 +184,26 @@ export const RatingQuestionField = ({
     [disabled, focusByIndex, handleSelect, options],
   );
 
+  const firstOption = options.at(0);
+  const lastOption = options.at(-1);
+  const rangeLabels = useMemo(() => {
+    if (firstOption === undefined || lastOption === undefined) {
+      return undefined;
+    }
+
+    const firstLabel = resolveLabel(question, firstOption);
+    const lastLabel = resolveLabel(question, lastOption);
+
+    if (firstLabel === undefined && lastLabel === undefined) {
+      return undefined;
+    }
+
+    return {
+      min: firstLabel,
+      max: lastLabel,
+    };
+  }, [firstOption, lastOption, question]);
+
   return (
     <VStack gap="2">
       <Heading id={headingId} level="3" size="small">
@@ -243,10 +263,10 @@ export const RatingQuestionField = ({
           })}
         </HStack>
       </fieldset>
-      {(question.minimumLabel || question.maximumLabel) && (
+      {rangeLabels && (
         <div className={styles.range}>
-          <BodyShort>{question.minimumLabel}</BodyShort>
-          <BodyShort>{question.maximumLabel}</BodyShort>
+          <BodyShort>{rangeLabels.min}</BodyShort>
+          <BodyShort>{rangeLabels.max}</BodyShort>
         </div>
       )}
       {isMissing && (

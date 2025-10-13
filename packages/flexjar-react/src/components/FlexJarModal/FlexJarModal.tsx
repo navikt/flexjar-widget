@@ -134,7 +134,12 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
       feedbackId,
       questions: orderedQuestions,
       transport,
+      events,
       context,
+      coreQuestionIds: {
+        rating: ratingQuestion.id,
+        main: mainQuestion.id,
+      },
     });
 
     useEffect(() => {
