@@ -5,6 +5,9 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 ## [Unreleased]
 - Add entries here before cutting the next release.
 
+## [0.1.4] - 2025-10-13
+- Expose `@navikt/flexjar-widget/styles.css` so consumers can import the compiled widget stylesheet without poking at internal build paths.
+
 ## [0.1.3] - 2025-10-13
 - Refine rating layout spacing so emoji buttons stay on two rows on mobile while remaining left aligned on larger screens.
 

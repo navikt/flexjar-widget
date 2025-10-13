@@ -20,11 +20,14 @@ collect feedback with a configurable question set.
 	npm install @navikt/flexjar-widget react react-dom @navikt/ds-react
 	```
 
-	Include the Aksel design system styles once in your app entry point:
+	Include the Aksel design system styles and the widget stylesheet once in your app entry point:
 
 	```ts
 	import "@navikt/ds-css";
+	import "@navikt/flexjar-widget/styles.css";
 	```
+
+	> Using a global CSS file instead of JavaScript imports? Add `@import "@navikt/flexjar-widget/styles.css";` below the Aksel import.
 
 3. Follow the usage guide below to describe your survey, wire a transport handler, and render the modal.
 
