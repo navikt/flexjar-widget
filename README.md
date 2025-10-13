@@ -47,9 +47,7 @@ const ratingQuestion: RatingQuestion = {
 
 // Omit `labels` to use the built-in emoji captions ("Veldig dårlig" →
 // "Veldig bra"). Supply your own array via `createRatingLabels` to
-// customise the text for each step while keeping the same icons. The
-// component automatically shows the first and last captions beneath the
-// emoji row for additional context.
+// customise the text for each step while keeping the same icons.
 
 const mainQuestion: FlexJarMainQuestion = {
 	id: "feedback",

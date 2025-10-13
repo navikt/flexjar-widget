@@ -26,7 +26,7 @@ export const TextQuestionField = ({
     onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
       onChange(event.target.value)
     }
-    maxLength={question.maxLength}
+  maxLength={question.maxLength ?? 1000}
     minRows={question.minRows}
     placeholder={question.placeholder}
     autoComplete={question.autoComplete}

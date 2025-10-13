@@ -82,9 +82,3 @@
 .errorMessage {
   color: var(--a-text-danger);
 }
-
-.range {
-  display: flex;
-  justify-content: space-between;
-  font-size: var(--a-font-size-small);
-}
