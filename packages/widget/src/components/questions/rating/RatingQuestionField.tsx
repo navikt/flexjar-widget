@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef } from "react";
-import { BodyShort, Heading, HStack, VStack } from "@navikt/ds-react";
+import { BodyShort, Box, Heading, HStack, VStack } from "@navikt/ds-react";
 import type {
   FlexJarAnswerValue,
   RatingQuestion,
@@ -213,15 +213,20 @@ export const RatingQuestionField = ({
       {question.description && (
         <BodyShort id={descriptionId}>{question.description}</BodyShort>
       )}
-      <fieldset
+      <Box
+        as="fieldset"
         className={CLASS_NAMES.fieldset}
         aria-labelledby={headingId}
         aria-describedby={describedBy}
+        paddingBlock="3"
+        paddingInline="4"
       >
         <legend className={CLASS_NAMES.legend}>{question.prompt}</legend>
         <HStack
           gap="4"
           justify="start"
+          align="center"
+          wrap
           className={CLASS_NAMES.row}
           role="radiogroup"
           aria-labelledby={headingId}
@@ -263,7 +268,7 @@ export const RatingQuestionField = ({
             );
           })}
         </HStack>
-      </fieldset>
+      </Box>
       {isMissing && (
         <BodyShort id={errorId} className={CLASS_NAMES.error} role="alert">
           {validationErrorMessage}
