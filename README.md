@@ -67,7 +67,27 @@ const followUpQuestions: FlexJarFollowUpQuestion[] = [
 			{ value: "public", label: "nav.no" },
 		],
 	},
+	{
+		id: "pain-points",
+		type: "multiChoice",
+		prompt: "Hva bør vi forbedre først?",
+		description: "Velg alle som gjelder.",
+		options: [
+			{ value: "copy", label: "Tekst og innhold" },
+			{ value: "design", label: "Design og tilgjengelighet" },
+			{ value: "integrations", label: "Integrasjoner" },
+			{ value: "analytics", label: "Analyse og målinger" },
+		],
+	},
+	{
+		id: "details",
+		type: "text",
+		prompt: "Fortell oss mer om behovene dine.",
+		description: "Den informasjonen hjelper oss å prioritere riktig.",
+		minRows: 2,
+	},
 ];
+
 const survey: FlexJarSurveyConfig = {
 	rating: ratingQuestion,
 	mainQuestion,
