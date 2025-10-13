@@ -201,3 +201,33 @@ The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencie
 | `rating` | `RatingQuestion` | Yes | Primary entry question; modal is gated on an answer here. |
 | `mainQuestion` | `FlexJarMainQuestion` | Yes | Captures the main feedback text that Flexjar expects in the `feedback` field. |
 | `followUpQuestions` | `FlexJarFollowUpQuestion[]` | No | Additional questions rendered after the rating has been answered. |
+
+<details>
+<summary>Developer documentation</summary>
+
+#### Publish to GitHub Packages
+
+1. **Prepare the workspace**
+	- Ensure you are on the branch you want to release from (typically `main`).
+	- Step into the package folder: `cd packages/widget` before running any version or publish commands.
+2. **Authenticate (one-time setup per machine)**
+	- Create a personal access token with `write:packages`, `read:packages`, and `repo` scopes.
+	- Store it locally: `npm config set //npm.pkg.github.com/:_authToken=<TOKEN>` *(or export `NODE_AUTH_TOKEN=<TOKEN>` in CI pipelines).* 
+3. **Choose the version number**
+	- We follow [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
+		- Bug fix only → `npm version patch`
+		- Backwards-compatible feature → `npm version minor`
+		- Breaking change → `npm version major`
+	- `npm version` updates `package.json`, generates a git tag, and commits the bump for you.
+4. **Document the release**
+	- Update `CHANGELOG.md` with a short summary of the changes going out.
+	- Stage the changelog and version bump: `git add package.json package-lock.json CHANGELOG.md`.
+5. **Verify before publishing**
+	- From the repo root: `npm run lint`, `npm run test`, `npm run build`.
+6. **Publish**
+	- Still inside `packages/widget`: `npm publish --registry=https://npm.pkg.github.com`.
+	- Push the release commit and tag to GitHub: `git push && git push --tags`.
+
+The package exposes the modal both via the default entry (`@navikt/flexjar-widget`) and the subpath (`@navikt/flexjar-widget/modal`).
+
+</details>
