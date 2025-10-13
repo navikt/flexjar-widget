@@ -6,14 +6,143 @@ collect feedback with a configurable question set.
 
 ## Getting started
 
-```sh
-npm install
-npm run build
-```
+1. Configure npm to read from GitHub Packages if you have not already:
+
+	```sh
+	npm config set @navikt:registry https://npm.pkg.github.com
+	```
+
+	Provide an auth token with `read:packages` scope via `npm login --registry=https://npm.pkg.github.com` or by exporting `NODE_AUTH_TOKEN` in CI.
+
+2. Install the widget along with its peer dependencies:
+
+	```sh
+	npm install @navikt/flexjar-widget react react-dom @navikt/ds-react
+	```
+
+	Include the Aksel design system styles once in your app entry point:
+
+	```ts
+	import "@navikt/ds-css";
+	```
+
+3. Follow the usage guide below to describe your survey, wire a transport handler, and render the modal.
 
 ## Usage
 
-### 1. Describe your survey
+### Quick start with FlexJarGuidePanel
+
+If you want a copy/paste flow that wires the trigger and modal for you, start by
+splitting the survey schema from the UI.
+
+Create `components/flexjar/survey.ts` (adjust the path to fit your project):
+
+```ts
+import {
+	type FlexJarFollowUpQuestion,
+	type FlexJarMainQuestion,
+	type FlexJarSurveyConfig,
+	type RatingQuestion,
+} from "@navikt/flexjar-widget";
+
+const ratingQuestion: RatingQuestion = {
+	id: "experience",
+	type: "rating",
+	prompt: "Hvordan var opplevelsen?",
+};
+
+const mainQuestion: FlexJarMainQuestion = {
+	id: "feedback",
+	type: "text",
+	prompt: "Hva tenker du om denne tjenesten?",
+	minRows: 3,
+};
+
+const followUpQuestions: FlexJarFollowUpQuestion[] = [
+	{
+		id: "channel",
+		type: "singleChoice",
+		prompt: "Hvor planlegger du å bruke Flexjar?",
+		options: [
+			{ value: "internal", label: "Interne flater" },
+			{ value: "public", label: "nav.no" },
+		],
+	},
+	{
+		id: "pain-points",
+		type: "multiChoice",
+		prompt: "Hva bør vi forbedre først?",
+		description: "Velg alle som gjelder.",
+		options: [
+			{ value: "copy", label: "Tekst og innhold" },
+			{ value: "design", label: "Design og tilgjengelighet" },
+			{ value: "integrations", label: "Integrasjoner" },
+			{ value: "analytics", label: "Analyse og målinger" },
+		],
+	},
+	{
+		id: "details",
+		type: "text",
+		prompt: "Fortell oss mer om behovene dine.",
+		description: "Den informasjonen hjelper oss å prioritere riktig.",
+		minRows: 2,
+	},
+];
+
+export const survey: FlexJarSurveyConfig = {
+	rating: ratingQuestion,
+	mainQuestion,
+	followUpQuestions,
+};
+```
+
+Then create `components/flexjar/Flexjar.tsx`:
+
+```tsx
+"use client";
+
+import { FlexJarGuidePanel, type FlexJarTransport } from "@navikt/flexjar-widget";
+import { survey } from "@/components/flexjar/survey";
+
+const transport: FlexJarTransport = {
+	async submit(submission) {
+		const response = await fetch("/api/flexjar", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(submission.transportPayload),
+		});
+
+		if (!response.ok) {
+			throw new Error("Failed to send feedback");
+		}
+	},
+};
+
+export const Flexjar = () => (
+	<FlexJarGuidePanel
+		feedbackId="oppfolgingsplan"
+		survey={survey}
+		transport={transport}
+		panelBody="Hei! Vi jobber med en ny og forbedret oppfølgingsplan i 2025. Har du to minutter til å dele behovene dine?"
+		title="Gi tilbakemelding"
+		intro="Svarene dine brukes til videre forbedringsarbeid."
+	/>
+);
+```
+
+`FlexJarGuidePanel` internally renders an Aksel `GuidePanel` with a call-to-action
+button and handles the modal lifecycle. You still get access to every
+`FlexJarModal` prop (like `events`, `width`, or `personalDataNotice`) plus a few
+extras:
+
+- `panelBody`: text or JSX placed next to the open button.
+- `buttonLabel`: override the button text (defaults to "Åpne spørreskjema").
+- `buttonProps`: pass any `@navikt/ds-react` button props (variant, size, icon,…).
+- `panelProps`: forward props to the underlying `GuidePanel`.
+
+### Manual modal integration
+
+#### Step 1. Describe your survey
 
 Every Flexjar flow starts with a mandatory rating question. Group it with any follow-ups in a `survey` object so the widget can enforce gating rules.
 
@@ -35,7 +164,6 @@ const ratingQuestion: RatingQuestion = {
 	id: "experience",
 	type: "rating",
 	prompt: "Hvordan var opplevelsen?",
-	required: true,
 	labels: createRatingLabels([
 		"Svært dårlig",
 		"Ganske dårlig",
@@ -54,7 +182,6 @@ const mainQuestion: FlexJarMainQuestion = {
 	type: "text",
 	prompt: "Hva tenker du om denne tjenesten?",
 	minRows: 3,
-	required: true,
 };
 
 const followUpQuestions: FlexJarFollowUpQuestion[] = [
@@ -94,9 +221,12 @@ const survey: FlexJarSurveyConfig = {
 	followUpQuestions,
 };
 
+// The widget marks the rating and main question as required automatically,
+// so there is no need to set `required: true` in the survey config.
+
 ```
 
-### 2. Inject the transport handler
+#### Step 2. Inject the transport handler
 
 Flexjar never performs HTTP calls for you. Provide a `transport` object that knows how to persist the submission in your context.
 
@@ -116,7 +246,7 @@ const transport: FlexJarTransport = {
 };
 ```
 
-### 3. Render the modal
+#### Step 3. Render the modal
 
 ```tsx
 import { Button } from "@navikt/ds-react";
@@ -143,8 +273,10 @@ const Example = () => {
 
 ### Customise the experience
 
+- **Guide panel CTA**: reach for `FlexJarGuidePanel` when you want a ready-made `GuidePanel` + button that opens the modal without wiring local state.
 - **Conditional follow-ups** are gated behind the rating automatically—no rating, no extra questions.
 - **Copy & layout**: override props such as `intro`, `submitLabel`, `cancelLabel`, or provide `personalDataNotice` to replace the standard warning.
+- **Layout width**: the modal defaults to the Aksel `"large"` preset (~48rem); pass `width="small"`, `width="medium"`, or a custom value (e.g. `"min(90vw, 880px)"`) for alternative sizing.
 - **Events**: pass an `events` object (see `FlexJarEvents`) to react to lifecycle hooks like `onViewModal`, `onSubmitSuccess`, or validation failures.
 - **Success handling**: enable `autoCloseOnSuccess` and tune `successCloseDelayMs` if you want the modal to close automatically after feedback is sent.
 
@@ -187,12 +319,24 @@ The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencie
 | `successBody` | `React.ReactNode` | No | `"Vi bruker svarene dine for å forbedre løsningen."` | Body text in the success view. |
 | `successPrimaryLabel` | `string` | No | `"Lukk"` | Label for the button in the success view. |
 | `className` | `string` | No | – | Optional class applied to the underlying `Modal`. |
+| `width` | `"small" \| "medium" \| "large" \| number \| string` | No | `"large"` | Controls the modal width; forwarded to Aksel’s `Modal` component. |
 | `renderQuestion` | `(props: FlexJarRenderQuestionProps) => React.ReactNode` | No | – | Custom renderer if you want to override the default question components. |
 | `resetOnClose` | `boolean` | No | `true` | Reset answers when the modal closes. |
 | `autoCloseOnSuccess` | `boolean` | No | `false` | Close the modal automatically after a successful submission. |
 | `successCloseDelayMs` | `number` | No | `1600` | Delay (ms) before auto-closing when `autoCloseOnSuccess` is enabled. |
 | `showPersonalDataNotice` | `boolean` | No | `true` | Toggle the default personal-data warning beneath the form. |
 | `personalDataNotice` | `React.ReactNode` | No | Default warning element | Custom content for the personal-data warning. |
+
+### FlexJarGuidePanel props
+
+`FlexJarGuidePanel` exposes every `FlexJarModal` prop (except `open` and `onClose`, which it manages internally) and adds a few extras for the outer `GuidePanel`:
+
+| Prop | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `panelBody` | `React.ReactNode` | Yes | – | Content displayed next to the open button inside the `GuidePanel`. |
+| `buttonLabel` | `string` | No | `"Åpne spørreskjema"` | Text for the call-to-action button. |
+| `buttonProps` | `Omit<ButtonProps, "onClick">` | No | – | Additional `@navikt/ds-react` button props (variant, size, icon, …). |
+| `panelProps` | `Omit<GuidePanelProps, "children">` | No | – | Forwarded props for the underlying `GuidePanel`. |
 
 ### FlexJarSurveyConfig
 
@@ -204,6 +348,13 @@ The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencie
 
 <details>
 <summary>Developer documentation</summary>
+
+#### Work on the widget locally
+
+```sh
+npm install
+npm run build
+```
 
 #### Publish to GitHub Packages
 

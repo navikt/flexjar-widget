@@ -15,7 +15,6 @@ const RATING_QUESTION: RatingQuestion = {
   type: "rating",
   prompt: "Hvor fornøyd er du med Flexjar-widgeten?",
   description: "Velg ansiktet som passer best til opplevelsen din.",
-  required: true,
 };
 
 const MAIN_QUESTION: FlexJarMainQuestion = {
@@ -24,7 +23,6 @@ const MAIN_QUESTION: FlexJarMainQuestion = {
   prompt: "Hvordan kan vi forbedre Flexjar for teamet ditt?",
   description: "Del så mange detaljer du vil.",
   placeholder: "For eksempel: støtte for egne tema",
-  required: true,
 };
 
 const FOLLOW_UP_QUESTIONS: FlexJarFollowUpQuestion[] = [

@@ -9,6 +9,7 @@ import {
   VStack,
 } from "@navikt/ds-react";
 import { MagnifyingGlassIcon } from "@navikt/aksel-icons";
+import type { ModalProps } from "@navikt/ds-react";
 import { useFlexJar } from "../../core/useFlexJar.js";
 import type {
   FlexJarAnswerValue,
@@ -31,6 +32,8 @@ export interface FlexJarSurveyConfig {
 
 export type FlexJarFollowUpQuestion = Exclude<FlexJarQuestion, { type: "rating" }>;
 export type FlexJarMainQuestion = Extract<FlexJarQuestion, { type: "text" }>;
+
+export type FlexJarModalWidth = ModalProps["width"] | "large";
 
 export interface FlexJarModalProps {
   open: boolean;
@@ -57,7 +60,14 @@ export interface FlexJarModalProps {
   successCloseDelayMs?: number;
   showPersonalDataNotice?: boolean;
   personalDataNotice?: React.ReactNode;
+  /**
+   * Controls the modal width. Mirrors the Aksel Modal `width` prop.
+   * @default "large"
+   */
+  width?: FlexJarModalWidth;
 }
+
+const LARGE_MODAL_WIDTH: ModalProps["width"] = "48rem";
 
 const DEFAULT_COPY = {
   submitLabel: "Send",
@@ -84,8 +94,8 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
     const {
       open,
       onClose,
-    feedbackId,
-    survey,
+      feedbackId,
+      survey,
       transport,
       events,
       context,
@@ -106,13 +116,23 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
       successCloseDelayMs = 1600,
       showPersonalDataNotice = true,
       personalDataNotice,
+      width = "large",
     } = props;
+
+    const resolvedWidth: ModalProps["width"] | undefined =
+      width === "large" ? LARGE_MODAL_WIDTH : width;
 
     const formId = useId();
     const headingId = useId();
 
-    const ratingQuestion = survey.rating;
-    const mainQuestion = survey.mainQuestion;
+    const ratingQuestion = useMemo(
+      () => ({ ...survey.rating, required: true }),
+      [survey.rating],
+    );
+    const mainQuestion = useMemo(
+      () => ({ ...survey.mainQuestion, required: true }),
+      [survey.mainQuestion],
+    );
     const sanitizedFollowUps = useMemo(
       () => {
         const followUps = survey.followUpQuestions ?? [];
@@ -184,6 +204,7 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
         open={open}
         onClose={handleClose}
         className={className}
+        width={resolvedWidth}
         aria-labelledby={headingId}
         data-feedback-id={feedbackId}
       >

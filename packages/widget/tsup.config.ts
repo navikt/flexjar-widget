@@ -1,0 +1,12 @@
+import { defineConfig } from "tsup";
+
+export default defineConfig({
+  entry: ["src/index.ts", "src/modal/index.ts"],
+  format: ["esm", "cjs"],
+  dts: true,
+  clean: true,
+  loader: {
+    ".module.css": "local-css",
+    ".css": "css",
+  },
+});

@@ -36,9 +36,11 @@
   "files": [
     "dist"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/**/*.css"
+  ],
   "scripts": {
-    "build": "tsup src/index.ts src/modal/index.ts --format esm,cjs --dts",
+  "build": "tsup --config tsup.config.ts",
     "test": "vitest run --passWithNoTests",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",

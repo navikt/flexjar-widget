@@ -7,6 +7,7 @@ import type {
 import { EmojiButton } from "./EmojiButton.js";
 import { Glad, Lei, Noytral, Sinna, VeldigGlad } from "./emojies.js";
 import styles from "./emo.module.css";
+import "./emo.fallback.css";
 
 interface RatingQuestionFieldProps {
   question: RatingQuestion;
@@ -25,37 +26,54 @@ interface EmojiVariant {
   Icon: (props: { fill?: string }) => JSX.Element;
 }
 
+const CLASS_NAMES = {
+  row: styles.emojiRow ?? "flexjar-rating__row",
+  fieldset: styles.fieldset ?? "flexjar-rating__fieldset",
+  legend: styles.legend ?? "flexjar-rating__legend",
+  button: styles.emobutton ?? "flexjar-rating__emoji-button",
+  active: styles.active ?? "flexjar-rating__emoji-button--active",
+  error: styles.errorMessage ?? "flexjar-rating__error-message",
+  variants: {
+    sinna: styles.sinnaButton ?? "flexjar-rating__emoji-button--sinna",
+    lei: styles.leiButton ?? "flexjar-rating__emoji-button--lei",
+    noytral: styles.noytralButton ?? "flexjar-rating__emoji-button--noytral",
+    glad: styles.gladButton ?? "flexjar-rating__emoji-button--glad",
+    veldigGlad:
+      styles.veldigGladButton ?? "flexjar-rating__emoji-button--veldig-glad",
+  },
+} as const;
+
 const VARIANTS: EmojiVariant[] = [
   {
-    className: styles.sinnaButton,
+    className: CLASS_NAMES.variants.sinna,
     activeFill: "var(--a-red-100)",
     activeColor: "var(--a-red-500)",
     fallbackLabel: "Veldig dårlig",
     Icon: Sinna,
   },
   {
-    className: styles.leiButton,
+    className: CLASS_NAMES.variants.lei,
     activeFill: "var(--a-orange-100)",
     activeColor: "var(--a-orange-500)",
     fallbackLabel: "Dårlig",
     Icon: Lei,
   },
   {
-    className: styles.noytralButton,
+    className: CLASS_NAMES.variants.noytral,
     activeFill: "var(--a-blue-100)",
     activeColor: "var(--a-blue-500)",
     fallbackLabel: "Nøytral",
     Icon: Noytral,
   },
   {
-    className: styles.gladButton,
+    className: CLASS_NAMES.variants.glad,
     activeFill: "var(--a-green-100)",
     activeColor: "var(--a-green-400)",
     fallbackLabel: "Bra",
     Icon: Glad,
   },
   {
-    className: styles.veldigGladButton,
+    className: CLASS_NAMES.variants.veldigGlad,
     activeFill: "var(--a-green-200)",
     activeColor: "var(--a-green-700)",
     fallbackLabel: "Veldig bra",
@@ -196,15 +214,15 @@ export const RatingQuestionField = ({
         <BodyShort id={descriptionId}>{question.description}</BodyShort>
       )}
       <fieldset
-        className={styles.fieldset}
+        className={CLASS_NAMES.fieldset}
         aria-labelledby={headingId}
         aria-describedby={describedBy}
       >
-        <legend className={styles.legend}>{question.prompt}</legend>
+        <legend className={CLASS_NAMES.legend}>{question.prompt}</legend>
         <HStack
           gap="4"
           justify="start"
-          className={styles.emojiRow}
+          className={CLASS_NAMES.row}
           role="radiogroup"
           aria-labelledby={headingId}
           aria-describedby={describedBy}
@@ -214,9 +232,9 @@ export const RatingQuestionField = ({
             const labelText = resolveLabel(question, option);
             const isActive = activeState === option;
             const buttonClass = joinClassNames(
-              styles.emobutton,
+              CLASS_NAMES.button,
               variant.className,
-              isActive ? styles.active : undefined,
+              isActive ? CLASS_NAMES.active : undefined,
             );
             const buttonStyle = isActive
               ? { color: variant.activeColor }
@@ -247,7 +265,7 @@ export const RatingQuestionField = ({
         </HStack>
       </fieldset>
       {isMissing && (
-        <BodyShort id={errorId} className={styles.errorMessage} role="alert">
+        <BodyShort id={errorId} className={CLASS_NAMES.error} role="alert">
           {validationErrorMessage}
         </BodyShort>
       )}
