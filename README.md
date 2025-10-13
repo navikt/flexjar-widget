@@ -28,6 +28,9 @@ import {
 	type RatingQuestion,
 } from "@navikt/flexjar-widget";
 
+// Alternatively, import the modal API via the dedicated subpath:
+// import { FlexJarModal } from "@navikt/flexjar-widget/modal";
+
 const ratingQuestion: RatingQuestion = {
 	id: "experience",
 	type: "rating",

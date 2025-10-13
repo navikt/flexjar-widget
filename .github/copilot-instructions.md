@@ -3,9 +3,9 @@
 - **Mission**: ship a reusable Flexjar survey widget so NAV product teams can embed configurable forms and wire their own transport. Treat this repo as the future npm package source.
 
 ## Current Code
-- **Entry point**: `packages/flexjar-widget/src/index.ts` re-exports the modal, question components, hooks, and types.
-- **Modal**: `components/FlexJarModal/FlexJarModal.tsx` renders the survey, enforces the rating gate, and wires submission via `useFlexJar`.
-- **Core logic**: `src/core/useFlexJar.ts` manages validation, submission lifecycle, and builds the Flexjar transport payload. All shared types live beside it in `core/types.ts`.
+- **Entry point**: `packages/widget/src/index.ts` re-exports the modal, question components, hooks, and types.
+- **Modal**: `modal/index.ts` re-exports `FlexJarModal` from `components/FlexJarModal/FlexJarModal.tsx`, which renders the survey, enforces the rating gate, and wires submission via `useFlexJar`.
+- **Core logic**: `packages/widget/src/core/useFlexJar.ts` manages validation, submission lifecycle, and builds the Flexjar transport payload. All shared types live beside it in `core/types.ts`.
 - **Questions**: rating, choice, and text renderers sit under `components/questions`. Keep the emoji UX accessible and keyboard friendly.
 - **Styling**: relies on `@navikt/ds-react` with CSS modules for emoji styling. Preserve NAV tokens and live-region feedback messaging.
 
