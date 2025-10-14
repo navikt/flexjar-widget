@@ -136,6 +136,15 @@ describe("useFlexJar", () => {
     expect(payload.transportPayload.feedback).toBe("Alt fungerer fint");
     expect(payload.transportPayload.rating).toBe(4);
     expect(payload.transportPayload["free-text"]).toBe("Alt fungerer fint");
+    expect(payload.transportPayload["question__rating"]).toBe(
+      "Hvor fornøyd er du?",
+    );
+    expect(payload.transportPayload["question__feedback"]).toBe(
+      "Hva kan vi forbedre?",
+    );
+    expect(payload.transportPayload["question__free-text"]).toBe(
+      "Andre kommentarer?",
+    );
     expect(payload.startedAt).toBe(INITIAL_TIME.toISOString());
     expect(payload.submittedAt).toBe(SUBMIT_TIME.toISOString());
 

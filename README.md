@@ -285,16 +285,19 @@ const Example = () => {
 
 Flexjar’s backend expects three core fields: `feedbackId`, `svar` (the rating), and `feedback` (the main text answer). The modal enforces those requirements by always rendering the rating question first and requiring a `mainQuestion` in the survey configuration; any extra questions are delivered alongside those core values.
 
-Every call to your `transport.submit` handler receives a `submission` object with a ready-to-send `transportPayload`:
+Every call to your `transport.submit` handler receives a `submission` object with a ready-to-send `transportPayload`. The widget enriches the payload with the human-readable question text so downstream logs keep answers and prompts together:
 
 ```ts
 submission.transportPayload satisfies {
 	feedbackId: string;
 	svar?: number;
 	feedback?: string;
+	[questionIdWithPrefix: `question__${string}`]: string;
 	[key: string]: string | number | string[];
 };
 ```
+
+The extra keys follow the pattern `question__<questionId>` and contain the exact prompt that was rendered.
 
 Send that payload directly to the Flexjar backend, or transform it further if you need to enrich the request.
 

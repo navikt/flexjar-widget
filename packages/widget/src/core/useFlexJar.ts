@@ -137,6 +137,7 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
       transportPayload: buildTransportPayload(
         feedbackId,
         answerSnapshot,
+        questions,
         coreQuestionIds,
       ),
     };
@@ -225,15 +226,22 @@ function cloneAnswers(
   return copy;
 }
 
+const QUESTION_TEXT_PREFIX = "question__";
+
 function buildTransportPayload(
   feedbackId: string,
   answers: Record<string, FlexJarAnswerValue>,
+  questions: FlexJarQuestion[],
   coreQuestionIds?: { rating: string; main: string },
 ): FlexJarTransportPayload {
   const payload: FlexJarTransportPayload = {
     feedbackId,
     ...answers,
   };
+
+  for (const question of questions) {
+    payload[`${QUESTION_TEXT_PREFIX}${question.id}`] = question.prompt;
+  }
 
   if (coreQuestionIds) {
     const ratingValue = answers[coreQuestionIds.rating];
