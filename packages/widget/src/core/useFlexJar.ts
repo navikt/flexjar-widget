@@ -162,6 +162,7 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     context,
     events,
     feedbackId,
+    questions,
     transport,
     validate,
     coreQuestionIds,
