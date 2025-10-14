@@ -105,7 +105,7 @@ Then create `components/flexjar/Flexjar.tsx`:
 "use client";
 
 import { FlexJarGuidePanel, type FlexJarTransport } from "@navikt/flexjar-widget";
-import { survey } from "@/components/flexjar/survey";
+import { survey } from "./survey";
 
 const transport: FlexJarTransport = {
 	async submit(submission) {
