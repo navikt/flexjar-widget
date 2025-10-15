@@ -134,9 +134,9 @@ describe("useFlexJar", () => {
     expect(payload.transportPayload.feedbackId).toBe(FEEDBACK_ID);
     expect(payload.transportPayload.svar).toBe(4);
     expect(payload.transportPayload.feedback).toBe("Alt fungerer fint");
-    expect(payload.transportPayload.rating).toBe(4);
+    expect(payload.transportPayload).not.toHaveProperty("rating");
     expect(payload.transportPayload["free-text"]).toBe("Alt fungerer fint");
-    expect(payload.transportPayload["question__rating"]).toBe(
+    expect(payload.transportPayload["question__svar"]).toBe(
       "Hvor fornøyd er du?",
     );
     expect(payload.transportPayload["question__feedback"]).toBe(

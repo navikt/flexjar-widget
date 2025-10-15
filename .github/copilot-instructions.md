@@ -13,7 +13,7 @@
 - **Single package**: ship everything from `@navikt/flexjar-widget`. Keep React and `@navikt/ds-react` as peer dependencies while exposing the hook and types through the same entry point.
 - **Styles export**: surface the compiled CSS at `@navikt/flexjar-widget/styles.css` so consuming apps can import the widget styles alongside `@navikt/ds-css` without poking at build internals.
 - **Transport injection**: continue to require a `transport` implementation that receives `{ feedbackId, answers, startedAt, submittedAt, transportPayload }` and returns a promise. Reflect loading, success, and error states via props/events.
-- **Submission payload**: every submission now includes `question__<id>` entries containing the rendered prompt so downstream logs can pair answers with their questions. Keep that prefix stable when touching payload code.
+- **Submission payload**: every submission now includes `question__<id>` entries containing the rendered prompt so downstream logs can pair answers with their questions. The rating answer must always resolve to `svar` and the main text to `feedback`; mirror those canonical keys (and their `question__svar`/`question__feedback` companions) in any transport changes.
 - **Question schema**: maintain typed descriptors (rating/text/choice) and keep the rating question mandatory before revealing follow-ups.
 - **Configurable copy**: accept all user-facing strings via props with sensible defaults. Avoid oppfølgingsplan-specific content.
 - **Accessibility**: ensure modal semantics, focus management, keyboard navigation, and emoji button labelling stay intact while iterating.
@@ -30,5 +30,6 @@
 - maintain accessibility: modal semantics, keyboard focus management, `aria-live` regions, and reachable emoji buttons are non-negotiable.
 - update `README.md` with migration notes and examples when you land breaking API changes.
 - keep the compiled CSS (`dist/index.css`) and exported `styles.css` subpath updated whenever you touch styling, and ensure fallback styles still match their CSS-module counterparts.
+- ensure no follow-up question leaks the reserved `svar` or `feedback` keys; surface helpful warnings or docs when adjusting question-normalisation logic.
 
 Questions or unclear areas? Surface gaps—especially around publishing strategy or API contracts—so we can expand these instructions.

@@ -228,6 +228,8 @@ function cloneAnswers(
 }
 
 const QUESTION_TEXT_PREFIX = "question__";
+const RATING_KEY = "svar";
+const FEEDBACK_KEY = "feedback";
 
 function buildTransportPayload(
   feedbackId: string,
@@ -237,11 +239,29 @@ function buildTransportPayload(
 ): FlexJarTransportPayload {
   const payload: FlexJarTransportPayload = {
     feedbackId,
-    ...answers,
   };
 
+  const isCoreQuestion = (questionId: string): boolean => {
+    if (!coreQuestionIds) {
+      return false;
+    }
+
+    return (
+      questionId === coreQuestionIds.rating || questionId === coreQuestionIds.main
+    );
+  };
+
+  for (const [questionId, answerValue] of Object.entries(answers)) {
+    if (isCoreQuestion(questionId)) {
+      continue;
+    }
+
+    payload[questionId] = answerValue;
+  }
+
   for (const question of questions) {
-    payload[`${QUESTION_TEXT_PREFIX}${question.id}`] = question.prompt;
+    const transportKey = resolveTransportQuestionKey(question.id, coreQuestionIds);
+    payload[`${QUESTION_TEXT_PREFIX}${transportKey}`] = question.prompt;
   }
 
   if (coreQuestionIds) {
@@ -250,16 +270,35 @@ function buildTransportPayload(
 
     const svar = coerceRatingAnswer(ratingValue);
     if (svar !== undefined) {
-      payload.svar = svar;
+      payload[RATING_KEY] = svar;
     }
 
     const feedback = coerceFeedbackAnswer(mainValue);
     if (feedback !== undefined) {
-      payload.feedback = feedback;
+      payload[FEEDBACK_KEY] = feedback;
     }
   }
 
   return payload;
+}
+
+function resolveTransportQuestionKey(
+  questionId: string,
+  coreQuestionIds?: { rating: string; main: string },
+): string {
+  if (!coreQuestionIds) {
+    return questionId;
+  }
+
+  if (questionId === coreQuestionIds.rating) {
+    return RATING_KEY;
+  }
+
+  if (questionId === coreQuestionIds.main) {
+    return FEEDBACK_KEY;
+  }
+
+  return questionId;
 }
 
 function coerceRatingAnswer(

@@ -45,17 +45,15 @@ import {
 	type FlexJarFollowUpQuestion,
 	type FlexJarMainQuestion,
 	type FlexJarSurveyConfig,
-	type RatingQuestion,
+	type FlexJarRatingQuestion,
 } from "@navikt/flexjar-widget";
 
-const ratingQuestion: RatingQuestion = {
-	id: "experience",
+const ratingQuestion: FlexJarRatingQuestion = {
 	type: "rating",
 	prompt: "Hvordan var opplevelsen?",
 };
 
 const mainQuestion: FlexJarMainQuestion = {
-	id: "feedback",
 	type: "text",
 	prompt: "Hva tenker du om denne tjenesten?",
 	minRows: 3,
@@ -97,6 +95,8 @@ export const survey: FlexJarSurveyConfig = {
 	mainQuestion,
 	followUpQuestions,
 };
+
+> `FlexJarModal` normalises the rating answer to the canonical Flexjar key `svar` and the main text to `feedback`. Any `id` you provide on those questions is used for analytics (via `analyticsId`) but no longer duplicates values in the transport payload. Avoid reusing the reserved `svar` or `feedback` identifiers for follow-up questions.
 ```
 
 Then create `components/flexjar/Flexjar.tsx`:
@@ -157,13 +157,13 @@ import {
 	type FlexJarMainQuestion,
 	type FlexJarSurveyConfig,
 	type FlexJarTransport,
-	type RatingQuestion,
+	type FlexJarRatingQuestion,
 } from "@navikt/flexjar-widget";
 
 // Alternatively, import the modal API via the dedicated subpath:
 // import { FlexJarModal } from "@navikt/flexjar-widget/modal";
 
-const ratingQuestion: RatingQuestion = {
+const ratingQuestion: FlexJarRatingQuestion = {
 	id: "experience",
 	type: "rating",
 	prompt: "Hvordan var opplevelsen?",
@@ -226,6 +226,10 @@ const survey: FlexJarSurveyConfig = {
 
 // The widget marks the rating and main question as required automatically,
 // so there is no need to set `required: true` in the survey config.
+
+// Rating answers are only reported under the `svar` key, and the main question
+// under `feedback`, matching the Flexjar backend schema. Supplying an `id`
+// remains optional and is best suited for analytics tagging via `analyticsId`.
 
 ```
 
@@ -297,7 +301,11 @@ submission.transportPayload satisfies {
 };
 ```
 
-The extra keys follow the pattern `question__<questionId>` and contain the exact prompt that was rendered.
+The extra keys follow the pattern `question__<questionId>` and contain the exact prompt that was rendered. Core questions use the canonical names `question__svar` and `question__feedback` so Flexjar logs line up with the standard schema.
+
+- Rating answers are emitted only under `svar`.
+- Main text answers are emitted only under `feedback`.
+- Additional questions continue to use their configured IDs for both the value and `question__` metadata.
 
 Send that payload directly to the Flexjar backend, or transform it further if you need to enrich the request.
 
@@ -348,7 +356,7 @@ The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencie
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
-| `rating` | `RatingQuestion` | Yes | Primary entry question; modal is gated on an answer here. |
+| `rating` | `FlexJarRatingQuestion` | Yes | Primary entry question; modal is gated on an answer here. |
 | `mainQuestion` | `FlexJarMainQuestion` | Yes | Captures the main feedback text that Flexjar expects in the `feedback` field. |
 | `followUpQuestions` | `FlexJarFollowUpQuestion[]` | No | Additional questions rendered after the rating has been answered. |
 

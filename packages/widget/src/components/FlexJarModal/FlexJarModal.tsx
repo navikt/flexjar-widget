@@ -24,14 +24,17 @@ import { useAutoCloseOnSuccess } from "./useAutoCloseOnSuccess.js";
 import { useRatingGate } from "./useRatingGate.js";
 import type { FlexJarRenderQuestionProps } from "../../types.js";
 
+type BaseMainQuestion = Extract<FlexJarQuestion, { type: "text" }>;
+
+export type FlexJarFollowUpQuestion = Exclude<FlexJarQuestion, { type: "rating" }>;
+export type FlexJarMainQuestion = Omit<BaseMainQuestion, "id"> & { id?: string };
+export type FlexJarRatingQuestion = Omit<RatingQuestion, "id"> & { id?: string };
+
 export interface FlexJarSurveyConfig {
-  rating: RatingQuestion;
+  rating: FlexJarRatingQuestion;
   mainQuestion: FlexJarMainQuestion;
   followUpQuestions?: FlexJarFollowUpQuestion[];
 }
-
-export type FlexJarFollowUpQuestion = Exclude<FlexJarQuestion, { type: "rating" }>;
-export type FlexJarMainQuestion = Extract<FlexJarQuestion, { type: "text" }>;
 
 export type FlexJarModalWidth = ModalProps["width"] | "large";
 
@@ -86,6 +89,9 @@ const DEFAULT_PERSONAL_DATA_NOTICE = (
   </>
 );
 
+const RATING_ANSWER_KEY = "svar";
+const MAIN_ANSWER_KEY = "feedback";
+
 export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProps>(
   function FlexJarModalInner(
     props: FlexJarModalProps,
@@ -125,23 +131,33 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
     const formId = useId();
     const headingId = useId();
 
-    const ratingQuestion = useMemo(
-      () => ({ ...survey.rating, required: true }),
-      [survey.rating],
-    );
-    const mainQuestion = useMemo(
-      () => ({ ...survey.mainQuestion, required: true }),
-      [survey.mainQuestion],
-    );
+    const ratingQuestion = useMemo(() => {
+      const { id: providedId, analyticsId, ...rest } = survey.rating;
+      return {
+        ...rest,
+        id: RATING_ANSWER_KEY,
+        analyticsId: analyticsId ?? providedId ?? RATING_ANSWER_KEY,
+        required: true,
+      } satisfies RatingQuestion;
+    }, [survey.rating]);
+    const mainQuestion = useMemo(() => {
+      const { id: providedId, analyticsId, ...rest } = survey.mainQuestion;
+      return {
+        ...rest,
+        id: MAIN_ANSWER_KEY,
+        analyticsId: analyticsId ?? providedId ?? MAIN_ANSWER_KEY,
+        required: true,
+      } satisfies BaseMainQuestion;
+    }, [survey.mainQuestion]);
     const sanitizedFollowUps = useMemo(
       () => {
         const followUps = survey.followUpQuestions ?? [];
         return followUps.filter(
           (question) =>
-            question.id !== ratingQuestion.id && question.id !== mainQuestion.id,
+            question.id !== RATING_ANSWER_KEY && question.id !== MAIN_ANSWER_KEY,
         );
       },
-      [mainQuestion.id, ratingQuestion.id, survey.followUpQuestions],
+      [survey.followUpQuestions],
     );
 
     const orderedQuestions = useMemo(
@@ -156,8 +172,8 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
       events,
       context,
       coreQuestionIds: {
-        rating: ratingQuestion.id,
-        main: mainQuestion.id,
+        rating: RATING_ANSWER_KEY,
+        main: MAIN_ANSWER_KEY,
       },
     });
 

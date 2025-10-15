@@ -7,6 +7,7 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 ## [0.1.5] - 2025-10-14
 - Include question prompts in the transport payload using `question__<id>` keys so Flexjar logs can pair answers with their human-readable questions.
+- Normalise rating and main question answers to the canonical Flexjar keys (`svar`/`feedback`) while preserving question metadata for analytics.
 
 ## [0.1.4] - 2025-10-13
 - Expose `@navikt/flexjar-widget/styles.css` so consumers can import the compiled widget stylesheet without poking at internal build paths.
