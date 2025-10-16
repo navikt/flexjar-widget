@@ -41,8 +41,7 @@ collect feedback with a configurable question set.
 Need the survey available at all times? `FlexJarDock` renders a compact, sticky
 panel that lets users answer the rating question immediately and complete the
 rest of the form inline—without opening a modal. The dock is the default entry
-point for Flexjar because it keeps feedback one click away while respecting the
-rating gate and success flow.
+point for Flexjar.
 
 ```tsx
 "use client";

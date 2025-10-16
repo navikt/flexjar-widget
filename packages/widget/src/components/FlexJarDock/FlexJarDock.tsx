@@ -113,6 +113,7 @@ export const FlexJarDock = ({
   containerClassName,
   panelClassName,
 }: FlexJarDockProps) => {
+  void _intro;
   void _triggerLabel;
   void _triggerAriaLabel;
 
