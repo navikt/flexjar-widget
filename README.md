@@ -36,6 +36,42 @@ collect feedback with a configurable question set.
 3. Follow the usage guide below to describe your survey, wire a transport handler,
 	and render the widget entry point that fits your product.
 
+### Describe your survey schema
+
+Most teams start by extracting the shared survey configuration to
+`components/flexjar/survey.ts` so it can be imported from any entry point:
+
+```ts
+import {
+	type FlexJarMainQuestion,
+	type FlexJarRatingQuestion,
+	type FlexJarSurveyConfig,
+} from "@navikt/flexjar-widget";
+
+const ratingQuestion: FlexJarRatingQuestion = {
+	type: "rating",
+	prompt: "Hvordan var det å bruke oppfølgingsplanen?",
+	description:
+		"Svarene du sender inn er anonyme, og blir brukt til videreutvikling av oppfølgingsplanen.",
+};
+
+const mainQuestion: FlexJarMainQuestion = {
+	type: "text",
+	prompt:
+		"Opplever du at oppfølgingsplanen er et nyttig verktøy for å følge opp den ansatte?",
+	minRows: 3,
+	maxLength: 500,
+};
+
+export const survey: FlexJarSurveyConfig = {
+	rating: ratingQuestion,
+	mainQuestion,
+};
+
+// Need a categorical main question? Set `type: "singleChoice"` and supply
+// an `options` array—the selected value will still be delivered as `feedback`.
+```
+
 ### FlexJarDock (recommended)
 
 Need the survey available at all times? `FlexJarDock` renders a compact, sticky
