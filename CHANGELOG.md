@@ -5,6 +5,10 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 ## [Unreleased]
 - Add entries here before cutting the next release.
 
+## [0.1.8] - 2025-10-16
+- Restore the white (`surface-default`) default panel background for `FlexJarDock` while keeping the `panelBackground` override for custom tokens.
+- Drop the duplicate validation warning banners in the dock and modal so individual questions surface their own error messaging.
+
 ## [0.1.7] - 2025-10-16
 - Improve `FlexJarDock` contrast on white surfaces by switching the default panel to the NAV `surface-subtle`/`border-subtle` tokens and exposing `panelBackground` / `panelBorderColor` overrides for further tuning.
 - Document the new dock styling props and expand the README survey examples with the single-choice variant used in Storybook.

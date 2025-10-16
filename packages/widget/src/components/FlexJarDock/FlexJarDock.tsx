@@ -123,7 +123,7 @@ export const FlexJarDock = ({
   offset = 24,
   containerClassName,
   panelClassName,
-  panelBackground = "surface-subtle",
+  panelBackground = "surface-default",
   panelBorderColor = "border-subtle",
 }: FlexJarDockProps) => {
   void _intro;

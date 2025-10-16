@@ -151,7 +151,7 @@ once it has been dismissed.
 | `offset` | `number` | No | `24` | Pixel distance from the viewport edge. |
 | `containerClassName` | `string` | No | – | Custom class applied to the fixed outer container. |
 | `panelClassName` | `string` | No | – | Custom class applied to the inner panel element. |
-| `panelBackground` | `BoxProps['background']` | No | `'surface-subtle'` | Token applied to the dock panel background. |
+| `panelBackground` | `BoxProps['background']` | No | `'surface-default'` | Token applied to the dock panel background. |
 | `panelBorderColor` | `BoxProps['borderColor']` | No | `'border-subtle'` | Token used for the panel border; set to `undefined` to remove it. |
 
 <details>
