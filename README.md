@@ -68,8 +68,30 @@ export const survey: FlexJarSurveyConfig = {
 	mainQuestion,
 };
 
-// Need a categorical main question? Set `type: "singleChoice"` and supply
-// an `options` array—the selected value will still be delivered as `feedback`.
+export const choiceSurvey: FlexJarSurveyConfig = {
+	rating: ratingQuestion,
+	mainQuestion: {
+		type: "singleChoice",
+		prompt:
+			"Opplever du at oppfølgingsplanen er et nyttig verktøy for å følge opp den ansatte?",
+		options: [
+			{ value: "yes", label: "Ja" },
+			{ value: "no", label: "Nei" },
+			{ value: "unsure", label: "Vet ikke" },
+		],
+	},
+	followUpQuestions: [
+		{
+			id: "oppfolgingsplan-detaljer",
+			type: "text",
+			prompt: "Hva bør vi vite for å forbedre oppfølgingsplanen?",
+			minRows: 3,
+			maxLength: 500,
+		},
+	],
+};
+
+// Both surveys yield the main answer under the canonical `feedback` key.
 ```
 
 ### FlexJarDock (recommended)
