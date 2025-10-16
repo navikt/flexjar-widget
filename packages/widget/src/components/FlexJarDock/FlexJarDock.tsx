@@ -3,6 +3,7 @@ import {
   Alert,
   BodyShort,
   Box,
+  type BoxProps,
   Button,
   HStack,
   Heading,
@@ -62,6 +63,16 @@ export interface FlexJarDockProps
   containerClassName?: string;
   /** Optional class for the inner panel. */
   panelClassName?: string;
+  /**
+   * Background token applied to the dock panel. Defaults to a subtle surface tone to lift the panel from white pages.
+   * @default "surface-subtle"
+   */
+  panelBackground?: BoxProps["background"];
+  /**
+   * Border token applied to the dock panel. Set to `undefined` to remove the border.
+   * @default "border-subtle"
+   */
+  panelBorderColor?: BoxProps["borderColor"];
 }
 
 const DEFAULT_TRIGGER_LABEL = "Gi tilbakemelding";
@@ -112,6 +123,8 @@ export const FlexJarDock = ({
   offset = 24,
   containerClassName,
   panelClassName,
+  panelBackground = "surface-subtle",
+  panelBorderColor = "border-subtle",
 }: FlexJarDockProps) => {
   void _intro;
   void _triggerLabel;
@@ -286,9 +299,11 @@ export const FlexJarDock = ({
     >
       <Box
         padding="4"
-        background="surface-default"
+        background={panelBackground}
         borderRadius="large"
         shadow="large"
+        borderWidth={panelBorderColor ? "1" : undefined}
+        borderColor={panelBorderColor}
         className={joinClassNames(CLASS_NAMES.panel, panelClassName)}
         style={panelStyle}
         aria-label={panelAriaLabel}
