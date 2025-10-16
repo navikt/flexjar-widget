@@ -4,6 +4,38 @@ This workspace hosts `@navikt/flexjar-widget` – the React-based Flexjar survey
 widget. The package bundles the modal UI, hooks, and shared types you need to
 collect feedback with a configurable question set.
 
+## Getting started
+
+1. Configure npm to read from GitHub Packages if you have not already:
+
+	```sh
+	npm config set @navikt:registry https://npm.pkg.github.com
+	```
+
+	Provide an auth token with `read:packages` scope via
+	`npm login --registry=https://npm.pkg.github.com` or by exporting
+	`NODE_AUTH_TOKEN` in CI.
+
+2. Install the widget along with its peer dependencies:
+
+	```sh
+	npm install @navikt/flexjar-widget react react-dom @navikt/ds-react
+	```
+
+	Include the Aksel design system styles and the widget stylesheet once in your
+	app entry point:
+
+	```ts
+	import "@navikt/ds-css";
+	import "@navikt/flexjar-widget/styles.css";
+	```
+
+	> Using a global CSS file instead of JavaScript imports? Add
+	> `@import "@navikt/flexjar-widget/styles.css";` below the Aksel import.
+
+3. Follow the usage guide below to describe your survey, wire a transport handler,
+	and render the widget entry point that fits your product.
+
 ### FlexJarDock (recommended)
 
 Need the survey available at all times? `FlexJarDock` renders a compact, sticky
@@ -38,8 +70,8 @@ export const FeedbackDock = () => (
 );
 ```
 
-`FlexJarDock` shares the full `FlexJarModal` API (except `open`, `onClose`,
-`width`, and `className`) and adds a few layout controls:
+`FlexJarDock` exposes the same survey and copy controls as the modal component,
+with a few dock-specific layout options:
 
 - `initialOpen`: control whether the dock appears on mount (defaults to open).
 - `position`: stick to `"bottom-right"` (default) or `"bottom-left"`.
@@ -63,7 +95,8 @@ once it has been dismissed.
 | `containerClassName` | `string` | No | – | Custom class applied to the fixed outer container. |
 | `panelClassName` | `string` | No | – | Custom class applied to the inner panel element. |
 
-### Other entry points
+<details>
+<summary><strong>Other entry points</strong></summary>
 
 #### FlexJarGuidePanel
 
@@ -231,6 +264,8 @@ const Example = () => {
 	);
 };
 ```
+
+</details>
 
 ### Customise the experience
 
