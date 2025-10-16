@@ -1,0 +1,77 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel {
+  position: relative;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--a-spacing-4);
+  margin-bottom: var(--a-spacing-2);
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--a-spacing-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.closeButton {
+  min-width: 2rem;
+  align-self: flex-start;
+}
+
+.ratingSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--a-spacing-2);
+}
+
+.ratingHeading {
+  font-size: var(--a-font-size-xlarge);
+  font-weight: var(--a-font-weight-bold);
+}
+
+.ratingDescription {
+  font-size: var(--a-font-size-small);
+}
+
+.ratingField :global(.flexjar-rating__fieldset) {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.ratingField :global(.flexjar-rating__legend) {
+  display: none;
+}
+
+.ratingRow {
+  display: flex;
+  gap: var(--a-spacing-3);
+  justify-content: space-between;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.ratingButton {
+  flex: 1 0 0;
+  padding-inline: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--a-spacing-1);
+  min-width: 0;
+}
+
+.ratingButton :global(svg) {
+  width: 2.5rem;
+  height: 2.5rem;
+}

@@ -16,25 +16,18 @@ import type {
   FlexJarEvents,
   FlexJarQuestion,
   FlexJarTransport,
-  RatingQuestion,
 } from "../../core/types.js";
 import { SuccessContent } from "./SuccessContent.js";
 import { DefaultQuestionRenderer } from "../questions/index.js";
 import { useAutoCloseOnSuccess } from "./useAutoCloseOnSuccess.js";
 import { useRatingGate } from "./useRatingGate.js";
 import type { FlexJarRenderQuestionProps } from "../../types.js";
-
-type BaseMainQuestion = Extract<FlexJarQuestion, { type: "text" }>;
-
-export type FlexJarFollowUpQuestion = Exclude<FlexJarQuestion, { type: "rating" }>;
-export type FlexJarMainQuestion = Omit<BaseMainQuestion, "id"> & { id?: string };
-export type FlexJarRatingQuestion = Omit<RatingQuestion, "id"> & { id?: string };
-
-export interface FlexJarSurveyConfig {
-  rating: FlexJarRatingQuestion;
-  mainQuestion: FlexJarMainQuestion;
-  followUpQuestions?: FlexJarFollowUpQuestion[];
-}
+import { buildCanonicalSurvey } from "../shared/canonicalSurvey.js";
+import type { FlexJarSurveyConfig } from "../surveyTypes.js";
+import {
+  DEFAULT_COPY,
+  DEFAULT_PERSONAL_DATA_NOTICE,
+} from "../FlexJar/commonDefaults.js";
 
 export type FlexJarModalWidth = ModalProps["width"] | "large";
 
@@ -72,25 +65,6 @@ export interface FlexJarModalProps {
 
 const LARGE_MODAL_WIDTH: ModalProps["width"] = "48rem";
 
-const DEFAULT_COPY = {
-  submitLabel: "Send",
-  submitPendingLabel: "Sender…",
-  cancelLabel: "Avbryt",
-  validationErrorMessage: "Du må svare på spørsmålet.",
-  transportErrorMessage: "Kunne ikke sende tilbakemeldingen. Prøv igjen senere.",
-  successTitle: "Takk for tilbakemeldingen!",
-  successBody: "Vi bruker svarene dine for å forbedre løsningen.",
-  successPrimaryLabel: "Lukk",
-};
-
-const DEFAULT_PERSONAL_DATA_NOTICE = (
-  <>
-    Ikke skriv inn navn eller andre personopplysninger.
-  </>
-);
-
-const RATING_ANSWER_KEY = "svar";
-const MAIN_ANSWER_KEY = "feedback";
 
 export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProps>(
   function FlexJarModalInner(
@@ -131,38 +105,15 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
     const formId = useId();
     const headingId = useId();
 
-    const ratingQuestion = useMemo(() => {
-      const { id: providedId, analyticsId, ...rest } = survey.rating;
-      return {
-        ...rest,
-        id: RATING_ANSWER_KEY,
-        analyticsId: analyticsId ?? providedId ?? RATING_ANSWER_KEY,
-        required: true,
-      } satisfies RatingQuestion;
-    }, [survey.rating]);
-    const mainQuestion = useMemo(() => {
-      const { id: providedId, analyticsId, ...rest } = survey.mainQuestion;
-      return {
-        ...rest,
-        id: MAIN_ANSWER_KEY,
-        analyticsId: analyticsId ?? providedId ?? MAIN_ANSWER_KEY,
-        required: true,
-      } satisfies BaseMainQuestion;
-    }, [survey.mainQuestion]);
-    const sanitizedFollowUps = useMemo(
-      () => {
-        const followUps = survey.followUpQuestions ?? [];
-        return followUps.filter(
-          (question) =>
-            question.id !== RATING_ANSWER_KEY && question.id !== MAIN_ANSWER_KEY,
-        );
-      },
-      [survey.followUpQuestions],
-    );
+
+    const canonicalSurvey = useMemo(() => buildCanonicalSurvey(survey), [survey]);
+
+    const { ratingQuestion, mainQuestion, followUpQuestions, coreQuestionIds } =
+      canonicalSurvey;
 
     const orderedQuestions = useMemo(
-      () => [ratingQuestion, mainQuestion, ...sanitizedFollowUps],
-      [mainQuestion, ratingQuestion, sanitizedFollowUps],
+      () => [ratingQuestion, mainQuestion, ...(followUpQuestions ?? [])],
+      [followUpQuestions, mainQuestion, ratingQuestion],
     );
 
     const { answers, status, error, setAnswer, submit, reset } = useFlexJar({
@@ -171,10 +122,7 @@ export const FlexJarModal = React.forwardRef<HTMLDialogElement, FlexJarModalProp
       transport,
       events,
       context,
-      coreQuestionIds: {
-        rating: RATING_ANSWER_KEY,
-        main: MAIN_ANSWER_KEY,
-      },
+      coreQuestionIds,
     });
 
     useEffect(() => {

@@ -42,7 +42,6 @@ Create `components/flexjar/survey.ts` (adjust the path to fit your project):
 
 ```ts
 import {
-	type FlexJarFollowUpQuestion,
 	type FlexJarMainQuestion,
 	type FlexJarSurveyConfig,
 	type FlexJarRatingQuestion,
@@ -50,53 +49,27 @@ import {
 
 const ratingQuestion: FlexJarRatingQuestion = {
 	type: "rating",
-	prompt: "Hvordan var opplevelsen?",
+	prompt: "Hvordan var det å bruke oppfølgingsplanen?",
+	description:
+		"Svarene du sender inn er anonyme, og blir brukt til videreutvikling av oppfølgingsplanen.",
 };
 
 const mainQuestion: FlexJarMainQuestion = {
 	type: "text",
-	prompt: "Hva tenker du om denne tjenesten?",
+	prompt:
+		"Opplever du at oppfølgingsplanen er et nyttig verktøy for å følge opp den ansatte?",
 	minRows: 3,
+	maxLength: 500,
 };
-
-const followUpQuestions: FlexJarFollowUpQuestion[] = [
-	{
-		id: "channel",
-		type: "singleChoice",
-		prompt: "Hvor planlegger du å bruke Flexjar?",
-		options: [
-			{ value: "internal", label: "Interne flater" },
-			{ value: "public", label: "nav.no" },
-		],
-	},
-	{
-		id: "pain-points",
-		type: "multiChoice",
-		prompt: "Hva bør vi forbedre først?",
-		description: "Velg alle som gjelder.",
-		options: [
-			{ value: "copy", label: "Tekst og innhold" },
-			{ value: "design", label: "Design og tilgjengelighet" },
-			{ value: "integrations", label: "Integrasjoner" },
-			{ value: "analytics", label: "Analyse og målinger" },
-		],
-	},
-	{
-		id: "details",
-		type: "text",
-		prompt: "Fortell oss mer om behovene dine.",
-		description: "Den informasjonen hjelper oss å prioritere riktig.",
-		minRows: 2,
-	},
-];
 
 export const survey: FlexJarSurveyConfig = {
 	rating: ratingQuestion,
 	mainQuestion,
-	followUpQuestions,
 };
 
 > `FlexJarModal` normalises the rating answer to the canonical Flexjar key `svar` and the main text to `feedback`. Any `id` you provide on those questions is used for analytics (via `analyticsId`) but no longer duplicates values in the transport payload. Avoid reusing the reserved `svar` or `feedback` identifiers for follow-up questions.
+
+Need a categorical answer instead of free text? Set `mainQuestion.type` to `"singleChoice"` and provide a set of `options`. The selected option’s `value` is still delivered as the `feedback` string in the transport payload.
 ```
 
 Then create `components/flexjar/Flexjar.tsx`:
@@ -143,6 +116,63 @@ extras:
 - `buttonProps`: pass any `@navikt/ds-react` button props (variant, size, icon,…).
 - `panelProps`: forward props to the underlying `GuidePanel`.
 
+### Sticky dock with FlexJarDock
+
+Need the survey available at all times? `FlexJarDock` renders a compact, sticky
+panel that lets users answer the rating question immediately and complete the
+rest of the form inline—without opening a modal.
+
+```tsx
+"use client";
+
+import { FlexJarDock, type FlexJarTransport } from "@navikt/flexjar-widget";
+import { survey } from "./survey";
+
+const transport: FlexJarTransport = {
+	async submit(submission) {
+		await fetch("/api/flexjar", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(submission.transportPayload),
+		});
+	},
+};
+
+export const FeedbackDock = () => (
+	<FlexJarDock
+		feedbackId="oppfolgingsplan"
+		survey={survey}
+		transport={transport}
+		position="bottom-right"
+	/>
+);
+```
+
+`FlexJarDock` shares the full `FlexJarModal` API (except `open`, `onClose`,
+`width`, and `className`) and adds a few layout controls:
+
+- `initialOpen`: control whether the dock appears on mount (defaults to open).
+- `position`: stick to `"bottom-right"` (default) or `"bottom-left"`.
+- `offset`: pixel distance from the viewport edge (defaults to `24`).
+- `containerClassName` / `panelClassName`: style overrides for advanced layouts.
+
+The dock opens by default and disappears for the rest of the browser session if
+the user clicks «Avbryt» or the close button. `initialOpen={false}` lets you
+opt out of showing the dock on a given screen, but there is no toggle button
+once it has been dismissed.
+
+### FlexJarDock props
+
+| Prop | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `initialOpen` | `boolean` | No | `true` | Show the dock immediately on mount. Use `false` to suppress it. |
+| `triggerLabel` | `string` | No | `"Gi tilbakemelding"` | Deprecated: the dock no longer renders a trigger button. |
+| `triggerAriaLabel` | `string` | No | `triggerLabel` | Deprecated: the dock no longer renders a trigger button. |
+| `position` | `'bottom-right' \| 'bottom-left'` | No | `'bottom-right'` | Which corner of the viewport the dock sticks to. |
+| `offset` | `number` | No | `24` | Pixel distance from the viewport edge. |
+| `containerClassName` | `string` | No | – | Custom class applied to the fixed outer container. |
+| `panelClassName` | `string` | No | – | Custom class applied to the inner panel element. |
+
 ### Manual modal integration
 
 #### Step 1. Describe your survey
@@ -153,7 +183,6 @@ Every Flexjar flow starts with a mandatory rating question. Group it with any fo
 import {
 	FlexJarModal,
 	createRatingLabels,
-	type FlexJarFollowUpQuestion,
 	type FlexJarMainQuestion,
 	type FlexJarSurveyConfig,
 	type FlexJarTransport,
@@ -166,7 +195,9 @@ import {
 const ratingQuestion: FlexJarRatingQuestion = {
 	id: "experience",
 	type: "rating",
-	prompt: "Hvordan var opplevelsen?",
+	prompt: "Hvordan var det å bruke oppfølgingsplanen?",
+	description:
+		"Svarene du sender inn er anonyme, og blir brukt til videreutvikling av oppfølgingsplanen.",
 	labels: createRatingLabels([
 		"Svært dårlig",
 		"Ganske dårlig",
@@ -183,45 +214,15 @@ const ratingQuestion: FlexJarRatingQuestion = {
 const mainQuestion: FlexJarMainQuestion = {
 	id: "feedback",
 	type: "text",
-	prompt: "Hva tenker du om denne tjenesten?",
+	prompt:
+		"Opplever du at oppfølgingsplanen er et nyttig verktøy for å følge opp den ansatte?",
 	minRows: 3,
+	maxLength: 500,
 };
-
-const followUpQuestions: FlexJarFollowUpQuestion[] = [
-	{
-		id: "channel",
-		type: "singleChoice",
-		prompt: "Hvor planlegger du å bruke Flexjar?",
-		options: [
-			{ value: "internal", label: "Interne flater" },
-			{ value: "public", label: "nav.no" },
-		],
-	},
-	{
-		id: "pain-points",
-		type: "multiChoice",
-		prompt: "Hva bør vi forbedre først?",
-		description: "Velg alle som gjelder.",
-		options: [
-			{ value: "copy", label: "Tekst og innhold" },
-			{ value: "design", label: "Design og tilgjengelighet" },
-			{ value: "integrations", label: "Integrasjoner" },
-			{ value: "analytics", label: "Analyse og målinger" },
-		],
-	},
-	{
-		id: "details",
-		type: "text",
-		prompt: "Fortell oss mer om behovene dine.",
-		description: "Den informasjonen hjelper oss å prioritere riktig.",
-		minRows: 2,
-	},
-];
 
 const survey: FlexJarSurveyConfig = {
 	rating: ratingQuestion,
 	mainQuestion,
-	followUpQuestions,
 };
 
 // The widget marks the rating and main question as required automatically,
@@ -281,13 +282,14 @@ const Example = () => {
 ### Customise the experience
 
 - **Guide panel CTA**: reach for `FlexJarGuidePanel` when you want a ready-made `GuidePanel` + button that opens the modal without wiring local state.
+- **Sticky dock**: use `FlexJarDock` to keep the survey visible on the page and reveal follow-up questions inline after the rating.
 - **Conditional follow-ups** are gated behind the rating automatically—no rating, no extra questions.
 - **Copy & layout**: override props such as `intro`, `submitLabel`, `cancelLabel`, or provide `personalDataNotice` to replace the standard warning.
 - **Layout width**: the modal defaults to the Aksel `"large"` preset (~48rem); pass `width="small"`, `width="medium"`, or a custom value (e.g. `"min(90vw, 880px)"`) for alternative sizing.
 - **Events**: pass an `events` object (see `FlexJarEvents`) to react to lifecycle hooks like `onViewModal`, `onSubmitSuccess`, or validation failures.
 - **Success handling**: enable `autoCloseOnSuccess` and tune `successCloseDelayMs` if you want the modal to close automatically after feedback is sent.
 
-Flexjar’s backend expects three core fields: `feedbackId`, `svar` (the rating), and `feedback` (the main text answer). The modal enforces those requirements by always rendering the rating question first and requiring a `mainQuestion` in the survey configuration; any extra questions are delivered alongside those core values.
+Flexjar’s backend expects three core fields: `feedbackId`, `svar` (the rating), and `feedback` (a string value for the main answer). The modal enforces those requirements by always rendering the rating question first and requiring a `mainQuestion` in the survey configuration; any extra questions are delivered alongside those core values.
 
 Every call to your `transport.submit` handler receives a `submission` object with a ready-to-send `transportPayload`. The widget enriches the payload with the human-readable question text so downstream logs keep answers and prompts together:
 
@@ -357,7 +359,7 @@ The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencie
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `rating` | `FlexJarRatingQuestion` | Yes | Primary entry question; modal is gated on an answer here. |
-| `mainQuestion` | `FlexJarMainQuestion` | Yes | Captures the main feedback text that Flexjar expects in the `feedback` field. |
+| `mainQuestion` | `FlexJarMainQuestion` | Yes | Captures the main answer (text or single choice) that Flexjar expects in the `feedback` field. |
 | `followUpQuestions` | `FlexJarFollowUpQuestion[]` | No | Additional questions rendered after the rating has been answered. |
 
 <details>

@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import { BodyShort, Box, Heading, HStack, VStack } from "@navikt/ds-react";
+import type { BoxProps } from "@navikt/ds-react";
 import type {
   FlexJarAnswerValue,
   RatingQuestion,
@@ -16,6 +17,30 @@ interface RatingQuestionFieldProps {
   validationErrorMessage: string;
   isMissing: boolean;
   disabled: boolean;
+  /** Optional class applied to the outer wrapper */
+  className?: string;
+  /** Extra class added to the fieldset element */
+  fieldsetClassName?: string;
+  /** Extra class added to the emoji button row */
+  rowClassName?: string;
+  /** Extra class appended to each emoji button */
+  buttonClassName?: string;
+  /** Provide external aria-labelledby id; skip internal heading when set */
+  ariaLabelledBy?: string;
+  /** Provide external aria-describedby id; skip internal description when set */
+  ariaDescribedBy?: string;
+  /** Hide the prompt heading inside the component */
+  hidePrompt?: boolean;
+  /** Hide the description text inside the component */
+  hideDescription?: boolean;
+  /** Hide the visible emoji labels while keeping them in aria attributes */
+  hideValueLabels?: boolean;
+  /** Control whether the emoji row should wrap to multiple lines */
+  wrap?: boolean;
+  /** Override the paddingBlock token on the underlying fieldset */
+  fieldsetPaddingBlock?: BoxProps["paddingBlock"];
+  /** Override the paddingInline token on the underlying fieldset */
+  fieldsetPaddingInline?: BoxProps["paddingInline"];
 }
 
 interface EmojiVariant {
@@ -105,6 +130,18 @@ export const RatingQuestionField = ({
   validationErrorMessage,
   isMissing,
   disabled,
+  className,
+  fieldsetClassName,
+  rowClassName,
+  buttonClassName,
+  ariaLabelledBy,
+  ariaDescribedBy,
+  hidePrompt = false,
+  hideDescription = false,
+  hideValueLabels = false,
+  wrap = true,
+  fieldsetPaddingBlock,
+  fieldsetPaddingInline,
 }: RatingQuestionFieldProps) => {
   const scale = question.scale ?? 5;
   const options = Array.from({ length: scale }, (_, index) => index + 1);
@@ -112,10 +149,13 @@ export const RatingQuestionField = ({
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   buttonRefs.current.length = options.length;
 
-  const headingId = `${question.id}-heading`;
-  const descriptionId = question.description
-    ? `${question.id}-description`
-    : undefined;
+  const fallbackHeadingId = `${question.id}-heading`;
+  const fallbackDescriptionId = `${question.id}-description`;
+  const headingId =
+    ariaLabelledBy ?? (!hidePrompt ? fallbackHeadingId : undefined);
+  const descriptionId = ariaDescribedBy ?? (
+    !hideDescription && question.description ? fallbackDescriptionId : undefined
+  );
   const errorId = `${question.id}-error`;
   const describedBy = useMemo(() => {
     const references = [descriptionId, isMissing ? errorId : undefined].filter(
@@ -206,28 +246,36 @@ export const RatingQuestionField = ({
   );
 
   return (
-    <VStack gap="2">
-      <Heading id={headingId} level="3" size="small">
-        {question.prompt}
-      </Heading>
-      {question.description && (
-        <BodyShort id={descriptionId}>{question.description}</BodyShort>
+    <VStack gap="2" className={className}>
+      {!hidePrompt && (
+        <Heading
+          id={ariaLabelledBy ? undefined : fallbackHeadingId}
+          level="3"
+          size="medium"
+        >
+          {question.prompt}
+        </Heading>
+      )}
+      {question.description && !hideDescription && (
+        <BodyShort id={ariaDescribedBy ? undefined : fallbackDescriptionId}>
+          {question.description}
+        </BodyShort>
       )}
       <Box
         as="fieldset"
-        className={CLASS_NAMES.fieldset}
+        className={joinClassNames(CLASS_NAMES.fieldset, fieldsetClassName)}
         aria-labelledby={headingId}
         aria-describedby={describedBy}
-        paddingBlock="3"
-        paddingInline="4"
+        paddingBlock={fieldsetPaddingBlock ?? "3"}
+        paddingInline={fieldsetPaddingInline ?? "4"}
       >
         <legend className={CLASS_NAMES.legend}>{question.prompt}</legend>
         <HStack
           gap="4"
           justify="start"
           align="center"
-          wrap
-          className={CLASS_NAMES.row}
+          wrap={wrap}
+          className={joinClassNames(CLASS_NAMES.row, rowClassName)}
           role="radiogroup"
           aria-labelledby={headingId}
           aria-describedby={describedBy}
@@ -240,6 +288,7 @@ export const RatingQuestionField = ({
               CLASS_NAMES.button,
               variant.className,
               isActive ? CLASS_NAMES.active : undefined,
+              buttonClassName,
             );
             const buttonStyle = isActive
               ? { color: variant.activeColor }
@@ -256,6 +305,7 @@ export const RatingQuestionField = ({
                 className={buttonClass}
                 style={buttonStyle}
                 text={labelText}
+                renderText={!hideValueLabels}
                 ariaLabel={ariaLabel}
                 disabled={disabled}
                 onKeyDown={(event) => handleKeyNavigation(event, index)}

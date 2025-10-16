@@ -14,34 +14,47 @@ import type { RatingQuestion } from "../core/types.js";
 const RATING_QUESTION: RatingQuestion = {
   id: "experience",
   type: "rating",
-  prompt: "Hvordan var opplevelsen?",
-  description: "Start med å velge et ansikt.",
+  prompt: "Hvordan var det å bruke oppfølgingsplanen?",
+  description:
+    "Svarene du sender inn er anonyme, og blir brukt til videreutvikling av oppfølgingsplanen.",
 };
 
 const MAIN_QUESTION: FlexJarMainQuestion = {
   id: "feedback",
   type: "text",
-  prompt: "Hva bør vi vite for å forbedre løsningen?",
+  prompt: "Opplever du at oppfølgingsplanen er et nyttig verktøy for å følge opp den ansatte?",
   minRows: 3,
+  maxLength: 500,
 };
-
-const FOLLOW_UP_QUESTIONS: FlexJarFollowUpQuestion[] = [
-  {
-    id: "channels",
-    type: "multiChoice",
-    prompt: "Hvor møter brukerne Flexjar først?",
-    options: [
-      { value: "navno", label: "nav.no" },
-      { value: "minside", label: "Ditt NAV" },
-      { value: "app", label: "NAV-appen" },
-    ],
-  },
-];
 
 const SURVEY: FlexJarSurveyConfig = {
   rating: RATING_QUESTION,
   mainQuestion: MAIN_QUESTION,
-  followUpQuestions: FOLLOW_UP_QUESTIONS,
+};
+
+const CHOICE_MAIN_QUESTION: FlexJarMainQuestion = {
+  id: "experience-choice",
+  type: "singleChoice",
+  prompt: "Opplever du at oppfølgingsplanen er et nyttig verktøy for å følge opp den ansatte?",
+  options: [
+    { value: "yes", label: "Ja" },
+    { value: "no", label: "Nei" },
+    { value: "unsure", label: "Vet ikke" },
+  ],
+};
+
+const OPTIONAL_TEXT_FOLLOW_UP: FlexJarFollowUpQuestion = {
+  id: "oppfolgingsplan-detaljer",
+  type: "text",
+  prompt: "Hva bør vi vite for å forbedre oppfølgingsplanen?",
+  minRows: 3,
+  maxLength: 500,
+};
+
+const CHOICE_SURVEY: FlexJarSurveyConfig = {
+  rating: RATING_QUESTION,
+  mainQuestion: CHOICE_MAIN_QUESTION,
+  followUpQuestions: [OPTIONAL_TEXT_FOLLOW_UP],
 };
 
 const TRANSPORT: FlexJarGuidePanelProps["transport"] = {
@@ -97,5 +110,12 @@ export const WithCustomButton: Story = {
     buttonProps: {
       variant: "secondary",
     },
+  },
+};
+
+export const ChoiceAsMainQuestion: Story = {
+  render: Default.render,
+  args: {
+    survey: CHOICE_SURVEY,
   },
 };

@@ -14,6 +14,10 @@ import type {
   FlexJarValidationError,
   RatingQuestion,
 } from "./types";
+import {
+  MAIN_ANSWER_KEY,
+  RATING_ANSWER_KEY,
+} from "../components/shared/canonicalSurvey.js";
 
 export interface UseFlexJarOptions {
   feedbackId: string;
@@ -228,8 +232,6 @@ function cloneAnswers(
 }
 
 const QUESTION_TEXT_PREFIX = "question__";
-const RATING_KEY = "svar";
-const FEEDBACK_KEY = "feedback";
 
 function buildTransportPayload(
   feedbackId: string,
@@ -270,12 +272,12 @@ function buildTransportPayload(
 
     const svar = coerceRatingAnswer(ratingValue);
     if (svar !== undefined) {
-      payload[RATING_KEY] = svar;
+      payload[RATING_ANSWER_KEY] = svar;
     }
 
     const feedback = coerceFeedbackAnswer(mainValue);
     if (feedback !== undefined) {
-      payload[FEEDBACK_KEY] = feedback;
+      payload[MAIN_ANSWER_KEY] = feedback;
     }
   }
 
@@ -291,11 +293,11 @@ function resolveTransportQuestionKey(
   }
 
   if (questionId === coreQuestionIds.rating) {
-    return RATING_KEY;
+    return RATING_ANSWER_KEY;
   }
 
   if (questionId === coreQuestionIds.main) {
-    return FEEDBACK_KEY;
+    return MAIN_ANSWER_KEY;
   }
 
   return questionId;

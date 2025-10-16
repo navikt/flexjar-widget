@@ -5,4 +5,5 @@ export {
 	FlexJarGuidePanel,
 	type FlexJarGuidePanelProps,
 } from "./components/FlexJarGuidePanel/index.js";
+export { FlexJarDock, type FlexJarDockProps } from "./components/FlexJarDock/index.js";
 export type { FlexJarRenderQuestionProps } from "./types.js";

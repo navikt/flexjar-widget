@@ -5,6 +5,7 @@
 ## Current Code
 - **Entry point**: `packages/widget/src/index.ts` re-exports the modal, question components, hooks, and types.
 - **Modal**: `modal/index.ts` re-exports `FlexJarModal` from `components/FlexJarModal/FlexJarModal.tsx`, which renders the survey, enforces the rating gate, and wires submission via `useFlexJar`.
+- **Dock**: `components/FlexJarDock/FlexJarDock.tsx` exposes a sticky inline variant that keeps the survey on screen via the same hook and question renderers.
 - **Core logic**: `packages/widget/src/core/useFlexJar.ts` manages validation, submission lifecycle, and builds the Flexjar transport payload. All shared types live beside it in `core/types.ts`.
 - **Questions**: rating, choice, and text renderers sit under `components/questions`. Keep the emoji UX accessible and keyboard friendly.
 - **Styling**: relies on `@navikt/ds-react` tokens with CSS modules plus a bundled fallback stylesheet for emoji styling. Preserve NAV tokens, live-region feedback, and keep the fallback classes in sync with the module names.
@@ -23,6 +24,7 @@
 - **CI/publishing**: plan for Changesets + GitHub Actions covering typecheck, tests, build, and publishing to GitHub Packages. Document the release flow when scripts exist.
 - **Testing focus**: unit-test the core hook, and cover React interactions with Testing Library for accessibility regressions.
 - **Docs discipline**: README must always call out the required `@navikt/ds-css` and `@navikt/flexjar-widget/styles.css` imports, and showcase both the `FlexJarModal` and `FlexJarGuidePanel` entry points.
+- **Docs discipline**: README must also cover the sticky `FlexJarDock` variant so teams know how to embed the inline widget.
 
 ## Refactor Checklist for Agents
 - keep transport logic framework-agnostic inside `core/useFlexJar.ts` and expose it through the package entry.
@@ -31,5 +33,6 @@
 - update `README.md` with migration notes and examples when you land breaking API changes.
 - keep the compiled CSS (`dist/index.css`) and exported `styles.css` subpath updated whenever you touch styling, and ensure fallback styles still match their CSS-module counterparts.
 - ensure no follow-up question leaks the reserved `svar` or `feedback` keys; surface helpful warnings or docs when adjusting question-normalisation logic.
+- keep `FlexJarDock` in sync with the modal (shared defaults, rating gate, success handling) whenever you touch submission or validation logic.
 
 Questions or unclear areas? Surface gaps—especially around publishing strategy or API contracts—so we can expand these instructions.

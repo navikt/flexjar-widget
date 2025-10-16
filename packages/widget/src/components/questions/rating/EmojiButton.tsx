@@ -12,6 +12,7 @@ export interface EmojiButtonProps {
   disabled?: boolean;
   ariaLabel?: string;
   onKeyDown?: (event: KeyboardEvent<HTMLButtonElement>) => void;
+  renderText?: boolean;
 }
 
 export const EmojiButton = React.forwardRef<HTMLButtonElement, EmojiButtonProps>(
@@ -27,6 +28,7 @@ export const EmojiButton = React.forwardRef<HTMLButtonElement, EmojiButtonProps>
       disabled,
       ariaLabel,
       onKeyDown,
+      renderText = true,
     },
     ref,
   ) => {
@@ -47,7 +49,7 @@ export const EmojiButton = React.forwardRef<HTMLButtonElement, EmojiButtonProps>
         onKeyDown={onKeyDown}
       >
         {children}
-        <BodyShort>{text}</BodyShort>
+        {renderText && <BodyShort>{text}</BodyShort>}
       </button>
     );
   },

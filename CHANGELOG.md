@@ -3,7 +3,14 @@
 All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 ## [Unreleased]
-- Add entries here before cutting the next release.
+- Allow `mainQuestion` to be either a text area or a single-choice prompt while still normalising the answer to the `feedback` transport key.
+- Showcase a Storybook variant where the main question is a yes/no choice and the free-text follow-up becomes an optional third question.
+- Make `FlexJarDock` open by default and persist dismissal in `sessionStorage` for the current browser session.
+
+## [0.1.6] - 2025-10-15
+- Introduce `FlexJarDock`, a sticky inline variant that keeps the survey visible without opening a modal.
+- Share canonical survey normalisation between entry points so rating/main answers always resolve to the Flexjar `svar`/`feedback` keys.
+- Refine the dock layout with a condensed rating row, emoji captions hidden visually, and less surrounding copy for a lighter footprint.
 
 ## [0.1.5] - 2025-10-14
 - Include question prompts in the transport payload using `question__<id>` keys so Flexjar logs can pair answers with their human-readable questions.
