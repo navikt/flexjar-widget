@@ -394,12 +394,6 @@ export const FlexJarDock = ({
                   );
                 })}
 
-                {error?.type === "validation" && (
-                  <Alert variant="warning" role="alert">
-                    {validationErrorMessage}
-                  </Alert>
-                )}
-
                 {error?.type === "transport" && (
                   <Alert variant="error" role="alert">
                     {transportErrorMessage}
