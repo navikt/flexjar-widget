@@ -4,123 +4,13 @@ This workspace hosts `@navikt/flexjar-widget` – the React-based Flexjar survey
 widget. The package bundles the modal UI, hooks, and shared types you need to
 collect feedback with a configurable question set.
 
-## Getting started
-
-1. Configure npm to read from GitHub Packages if you have not already:
-
-	```sh
-	npm config set @navikt:registry https://npm.pkg.github.com
-	```
-
-	Provide an auth token with `read:packages` scope via `npm login --registry=https://npm.pkg.github.com` or by exporting `NODE_AUTH_TOKEN` in CI.
-
-2. Install the widget along with its peer dependencies:
-
-	```sh
-	npm install @navikt/flexjar-widget react react-dom @navikt/ds-react
-	```
-
-	Include the Aksel design system styles and the widget stylesheet once in your app entry point:
-
-	```ts
-	import "@navikt/ds-css";
-	import "@navikt/flexjar-widget/styles.css";
-	```
-
-	> Using a global CSS file instead of JavaScript imports? Add `@import "@navikt/flexjar-widget/styles.css";` below the Aksel import.
-
-3. Follow the usage guide below to describe your survey, wire a transport handler, and render the modal.
-
-## Usage
-
-### Quick start with FlexJarGuidePanel
-
-If you want a copy/paste flow that wires the trigger and modal for you, start by
-splitting the survey schema from the UI.
-
-Create `components/flexjar/survey.ts` (adjust the path to fit your project):
-
-```ts
-import {
-	type FlexJarMainQuestion,
-	type FlexJarSurveyConfig,
-	type FlexJarRatingQuestion,
-} from "@navikt/flexjar-widget";
-
-const ratingQuestion: FlexJarRatingQuestion = {
-	type: "rating",
-	prompt: "Hvordan var det å bruke oppfølgingsplanen?",
-	description:
-		"Svarene du sender inn er anonyme, og blir brukt til videreutvikling av oppfølgingsplanen.",
-};
-
-const mainQuestion: FlexJarMainQuestion = {
-	type: "text",
-	prompt:
-		"Opplever du at oppfølgingsplanen er et nyttig verktøy for å følge opp den ansatte?",
-	minRows: 3,
-	maxLength: 500,
-};
-
-export const survey: FlexJarSurveyConfig = {
-	rating: ratingQuestion,
-	mainQuestion,
-};
-
-> `FlexJarModal` normalises the rating answer to the canonical Flexjar key `svar` and the main text to `feedback`. Any `id` you provide on those questions is used for analytics (via `analyticsId`) but no longer duplicates values in the transport payload. Avoid reusing the reserved `svar` or `feedback` identifiers for follow-up questions.
-
-Need a categorical answer instead of free text? Set `mainQuestion.type` to `"singleChoice"` and provide a set of `options`. The selected option’s `value` is still delivered as the `feedback` string in the transport payload.
-```
-
-Then create `components/flexjar/Flexjar.tsx`:
-
-```tsx
-"use client";
-
-import { FlexJarGuidePanel, type FlexJarTransport } from "@navikt/flexjar-widget";
-import { survey } from "./survey";
-
-const transport: FlexJarTransport = {
-	async submit(submission) {
-		const response = await fetch("/api/flexjar", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(submission.transportPayload),
-		});
-
-		if (!response.ok) {
-			throw new Error("Failed to send feedback");
-		}
-	},
-};
-
-export const Flexjar = () => (
-	<FlexJarGuidePanel
-		feedbackId="oppfolgingsplan"
-		survey={survey}
-		transport={transport}
-		panelBody="Hei! Vi jobber med en ny og forbedret oppfølgingsplan i 2025. Har du to minutter til å dele behovene dine?"
-		title="Gi tilbakemelding"
-		intro="Svarene dine brukes til videre forbedringsarbeid."
-	/>
-);
-```
-
-`FlexJarGuidePanel` internally renders an Aksel `GuidePanel` with a call-to-action
-button and handles the modal lifecycle. You still get access to every
-`FlexJarModal` prop (like `events`, `width`, or `personalDataNotice`) plus a few
-extras:
-
-- `panelBody`: text or JSX placed next to the open button.
-- `buttonLabel`: override the button text (defaults to "Åpne spørreskjema").
-- `buttonProps`: pass any `@navikt/ds-react` button props (variant, size, icon,…).
-- `panelProps`: forward props to the underlying `GuidePanel`.
-
-### Sticky dock with FlexJarDock
+### FlexJarDock (recommended)
 
 Need the survey available at all times? `FlexJarDock` renders a compact, sticky
 panel that lets users answer the rating question immediately and complete the
-rest of the form inline—without opening a modal.
+rest of the form inline—without opening a modal. The dock is the default entry
+point for Flexjar because it keeps feedback one click away while respecting the
+rating gate and success flow.
 
 ```tsx
 "use client";
@@ -161,7 +51,7 @@ the user clicks «Avbryt» or the close button. `initialOpen={false}` lets you
 opt out of showing the dock on a given screen, but there is no toggle button
 once it has been dismissed.
 
-### FlexJarDock props
+#### FlexJarDock props
 
 | Prop | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -173,9 +63,72 @@ once it has been dismissed.
 | `containerClassName` | `string` | No | – | Custom class applied to the fixed outer container. |
 | `panelClassName` | `string` | No | – | Custom class applied to the inner panel element. |
 
-### Manual modal integration
+### Other entry points
 
-#### Step 1. Describe your survey
+#### FlexJarGuidePanel
+
+If you want a copy/paste flow that wires the trigger and modal for you, start by
+splitting the survey schema from the UI.
+
+Create `components/flexjar/survey.ts` (adjust the path to fit your project):
+
+```ts
+import {
+	type FlexJarMainQuestion,
+	type FlexJarSurveyConfig,
+	type FlexJarRatingQuestion,
+} from "@navikt/flexjar-widget";
+
+const ratingQuestion: FlexJarRatingQuestion = {
+	type: "rating",
+};
+
+const mainQuestion: FlexJarMainQuestion = {
+	type: "text",
+	maxLength: 500,
+};
+
+export const survey: FlexJarSurveyConfig = {
+	rating: ratingQuestion,
+	mainQuestion,
+};
+
+> `FlexJarModal` normalises the rating answer to the canonical Flexjar key `svar` and the main text to `feedback`. Any `id` you provide on those questions is used for analytics (via `analyticsId`) but no longer duplicates values in the transport payload. Avoid reusing the reserved `svar` or `feedback` identifiers for follow-up questions.
+
+Need a categorical answer instead of free text? Set `mainQuestion.type` to `"singleChoice"` and provide a set of `options`. The selected option’s `value` is still delivered as the `feedback` string in the transport payload.
+```
+
+Then create `components/flexjar/Flexjar.tsx`:
+
+```tsx
+"use client";
+
+import { FlexJarGuidePanel, type FlexJarTransport } from "@navikt/flexjar-widget";
+import { survey } from "./survey";
+
+const transport: FlexJarTransport = {
+	async submit(submission) {…},
+};
+
+export const Flexjar = () => (
+	<FlexJarGuidePanel
+	/>
+);
+```
+
+`FlexJarGuidePanel` internally renders an Aksel `GuidePanel` with a
+call-to-action button and handles the modal lifecycle. You still get access to
+every `FlexJarModal` prop (like `events`, `width`, or `personalDataNotice`) plus
+a few extras:
+
+- `panelBody`: text or JSX placed next to the open button.
+- `buttonLabel`: override the button text (defaults to "Åpne spørreskjema").
+- `buttonProps`: pass any `@navikt/ds-react` button props (variant, size, icon,…).
+- `panelProps`: forward props to the underlying `GuidePanel`.
+
+#### Manual modal integration
+
+##### Step 1. Describe your survey
 
 Every Flexjar flow starts with a mandatory rating question. Group it with any follow-ups in a `survey` object so the widget can enforce gating rules.
 
@@ -234,7 +187,7 @@ const survey: FlexJarSurveyConfig = {
 
 ```
 
-#### Step 2. Inject the transport handler
+##### Step 2. Inject the transport handler
 
 Flexjar never performs HTTP calls for you. Provide a `transport` object that knows how to persist the submission in your context.
 
@@ -254,7 +207,7 @@ const transport: FlexJarTransport = {
 };
 ```
 
-#### Step 3. Render the modal
+##### Step 3. Render the modal
 
 ```tsx
 import { Button } from "@navikt/ds-react";
@@ -281,8 +234,8 @@ const Example = () => {
 
 ### Customise the experience
 
-- **Guide panel CTA**: reach for `FlexJarGuidePanel` when you want a ready-made `GuidePanel` + button that opens the modal without wiring local state.
 - **Sticky dock**: use `FlexJarDock` to keep the survey visible on the page and reveal follow-up questions inline after the rating.
+- **Guide panel CTA**: reach for `FlexJarGuidePanel` when you want a ready-made `GuidePanel` + button that opens the modal without wiring local state.
 - **Conditional follow-ups** are gated behind the rating automatically—no rating, no extra questions.
 - **Copy & layout**: override props such as `intro`, `submitLabel`, `cancelLabel`, or provide `personalDataNotice` to replace the standard warning.
 - **Layout width**: the modal defaults to the Aksel `"large"` preset (~48rem); pass `width="small"`, `width="medium"`, or a custom value (e.g. `"min(90vw, 880px)"`) for alternative sizing.
