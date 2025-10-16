@@ -5,6 +5,10 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 ## [Unreleased]
 - Add entries here before cutting the next release.
 
+## [0.1.7] - 2025-10-16
+- Improve `FlexJarDock` contrast on white surfaces by switching the default panel to the NAV `surface-subtle`/`border-subtle` tokens and exposing `panelBackground` / `panelBorderColor` overrides for further tuning.
+- Document the new dock styling props and expand the README survey examples with the single-choice variant used in Storybook.
+
 ## [0.1.6] - 2025-10-16
 - Keep `FlexJarDock` open by default and remember dismissals in `sessionStorage`, so users only see the panel once per session unless you opt out with `initialOpen={false}`.
 - Allow the main survey question to be defined as either free text or a single-choice list while still mapping the answer to the canonical `feedback` transport key.
