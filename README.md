@@ -115,7 +115,10 @@ with a few dock-specific layout options:
 - `containerClassName` / `panelClassName`: style overrides for advanced layouts.
 
 The dock opens by default and disappears for the rest of the browser session if
-the user clicks «Avbryt» or the close button.
+the user clicks «Avbryt» or the close button. When `sessionStorage` is unavailable
+(for example, some private browsing modes), the dismissal falls back to in-memory
+state; expose `events.onDismissalPersistFailed` if you want telemetry when that
+persistence step fails.
 
 #### FlexJarDock props
 
@@ -159,7 +162,7 @@ export const survey: FlexJarSurveyConfig = {
 	mainQuestion,
 };
 
-> `FlexJarModal` normalises the rating answer to the canonical Flexjar key `svar` and the main text to `feedback`. Any `id` you provide on those questions is used for analytics (via `analyticsId`) but no longer duplicates values in the transport payload. Avoid reusing the reserved `svar` or `feedback` identifiers for follow-up questions.
+> `FlexJarModal` normalises the rating answer to the canonical Flexjar key `svar` and the main text to `feedback`. Any `id` you provide on those questions is used for analytics (via `analyticsId`) but no longer duplicates values in the transport payload. Avoid reusing the reserved `svar` or `feedback` identifiers for follow-up questions—development builds now warn if those IDs slip through.
 
 Need a categorical answer instead of free text? Set `mainQuestion.type` to `"singleChoice"` and provide a set of `options`. The selected option’s `value` is still delivered as the `feedback` string in the transport payload.
 ```
@@ -260,14 +263,20 @@ Flexjar never performs HTTP calls for you. Provide a `transport` object that kno
 ```tsx
 const transport: FlexJarTransport = {
 	async submit(submission) {
-		const response = await fetch("/api/flexjar", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(submission.transportPayload),
-		});
+		try {
+			const response = await fetch("/api/flexjar", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(submission.transportPayload),
+			});
 
-		if (!response.ok) {
-			throw new Error("Failed to send feedback");
+			if (!response.ok) {
+				throw new Error(`Flexjar transport failed with status ${response.status}`);
+			}
+		} catch (cause) {
+			// Re-throw so the widget reflects the transport error (showing the error alert).
+			// Optional: perform retries or log to your telemetry pipeline first.
+			throw cause;
 		}
 	},
 };
@@ -307,7 +316,7 @@ const Example = () => {
 - **Conditional follow-ups** are gated behind the rating automatically—no rating, no extra questions.
 - **Copy & layout**: override props such as `intro`, `submitLabel`, `cancelLabel`, or provide `personalDataNotice` to replace the standard warning.
 - **Layout width**: the modal defaults to the Aksel `"large"` preset (~48rem); pass `width="small"`, `width="medium"`, or a custom value (e.g. `"min(90vw, 880px)"`) for alternative sizing.
-- **Events**: pass an `events` object (see `FlexJarEvents`) to react to lifecycle hooks like `onViewModal`, `onSubmitSuccess`, or validation failures.
+- **Events**: pass an `events` object (see `FlexJarEvents`) to react to lifecycle hooks like `onViewModal`, `onSubmitSuccess`, validation failures, or dismissal persistence issues via `onDismissalPersistFailed`.
 - **Success handling**: enable `autoCloseOnSuccess` and tune `successCloseDelayMs` if you want the modal to close automatically after feedback is sent.
 
 Flexjar’s backend expects three core fields: `feedbackId`, `svar` (the rating), and `feedback` (a string value for the main answer). The components always render the rating question first and require you to provide a `mainQuestion` in the survey configuration. That main question defaults to required, but you can pass `required: false` to let respondents skip it—in that case the canonical `feedback` value is omitted from the transport payload.

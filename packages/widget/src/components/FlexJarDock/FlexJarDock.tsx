@@ -162,10 +162,17 @@ export const FlexJarDock = ({
     }
     try {
       window.sessionStorage.setItem(storageKey, "1");
-    } catch {
-      /* noop */
+    } catch (persistError) {
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console -- development-time diagnostics only
+        console.warn(
+          "FlexJar: failed to persist dock dismissal in sessionStorage. The dock may reappear if the page reloads.",
+          persistError,
+        );
+      }
+      events?.onDismissalPersistFailed?.(persistError);
     }
-  }, [storageKey]);
+  }, [events, storageKey]);
 
   const handleClose = useCallback(() => {
     if (dismissed) {

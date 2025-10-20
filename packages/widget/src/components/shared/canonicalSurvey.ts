@@ -56,9 +56,21 @@ export const buildCanonicalSurvey = (
 
   const canonicalMain: AllowedMainQuestion = mainBase;
 
-  const sanitizedFollowUps: FlexJarFollowUpQuestion[] = (followUpQuestions ?? []).filter(
-    (question) => !RESERVED_KEYS.has(question.id),
-  );
+  const sanitizedFollowUps: FlexJarFollowUpQuestion[] = [];
+
+  for (const question of followUpQuestions ?? []) {
+    if (RESERVED_KEYS.has(question.id)) {
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console -- development-time diagnostics only
+        console.warn(
+          `FlexJar: follow-up question id "${question.id}" is reserved and will be ignored. ` +
+            `Choose a different id to ensure the question is rendered.`,
+        );
+      }
+      continue;
+    }
+    sanitizedFollowUps.push(question);
+  }
 
   return {
     ratingQuestion,

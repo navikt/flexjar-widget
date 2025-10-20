@@ -77,6 +77,10 @@ export interface FlexJarEvents {
   onSubmitError?: (cause: unknown) => void;
   onValidationFailed?: (missingQuestionIds: string[]) => void;
   onReset?: () => void;
+  /**
+   * Fired when the dock cannot persist its dismissal flag to sessionStorage (for example in private browsing).
+   */
+  onDismissalPersistFailed?: (cause: unknown) => void;
 }
 
 export type FlexJarStatus = "idle" | "submitting" | "success" | "error";
