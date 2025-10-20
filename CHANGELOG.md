@@ -3,7 +3,7 @@
 All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 ## [Unreleased]
-- Add entries here before cutting the next release.
+- Drop the unused `initialOpen`, `triggerLabel`, and `triggerAriaLabel` props from `FlexJarDock` so the API reflects the current always-on dock design.
 
 ## [0.1.10] - 2025-10-20
 - Rebuild the published bundle so the optional `mainQuestion` requirement ships in the npm package, ensuring `required: false` works outside Storybook.

@@ -37,19 +37,6 @@ export interface FlexJarDockProps
     "open" | "onClose" | "width" | "className"
   > {
   /**
-   * Control whether the dock starts open. When closed by the user it stays hidden for the session.
-   * @default true
-   */
-  initialOpen?: boolean;
-  /**
-   * @deprecated The dock no longer renders a trigger button, so this prop is ignored.
-   */
-  triggerLabel?: string;
-  /**
-   * @deprecated The dock no longer renders a trigger button, so this prop is ignored.
-   */
-  triggerAriaLabel?: string;
-  /**
    * Controls which side of the viewport the dock sticks to.
    * @default "bottom-right"
    */
@@ -74,8 +61,6 @@ export interface FlexJarDockProps
    */
   panelBorderColor?: BoxProps["borderColor"];
 }
-
-const DEFAULT_TRIGGER_LABEL = "Gi tilbakemelding";
 
 const CLASS_NAMES = {
   container: styles.container ?? "flexjar-dock",
@@ -116,9 +101,6 @@ export const FlexJarDock = ({
   successCloseDelayMs = 1600,
   showPersonalDataNotice = true,
   personalDataNotice,
-  initialOpen = true,
-  triggerLabel: _triggerLabel = DEFAULT_TRIGGER_LABEL,
-  triggerAriaLabel: _triggerAriaLabel,
   position = "bottom-right",
   offset = 24,
   containerClassName,
@@ -127,8 +109,6 @@ export const FlexJarDock = ({
   panelBorderColor = "border-subtle",
 }: FlexJarDockProps) => {
   void _intro;
-  void _triggerLabel;
-  void _triggerAriaLabel;
 
   const storageKey = useMemo(
     () => `flexjar-dock-dismissed:${feedbackId}`,
@@ -136,9 +116,6 @@ export const FlexJarDock = ({
   );
 
   const [dismissed, setDismissed] = useState<boolean>(() => {
-    if (!initialOpen) {
-      return true;
-    }
     if (typeof window === "undefined") {
       return false;
     }

@@ -38,7 +38,7 @@ collect feedback with a configurable question set.
 
 ### See it in action
 
-<img src="./demo-closeup.png" alt="Flexjar dock with rating and text fields" width="420" />
+<img src="./demo-closeup.png" alt="Flexjar dock with rating and text fields" width="320" />
 
 ### Describe your survey schema
 
@@ -72,31 +72,6 @@ export const survey: FlexJarSurveyConfig = {
 	rating: ratingQuestion,
 	mainQuestion,
 };
-
-export const choiceSurvey: FlexJarSurveyConfig = {
-	rating: ratingQuestion,
-	mainQuestion: {
-		type: "singleChoice",
-		prompt:
-			"Opplever du at oppfølgingsplanen er et nyttig verktøy for å følge opp den ansatte?",
-		options: [
-			{ value: "yes", label: "Ja" },
-			{ value: "no", label: "Nei" },
-			{ value: "unsure", label: "Vet ikke" },
-		],
-	},
-	followUpQuestions: [
-		{
-			id: "oppfolgingsplan-detaljer",
-			type: "text",
-			prompt: "Hva bør vi vite for å forbedre oppfølgingsplanen?",
-			minRows: 3,
-			maxLength: 500,
-		},
-	],
-};
-
-// Both surveys yield the main answer under the canonical `feedback` key.
 ```
 
 ### FlexJarDock (recommended)
@@ -135,23 +110,17 @@ export const FeedbackDock = () => (
 `FlexJarDock` exposes the same survey and copy controls as the modal component,
 with a few dock-specific layout options:
 
-- `initialOpen`: control whether the dock appears on mount (defaults to open).
 - `position`: stick to `"bottom-right"` (default) or `"bottom-left"`.
 - `offset`: pixel distance from the viewport edge (defaults to `24`).
 - `containerClassName` / `panelClassName`: style overrides for advanced layouts.
 
 The dock opens by default and disappears for the rest of the browser session if
-the user clicks «Avbryt» or the close button. `initialOpen={false}` lets you
-opt out of showing the dock on a given screen, but there is no toggle button
-once it has been dismissed.
+the user clicks «Avbryt» or the close button.
 
 #### FlexJarDock props
 
 | Prop | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `initialOpen` | `boolean` | No | `true` | Show the dock immediately on mount. Use `false` to suppress it. |
-| `triggerLabel` | `string` | No | `"Gi tilbakemelding"` | Deprecated: the dock no longer renders a trigger button. |
-| `triggerAriaLabel` | `string` | No | `triggerLabel` | Deprecated: the dock no longer renders a trigger button. |
 | `position` | `'bottom-right' \| 'bottom-left'` | No | `'bottom-right'` | Which corner of the viewport the dock sticks to. |
 | `offset` | `number` | No | `24` | Pixel distance from the viewport edge. |
 | `containerClassName` | `string` | No | – | Custom class applied to the fixed outer container. |
