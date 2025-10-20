@@ -46,6 +46,17 @@ const OPTIONAL_TEXT_FOLLOW_UP: FlexJarFollowUpQuestion = {
   maxLength: 500,
 };
 
+const OPTIONAL_MAIN_SURVEY: FlexJarSurveyConfig = {
+  rating: RATING_QUESTION,
+  mainQuestion: {
+    ...MAIN_QUESTION,
+    prompt:
+      "Hvordan kan oppfølgingsplanen bli et bedre verktøy for deg? (Valgfritt)",
+    required: false,
+  },
+  followUpQuestions: [OPTIONAL_TEXT_FOLLOW_UP],
+};
+
 const CHOICE_SURVEY: FlexJarSurveyConfig = {
   rating: RATING_QUESTION,
   mainQuestion: CHOICE_MAIN_QUESTION,
@@ -128,5 +139,12 @@ export const ChoiceAsMainQuestion: Story = {
   render: Default.render,
   args: {
     survey: CHOICE_SURVEY,
+  },
+};
+
+export const OptionalMainQuestion: Story = {
+  render: Default.render,
+  args: {
+    survey: OPTIONAL_MAIN_SURVEY,
   },
 };
