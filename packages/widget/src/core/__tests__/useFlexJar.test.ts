@@ -32,6 +32,23 @@ const requiredQuestions: FlexJarQuestion[] = [
   },
 ];
 
+const optionalMainQuestionSurvey: FlexJarQuestion[] = [
+  {
+    id: "rating",
+    type: "rating",
+    prompt: "Hvor fornøyd er du?",
+    required: true,
+    scale: 5,
+  },
+  {
+    id: "feedback",
+    type: "text",
+    prompt: "Hva kan vi forbedre?",
+    required: false,
+    maxLength: 500,
+  },
+];
+
 const FEEDBACK_ID = "test-feedback";
 
 const INITIAL_TIME = new Date("2024-01-01T12:00:00.000Z");
@@ -87,6 +104,59 @@ describe("useFlexJar", () => {
 
     expect(submitMock).not.toHaveBeenCalled();
     expect(result.current.status).toBe("error");
+  });
+
+  it("allows submissions when the main question is optional", async () => {
+    const submitMock = vi.fn(async (payload: FlexJarSubmission) => {
+      void payload;
+    });
+    const transport: FlexJarTransport = {
+      submit: submitMock,
+    };
+
+    const { result } = renderHook(() =>
+      useFlexJar({
+        feedbackId: FEEDBACK_ID,
+        questions: optionalMainQuestionSurvey,
+        transport,
+        coreQuestionIds: {
+          rating: "rating",
+          main: "feedback",
+        },
+      }),
+    );
+
+    await act(() => {
+      result.current.setAnswer("rating", 5);
+    });
+
+    let submission: FlexJarSubmitResult | undefined;
+    await act(async () => {
+      submission = await result.current.submit();
+    });
+
+    expect(submission).toBeDefined();
+    if (!submission) {
+      throw new Error("Submission result expected");
+    }
+
+    expect(submission.ok).toBe(true);
+    if (!submission.ok) {
+      throw new Error("Expected submission to succeed");
+    }
+
+    expect(submitMock).toHaveBeenCalledTimes(1);
+    const payload = submitMock.mock.calls[0][0];
+
+    expect(payload.answers).toEqual({ rating: 5 });
+    expect(payload.transportPayload.svar).toBe(5);
+    expect(payload.transportPayload).not.toHaveProperty("feedback");
+    expect(payload.transportPayload["question__feedback"]).toBe(
+      "Hva kan vi forbedre?",
+    );
+
+    expect(result.current.status).toBe("success");
+    expect(result.current.error).toBeNull();
   });
 
   it("submits answers when validation passes", async () => {

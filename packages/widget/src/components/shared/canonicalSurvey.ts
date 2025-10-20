@@ -39,11 +39,13 @@ export const buildCanonicalSurvey = (
     required: true,
   };
 
+  const resolvedMainRequired = mainQuestion.required ?? true;
+
   const mainBase = {
     ...mainQuestion,
     id: MAIN_ANSWER_KEY,
     analyticsId: mainQuestion.analyticsId ?? mainQuestion.id ?? MAIN_ANSWER_KEY,
-    required: true,
+    required: resolvedMainRequired,
   } as FlexJarQuestion;
 
   if (mainBase.type !== "text" && mainBase.type !== "singleChoice") {

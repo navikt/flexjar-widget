@@ -61,6 +61,7 @@ const mainQuestion: FlexJarMainQuestion = {
 		"Opplever du at oppfølgingsplanen er et nyttig verktøy for å følge opp den ansatte?",
 	minRows: 3,
 	maxLength: 500,
+	// required defaults to true; set required: false to allow skipping the main question.
 };
 
 export const survey: FlexJarSurveyConfig = {
@@ -336,7 +337,7 @@ const Example = () => {
 - **Events**: pass an `events` object (see `FlexJarEvents`) to react to lifecycle hooks like `onViewModal`, `onSubmitSuccess`, or validation failures.
 - **Success handling**: enable `autoCloseOnSuccess` and tune `successCloseDelayMs` if you want the modal to close automatically after feedback is sent.
 
-Flexjar’s backend expects three core fields: `feedbackId`, `svar` (the rating), and `feedback` (a string value for the main answer). The modal enforces those requirements by always rendering the rating question first and requiring a `mainQuestion` in the survey configuration; any extra questions are delivered alongside those core values.
+Flexjar’s backend expects three core fields: `feedbackId`, `svar` (the rating), and `feedback` (a string value for the main answer). The components always render the rating question first and require you to provide a `mainQuestion` in the survey configuration. That main question defaults to required, but you can pass `required: false` to let respondents skip it—in that case the canonical `feedback` value is omitted from the transport payload.
 
 Every call to your `transport.submit` handler receives a `submission` object with a ready-to-send `transportPayload`. The widget enriches the payload with the human-readable question text so downstream logs keep answers and prompts together:
 
@@ -406,7 +407,7 @@ The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencie
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `rating` | `FlexJarRatingQuestion` | Yes | Primary entry question; modal is gated on an answer here. |
-| `mainQuestion` | `FlexJarMainQuestion` | Yes | Captures the main answer (text or single choice) that Flexjar expects in the `feedback` field. |
+| `mainQuestion` | `FlexJarMainQuestion` | Yes | Captures the main answer (text or single choice) that Flexjar expects in the `feedback` field. Defaults to `required: true`; set `required: false` to make it optional. |
 | `followUpQuestions` | `FlexJarFollowUpQuestion[]` | No | Additional questions rendered after the rating has been answered. |
 
 <details>

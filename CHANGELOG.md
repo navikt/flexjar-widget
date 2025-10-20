@@ -3,7 +3,7 @@
 All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 ## [Unreleased]
-- Add entries here before cutting the next release.
+- Respect `mainQuestion.required`, allowing teams to mark the main survey question as optional while still mapping answers to the canonical `feedback` key when provided.
 
 ## [0.1.8] - 2025-10-16
 - Restore the white (`surface-default`) default panel background for `FlexJarDock` while keeping the `panelBackground` override for custom tokens.
