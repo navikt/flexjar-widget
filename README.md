@@ -36,6 +36,10 @@ collect feedback with a configurable question set.
 3. Follow the usage guide below to describe your survey, wire a transport handler,
 	and render the widget entry point that fits your product.
 
+### See it in action
+
+<img src="./demo-closeup.png" alt="Flexjar dock with rating and text fields" width="420" />
+
 ### Describe your survey schema
 
 Most teams start by extracting the shared survey configuration to
