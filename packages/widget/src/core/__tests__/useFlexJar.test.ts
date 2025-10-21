@@ -6,6 +6,8 @@ import type {
   FlexJarTransport,
   FlexJarSubmission,
   FlexJarSubmitResult,
+  FlexJarEvents,
+  FlexJarAnswerValue,
 } from "../types.js";
 
 const requiredQuestions: FlexJarQuestion[] = [
@@ -53,6 +55,19 @@ const FEEDBACK_ID = "test-feedback";
 
 const INITIAL_TIME = new Date("2024-01-01T12:00:00.000Z");
 const SUBMIT_TIME = new Date("2024-01-01T12:05:00.000Z");
+const RESET_TIME = new Date("2024-01-01T12:07:00.000Z");
+const POST_RESET_SUBMIT_TIME = new Date("2024-01-01T12:09:00.000Z");
+
+function createEventSpies(): FlexJarEvents {
+  return {
+    onAnswer: vi.fn(),
+    onValidationFailed: vi.fn(),
+    onSubmitStart: vi.fn(),
+    onSubmitSuccess: vi.fn(),
+    onSubmitError: vi.fn(),
+    onReset: vi.fn(),
+  };
+}
 
 describe("useFlexJar", () => {
   beforeEach(() => {
@@ -230,5 +245,157 @@ describe("useFlexJar", () => {
 
     expect(result.current.status).toBe("success");
     expect(result.current.error).toBeNull();
+  });
+
+  it("surfaces transport failures and triggers error callbacks", async () => {
+    const transportError = new Error("Transport failed");
+    const transport: FlexJarTransport = {
+      submit: vi.fn().mockRejectedValue(transportError),
+    };
+    const events = createEventSpies();
+
+    const { result } = renderHook(() =>
+      useFlexJar({
+        feedbackId: FEEDBACK_ID,
+        questions: requiredQuestions,
+        transport,
+        events,
+        coreQuestionIds: {
+          rating: "rating",
+          main: "feedback",
+        },
+      }),
+    );
+
+    await act(() => {
+      result.current.setAnswer("rating", 3);
+      result.current.setAnswer("feedback", "Hei");
+    });
+
+    vi.setSystemTime(SUBMIT_TIME);
+
+    let submission: FlexJarSubmitResult | undefined;
+    await act(async () => {
+      submission = await result.current.submit();
+    });
+
+    expect(submission).toBeDefined();
+    if (!submission) {
+      throw new Error("Submission expected");
+    }
+
+    expect(submission.ok).toBe(false);
+    if (!submission.ok) {
+      expect(submission.error.type).toBe("transport");
+      if (submission.error.type === "transport") {
+        expect(submission.error.cause).toBe(transportError);
+      }
+    }
+
+    expect(result.current.status).toBe("error");
+    expect(result.current.error?.type).toBe("transport");
+
+    expect(transport.submit).toHaveBeenCalledTimes(1);
+    expect(events.onSubmitStart).toHaveBeenCalledTimes(1);
+    expect(events.onSubmitError).toHaveBeenCalledWith(transportError);
+    expect(events.onSubmitSuccess).not.toHaveBeenCalled();
+    expect(events.onValidationFailed).not.toHaveBeenCalled();
+    expect(events.onAnswer).toHaveBeenCalledWith("rating", 3);
+    expect(events.onAnswer).toHaveBeenCalledWith("feedback", "Hei");
+  });
+
+  it("resets answers to the initial snapshot and refreshes startedAt", async () => {
+    const submitMock = vi.fn(async (payload: FlexJarSubmission) => {
+      void payload;
+    });
+    const transport: FlexJarTransport = {
+      submit: submitMock,
+    };
+    const events = createEventSpies();
+
+    const initialAnswers: Record<string, FlexJarAnswerValue> = {
+      rating: 2,
+      feedback: "Initial",
+    };
+
+    const { result } = renderHook(() =>
+      useFlexJar({
+        feedbackId: FEEDBACK_ID,
+        questions: requiredQuestions,
+        transport,
+        events,
+        initialAnswers,
+        coreQuestionIds: {
+          rating: "rating",
+          main: "feedback",
+        },
+      }),
+    );
+
+  expect(result.current.answers).toEqual({ rating: 2, feedback: "Initial" });
+
+    await act(() => {
+      result.current.setAnswer("rating", 5);
+      result.current.setAnswer("feedback", "Updated");
+      result.current.setAnswer("free-text", "Notes");
+    });
+
+    vi.setSystemTime(RESET_TIME);
+
+    await act(() => {
+      result.current.reset();
+    });
+
+    expect(result.current.answers).toEqual({ rating: 2, feedback: "Initial" });
+    expect(result.current.status).toBe("idle");
+    expect(result.current.error).toBeNull();
+    expect(events.onReset).toHaveBeenCalledTimes(1);
+
+  vi.setSystemTime(POST_RESET_SUBMIT_TIME);
+
+    await act(() => {
+      result.current.setAnswer("rating", 4);
+    });
+
+    let submission: FlexJarSubmitResult | undefined;
+    await act(async () => {
+      submission = await result.current.submit();
+    });
+
+    expect(submitMock).toHaveBeenCalledTimes(1);
+    const call = submitMock.mock.calls[0][0];
+  expect(call.startedAt).toBe(RESET_TIME.toISOString());
+  expect(call.submittedAt).toBe(POST_RESET_SUBMIT_TIME.toISOString());
+    expect(call.answers.rating).toBe(4);
+    expect(call.answers.feedback).toBe("Initial");
+  });
+
+  it("drops empty answer values instead of storing blanks", () => {
+    const transport: FlexJarTransport = {
+      submit: vi.fn(),
+    };
+
+    const { result } = renderHook(() =>
+      useFlexJar({
+        feedbackId: FEEDBACK_ID,
+        questions: requiredQuestions,
+        transport,
+        coreQuestionIds: {
+          rating: "rating",
+          main: "feedback",
+        },
+      }),
+    );
+
+    act(() => {
+      result.current.setAnswer("feedback", "some text");
+    });
+    expect(result.current.answers.feedback).toBe("some text");
+
+    act(() => {
+      result.current.setAnswer("feedback", "   ");
+    });
+
+    expect(result.current.answers).not.toHaveProperty("feedback");
   });
 });
