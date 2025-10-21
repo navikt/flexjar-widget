@@ -307,8 +307,6 @@ const Example = () => {
 };
 ```
 
-</details>
-
 ### Customise the experience
 
 - **Sticky dock**: use `FlexJarDock` to keep the survey visible on the page and reveal follow-up questions inline after the rating.
@@ -384,6 +382,8 @@ The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencie
 | `buttonProps` | `Omit<ButtonProps, "onClick">` | No | – | Additional `@navikt/ds-react` button props (variant, size, icon, …). |
 | `panelProps` | `Omit<GuidePanelProps, "children">` | No | – | Forwarded props for the underlying `GuidePanel`. |
 
+<details>
+<summary><strong>Other entry points</strong></summary>
 ### FlexJarSurveyConfig
 
 | Field | Type | Required | Description |
