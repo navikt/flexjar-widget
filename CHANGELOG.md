@@ -3,6 +3,9 @@
 All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 ## [Unreleased]
+- Add entries here before cutting the next release.
+
+## [0.1.11] - 2025-10-21
 - Drop the unused `initialOpen`, `triggerLabel`, and `triggerAriaLabel` props from `FlexJarDock` so the API reflects the current always-on dock design.
 - Warn during development when follow-up question ids collide with the reserved `svar`/`feedback` keys so hidden questions are easier to debug.
 - Surface dock dismissal persistence failures through a new `events.onDismissalPersistFailed` callback and document the `sessionStorage` fallback behaviour.
