@@ -5,7 +5,7 @@ export const DEFAULT_COPY = {
   validationErrorMessage: "Du må svare på spørsmålet.",
   transportErrorMessage: "Kunne ikke sende tilbakemeldingen. Prøv igjen senere.",
   successTitle: "Takk for tilbakemeldingen!",
-  successBody: "Vi bruker svarene dine for å forbedre løsningen.",
+  successBody: undefined,
   successPrimaryLabel: "Lukk",
 };
 

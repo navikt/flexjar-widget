@@ -362,7 +362,7 @@ The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencie
 | `validationErrorMessage` | `string` | No | `"Svar på obligatoriske spørsmål."` | Message displayed when required answers are missing. |
 | `transportErrorMessage` | `string` | No | `"Kunne ikke sende tilbakemeldingen. Prøv igjen senere."` | Message displayed when the transport throws. |
 | `successTitle` | `string` | No | `"Takk for tilbakemeldingen!"` | Title shown after a successful submission. |
-| `successBody` | `React.ReactNode` | No | `"Vi bruker svarene dine for å forbedre løsningen."` | Body text in the success view. |
+| `successBody` | `React.ReactNode` | No | `undefined` | Body text in the success view. |
 | `successPrimaryLabel` | `string` | No | `"Lukk"` | Label for the button in the success view. |
 | `className` | `string` | No | – | Optional class applied to the underlying `Modal`. |
 | `width` | `"small" \| "medium" \| "large" \| number \| string` | No | `"large"` | Controls the modal width; forwarded to Aksel’s `Modal` component. |
