@@ -131,6 +131,48 @@ persistence step fails.
 | `panelBackground` | `BoxProps['background']` | No | `'surface-default'` | Token applied to the dock panel background. |
 | `panelBorderColor` | `BoxProps['borderColor']` | No | `'border-subtle'` | Token used for the panel border; set to `undefined` to remove it. |
 
+### Customise the experience
+
+- **Sticky dock**: use `FlexJarDock` to keep the survey visible on the page and reveal follow-up questions inline after the rating.
+- **Guide panel CTA**: reach for `FlexJarGuidePanel` when you want a ready-made `GuidePanel` + button that opens the modal without wiring local state.
+- **Conditional follow-ups** are gated behind the rating automatically—no rating, no extra questions.
+- **Copy & layout**: override props such as `intro`, `submitLabel`, `cancelLabel`, or provide `personalDataNotice` to replace the standard warning.
+- **Layout width**: the modal defaults to the Aksel `"large"` preset (~48rem); pass `width="small"`, `width="medium"`, or a custom value (e.g. `"min(90vw, 880px)"`) for alternative sizing.
+- **Events**: pass an `events` object (see `FlexJarEvents`) to react to lifecycle hooks like `onViewModal`, `onSubmitSuccess`, validation failures, or dismissal persistence issues via `onDismissalPersistFailed`.
+- **Success handling**: enable `autoCloseOnSuccess` and tune `successCloseDelayMs` if you want the modal to close automatically after feedback is sent.
+
+Flexjar’s backend expects three core fields: `feedbackId`, `svar` (the rating), and `feedback` (a string value for the main answer). The components always render the rating question first and require you to provide a `mainQuestion` in the survey configuration. That main question defaults to required, but you can pass `required: false` to let respondents skip it—in that case the canonical `feedback` value is omitted from the transport payload.
+
+Every call to your `transport.submit` handler receives a `submission` object with a ready-to-send `transportPayload`. The widget enriches the payload with the human-readable question text so downstream logs keep answers and prompts together:
+
+```ts
+submission.transportPayload satisfies {
+	feedbackId: string;
+	svar?: number;
+	feedback?: string;
+	[questionIdWithPrefix: `question__${string}`]: string;
+	[key: string]: string | number | string[];
+};
+```
+
+The extra keys follow the pattern `question__<questionId>` and contain the exact prompt that was rendered. Core questions use the canonical names `question__svar` and `question__feedback` so Flexjar logs line up with the standard schema.
+
+- Rating answers are emitted only under `svar`.
+- Main text answers are emitted only under `feedback`.
+- Additional questions continue to use their configured IDs for both the value and `question__` metadata.
+
+Send that payload directly to the Flexjar backend, or transform it further if you need to enrich the request.
+
+The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencies. Consumers stay in full control of network transport, analytics, and question configuration.
+
+### FlexJarSurveyConfig
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `rating` | `FlexJarRatingQuestion` | Yes | Primary entry question; modal is gated on an answer here. |
+| `mainQuestion` | `FlexJarMainQuestion` | Yes | Captures the main answer (text or single choice) that Flexjar expects in the `feedback` field. Defaults to `required: true`; set `required: false` to make it optional. |
+| `followUpQuestions` | `FlexJarFollowUpQuestion[]` | No | Additional questions rendered after the rating has been answered. |
+
 <details>
 <summary><strong>Other entry points</strong></summary>
 
@@ -307,40 +349,6 @@ const Example = () => {
 };
 ```
 
-### Customise the experience
-
-- **Sticky dock**: use `FlexJarDock` to keep the survey visible on the page and reveal follow-up questions inline after the rating.
-- **Guide panel CTA**: reach for `FlexJarGuidePanel` when you want a ready-made `GuidePanel` + button that opens the modal without wiring local state.
-- **Conditional follow-ups** are gated behind the rating automatically—no rating, no extra questions.
-- **Copy & layout**: override props such as `intro`, `submitLabel`, `cancelLabel`, or provide `personalDataNotice` to replace the standard warning.
-- **Layout width**: the modal defaults to the Aksel `"large"` preset (~48rem); pass `width="small"`, `width="medium"`, or a custom value (e.g. `"min(90vw, 880px)"`) for alternative sizing.
-- **Events**: pass an `events` object (see `FlexJarEvents`) to react to lifecycle hooks like `onViewModal`, `onSubmitSuccess`, validation failures, or dismissal persistence issues via `onDismissalPersistFailed`.
-- **Success handling**: enable `autoCloseOnSuccess` and tune `successCloseDelayMs` if you want the modal to close automatically after feedback is sent.
-
-Flexjar’s backend expects three core fields: `feedbackId`, `svar` (the rating), and `feedback` (a string value for the main answer). The components always render the rating question first and require you to provide a `mainQuestion` in the survey configuration. That main question defaults to required, but you can pass `required: false` to let respondents skip it—in that case the canonical `feedback` value is omitted from the transport payload.
-
-Every call to your `transport.submit` handler receives a `submission` object with a ready-to-send `transportPayload`. The widget enriches the payload with the human-readable question text so downstream logs keep answers and prompts together:
-
-```ts
-submission.transportPayload satisfies {
-	feedbackId: string;
-	svar?: number;
-	feedback?: string;
-	[questionIdWithPrefix: `question__${string}`]: string;
-	[key: string]: string | number | string[];
-};
-```
-
-The extra keys follow the pattern `question__<questionId>` and contain the exact prompt that was rendered. Core questions use the canonical names `question__svar` and `question__feedback` so Flexjar logs line up with the standard schema.
-
-- Rating answers are emitted only under `svar`.
-- Main text answers are emitted only under `feedback`.
-- Additional questions continue to use their configured IDs for both the value and `question__` metadata.
-
-Send that payload directly to the Flexjar backend, or transform it further if you need to enrich the request.
-
-The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencies. Consumers stay in full control of network transport, analytics, and question configuration.
-
 ### FlexJarModal props
 
 | Prop | Type | Required | Default | Description |
@@ -382,18 +390,10 @@ The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencie
 | `buttonProps` | `Omit<ButtonProps, "onClick">` | No | – | Additional `@navikt/ds-react` button props (variant, size, icon, …). |
 | `panelProps` | `Omit<GuidePanelProps, "children">` | No | – | Forwarded props for the underlying `GuidePanel`. |
 
-<details>
-<summary><strong>Other entry points</strong></summary>
-### FlexJarSurveyConfig
-
-| Field | Type | Required | Description |
-| --- | --- | --- | --- |
-| `rating` | `FlexJarRatingQuestion` | Yes | Primary entry question; modal is gated on an answer here. |
-| `mainQuestion` | `FlexJarMainQuestion` | Yes | Captures the main answer (text or single choice) that Flexjar expects in the `feedback` field. Defaults to `required: true`; set `required: false` to make it optional. |
-| `followUpQuestions` | `FlexJarFollowUpQuestion[]` | No | Additional questions rendered after the rating has been answered. |
+</details>
 
 <details>
-<summary>Developer documentation</summary>
+<summary><strong>Developer documentation</strong></summary>
 
 #### Work on the widget locally
 
