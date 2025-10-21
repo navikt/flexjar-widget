@@ -1,7 +1,5 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import type {
-  ChoiceOption,
-  ChoiceQuestion,
   FlexJarAnswerValue,
   FlexJarError,
   FlexJarEvents,
@@ -10,14 +8,11 @@ import type {
   FlexJarSubmission,
   FlexJarSubmitResult,
   FlexJarTransport,
-  FlexJarTransportPayload,
   FlexJarValidationError,
-  RatingQuestion,
 } from "./types";
-import {
-  MAIN_ANSWER_KEY,
-  RATING_ANSWER_KEY,
-} from "../components/shared/canonicalSurvey.js";
+import { useAnswerState, cloneAnswers } from "./answers.js";
+import { validateAnswers } from "./validation.js";
+import { buildTransportPayload } from "./transportPayload.js";
 
 export interface UseFlexJarOptions {
   feedbackId: string;
@@ -45,8 +40,6 @@ export interface UseFlexJarReturn {
   reset: () => void;
 }
 
-const DEFAULT_SCALE = 5;
-
 export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
   const {
     feedbackId,
@@ -58,60 +51,15 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     coreQuestionIds,
   } = options;
 
-  const initialAnswersRef = useRef<Record<string, FlexJarAnswerValue>>(
-    initialAnswers ? cloneAnswers(initialAnswers) : {},
-  );
-
-  const [answers, setAnswers] = useState<Record<string, FlexJarAnswerValue>>(
-    initialAnswersRef.current,
-  );
+  const { answers, setAnswer, resetAnswers, startedAtRef } = useAnswerState({
+    initialAnswers,
+    onAnswer: events?.onAnswer,
+  });
   const [status, setStatus] = useState<FlexJarStatus>("idle");
   const [error, setError] = useState<FlexJarError | null>(null);
 
-  const startedAtRef = useRef<string>(new Date().toISOString());
-
-  const setAnswer = useCallback(
-    (
-      questionId: string,
-      value: FlexJarAnswerValue | null | undefined,
-    ) => {
-      setAnswers((prev: Record<string, FlexJarAnswerValue>) => {
-        const next = { ...prev };
-        if (shouldDropValue(value)) {
-          delete next[questionId];
-        } else {
-          const safeValue = value as FlexJarAnswerValue;
-          next[questionId] = cloneAnswerValue(safeValue);
-        }
-        return next;
-      });
-
-      events?.onAnswer?.(questionId, value);
-    },
-    [events],
-  );
-
   const validate = useCallback((): string[] => {
-    const missingIds: string[] = [];
-
-    for (const question of questions) {
-      if (!question.required) {
-        continue;
-      }
-
-      const answer = answers[question.id];
-
-      if (!isAnswerPresent(answer)) {
-        missingIds.push(question.id);
-        continue;
-      }
-
-      if (!isAnswerValidForQuestion(question, answer)) {
-        missingIds.push(question.id);
-      }
-    }
-
-    return missingIds;
+    return validateAnswers(questions, answers);
   }, [answers, questions]);
 
   const submit = useCallback(async (): Promise<FlexJarSubmitResult> => {
@@ -170,16 +118,15 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     transport,
     validate,
     coreQuestionIds,
+    startedAtRef,
   ]);
 
   const reset = useCallback(() => {
-    const nextInitial = cloneAnswers(initialAnswersRef.current);
-    setAnswers(nextInitial);
+    resetAnswers();
     setStatus("idle");
     setError(null);
-    startedAtRef.current = new Date().toISOString();
     events?.onReset?.();
-  }, [events]);
+  }, [events, resetAnswers]);
 
   return {
     answers,
@@ -190,223 +137,4 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     validate,
     reset,
   };
-}
-
-function shouldDropValue(
-  value: FlexJarAnswerValue | null | undefined,
-): boolean {
-  if (value === undefined || value === null) {
-    return true;
-  }
-
-  if (typeof value === "string" && value.trim().length === 0) {
-    return true;
-  }
-
-  if (Array.isArray(value) && value.length === 0) {
-    return true;
-  }
-
-  return false;
-}
-
-function cloneAnswerValue(value: FlexJarAnswerValue): FlexJarAnswerValue {
-  if (Array.isArray(value)) {
-    return [...value];
-  }
-
-  return value;
-}
-
-function cloneAnswers(
-  source: Record<string, FlexJarAnswerValue>,
-): Record<string, FlexJarAnswerValue> {
-  const copy: Record<string, FlexJarAnswerValue> = {};
-  for (const key of Object.keys(source)) {
-    const value = source[key];
-    if (value !== undefined) {
-      copy[key] = cloneAnswerValue(value);
-    }
-  }
-  return copy;
-}
-
-const QUESTION_TEXT_PREFIX = "question__";
-
-function buildTransportPayload(
-  feedbackId: string,
-  answers: Record<string, FlexJarAnswerValue>,
-  questions: FlexJarQuestion[],
-  coreQuestionIds?: { rating: string; main: string },
-): FlexJarTransportPayload {
-  const payload: FlexJarTransportPayload = {
-    feedbackId,
-  };
-
-  const isCoreQuestion = (questionId: string): boolean => {
-    if (!coreQuestionIds) {
-      return false;
-    }
-
-    return (
-      questionId === coreQuestionIds.rating || questionId === coreQuestionIds.main
-    );
-  };
-
-  for (const [questionId, answerValue] of Object.entries(answers)) {
-    if (isCoreQuestion(questionId)) {
-      continue;
-    }
-
-    payload[questionId] = answerValue;
-  }
-
-  for (const question of questions) {
-    const transportKey = resolveTransportQuestionKey(question.id, coreQuestionIds);
-    payload[`${QUESTION_TEXT_PREFIX}${transportKey}`] = question.prompt;
-  }
-
-  if (coreQuestionIds) {
-    const ratingValue = answers[coreQuestionIds.rating];
-    const mainValue = answers[coreQuestionIds.main];
-
-    const svar = coerceRatingAnswer(ratingValue);
-    if (svar !== undefined) {
-      payload[RATING_ANSWER_KEY] = svar;
-    }
-
-    const feedback = coerceFeedbackAnswer(mainValue);
-    if (feedback !== undefined) {
-      payload[MAIN_ANSWER_KEY] = feedback;
-    }
-  }
-
-  return payload;
-}
-
-function resolveTransportQuestionKey(
-  questionId: string,
-  coreQuestionIds?: { rating: string; main: string },
-): string {
-  if (!coreQuestionIds) {
-    return questionId;
-  }
-
-  if (questionId === coreQuestionIds.rating) {
-    return RATING_ANSWER_KEY;
-  }
-
-  if (questionId === coreQuestionIds.main) {
-    return MAIN_ANSWER_KEY;
-  }
-
-  return questionId;
-}
-
-function coerceRatingAnswer(
-  value: FlexJarAnswerValue | undefined,
-): number | undefined {
-  if (value === undefined || value === null) {
-    return undefined;
-  }
-
-  if (typeof value === "number") {
-    return value;
-  }
-
-  const numeric = Number(value);
-  return Number.isNaN(numeric) ? undefined : numeric;
-}
-
-function coerceFeedbackAnswer(
-  value: FlexJarAnswerValue | undefined,
-): string | undefined {
-  if (value === undefined || value === null) {
-    return undefined;
-  }
-
-  if (Array.isArray(value)) {
-    return value.join(", ");
-  }
-
-  return String(value);
-}
-
-function isAnswerPresent(
-  value: FlexJarAnswerValue | undefined,
-): value is FlexJarAnswerValue {
-  if (value === undefined || value === null) {
-    return false;
-  }
-
-  if (typeof value === "string") {
-    return value.trim().length > 0;
-  }
-
-  if (Array.isArray(value)) {
-    return value.length > 0;
-  }
-
-  return true;
-}
-
-function isAnswerValidForQuestion(
-  question: FlexJarQuestion,
-  rawAnswer: FlexJarAnswerValue,
-): boolean {
-  switch (question.type) {
-    case "rating":
-      return isValidRatingAnswer(question, rawAnswer);
-    case "text":
-      return typeof rawAnswer === "string";
-    case "singleChoice":
-      return isValidSingleChoiceAnswer(question, rawAnswer);
-    case "multiChoice":
-      return isValidMultiChoiceAnswer(question, rawAnswer);
-    default:
-      return true;
-  }
-}
-
-function isValidRatingAnswer(
-  question: RatingQuestion,
-  rawAnswer: FlexJarAnswerValue,
-): boolean {
-  const scale = question.scale ?? DEFAULT_SCALE;
-  const numeric = typeof rawAnswer === "number" ? rawAnswer : Number(rawAnswer);
-  if (Number.isNaN(numeric)) {
-    return false;
-  }
-  return numeric >= 1 && numeric <= scale;
-}
-
-function isValidSingleChoiceAnswer(
-  question: ChoiceQuestion & { type: "singleChoice" },
-  rawAnswer: FlexJarAnswerValue,
-): boolean {
-  if (typeof rawAnswer !== "string") {
-    return false;
-  }
-
-  return question.options.some(({ value }: ChoiceOption) => value === rawAnswer);
-}
-
-function isValidMultiChoiceAnswer(
-  question: ChoiceQuestion & { type: "multiChoice" },
-  rawAnswer: FlexJarAnswerValue,
-): boolean {
-  if (!Array.isArray(rawAnswer)) {
-    return false;
-  }
-
-  if (rawAnswer.length === 0) {
-    return false;
-  }
-
-  const optionValues = new Set(
-    question.options.map(({ value }: ChoiceOption) => value),
-  );
-  return rawAnswer.every(
-    (value) => typeof value === "string" && optionValues.has(value),
-  );
 }
