@@ -43,13 +43,13 @@
   font-size: var(--a-font-size-small);
 }
 
-.flexjar-dock__rating-field .flexjar-rating__fieldset {
+.flexjar-dock__rating-fieldset {
   padding: 0;
   border: none;
   background: none;
 }
 
-.flexjar-dock__rating-field .flexjar-rating__legend {
+.flexjar-dock__rating-fieldset legend {
   display: none;
 }
 

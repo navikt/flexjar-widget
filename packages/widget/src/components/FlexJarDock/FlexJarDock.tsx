@@ -72,6 +72,7 @@ const CLASS_NAMES = {
   ratingHeading: styles.ratingHeading ?? "flexjar-dock__rating-heading",
   ratingDescription: styles.ratingDescription ?? "flexjar-dock__rating-description",
   ratingField: styles.ratingField ?? "flexjar-dock__rating-field",
+  ratingFieldset: styles.ratingFieldset ?? "flexjar-dock__rating-fieldset",
   ratingRow: styles.ratingRow ?? "flexjar-dock__rating-row",
   ratingButton: styles.ratingButton ?? "flexjar-dock__rating-button",
 };
@@ -237,6 +238,7 @@ export const FlexJarDock = ({
                 validationErrorMessage={validationErrorMessage}
                 isMissing={props.isMissing}
                 disabled={props.disabled}
+                fieldsetClassName={CLASS_NAMES.ratingFieldset}
                 hidePrompt
                 hideDescription
                 hideValueLabels

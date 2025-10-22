@@ -43,13 +43,13 @@
   font-size: var(--a-font-size-small);
 }
 
-.ratingField :global(.flexjar-rating__fieldset) {
+.ratingFieldset {
   padding: 0;
   border: none;
   background: none;
 }
 
-.ratingField :global(.flexjar-rating__legend) {
+.ratingFieldset legend {
   display: none;
 }
 
@@ -71,7 +71,7 @@
   min-width: 0;
 }
 
-.ratingButton :global(svg) {
+.ratingButton svg {
   width: 2.5rem;
   height: 2.5rem;
 }

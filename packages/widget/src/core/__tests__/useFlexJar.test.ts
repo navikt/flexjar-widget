@@ -103,7 +103,6 @@ describe("useFlexJar", () => {
     await act(async () => {
       submission = await result.current.submit();
     });
-
     expect(submission).toBeDefined();
     if (!submission) {
       throw new Error("Submission result expected");
@@ -332,7 +331,7 @@ describe("useFlexJar", () => {
       }),
     );
 
-  expect(result.current.answers).toEqual({ rating: 2, feedback: "Initial" });
+    expect(result.current.answers).toEqual({ rating: 2, feedback: "Initial" });
 
     await act(() => {
       result.current.setAnswer("rating", 5);
@@ -351,21 +350,20 @@ describe("useFlexJar", () => {
     expect(result.current.error).toBeNull();
     expect(events.onReset).toHaveBeenCalledTimes(1);
 
-  vi.setSystemTime(POST_RESET_SUBMIT_TIME);
+    vi.setSystemTime(POST_RESET_SUBMIT_TIME);
 
     await act(() => {
       result.current.setAnswer("rating", 4);
     });
 
-    let submission: FlexJarSubmitResult | undefined;
     await act(async () => {
-      submission = await result.current.submit();
+      await result.current.submit();
     });
 
     expect(submitMock).toHaveBeenCalledTimes(1);
     const call = submitMock.mock.calls[0][0];
-  expect(call.startedAt).toBe(RESET_TIME.toISOString());
-  expect(call.submittedAt).toBe(POST_RESET_SUBMIT_TIME.toISOString());
+    expect(call.startedAt).toBe(RESET_TIME.toISOString());
+    expect(call.submittedAt).toBe(POST_RESET_SUBMIT_TIME.toISOString());
     expect(call.answers.rating).toBe(4);
     expect(call.answers.feedback).toBe("Initial");
   });
