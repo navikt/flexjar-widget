@@ -5,6 +5,10 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 ## [Unreleased]
 - Add entries here before cutting the next release.
 
+## [0.1.12] - 2025-10-22
+- Replace the Dock rating styles to avoid CSS Modules `:global` selectors so `@navikt/flexjar-widget/styles.css` works in host apps that don’t process CSS Modules.
+- Align the fallback stylesheet and Dock renderer with the new class names to keep the rating field spacing and legend hiding intact.
+
 ## [0.1.11] - 2025-10-21
 - Drop the unused `initialOpen`, `triggerLabel`, and `triggerAriaLabel` props from `FlexJarDock` so the API reflects the current always-on dock design.
 - Warn during development when follow-up question ids collide with the reserved `svar`/`feedback` keys so hidden questions are easier to debug.
