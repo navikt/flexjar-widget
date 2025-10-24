@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useMemo } from "react";
 import { BodyShort, Box, Heading, HStack, VStack } from "@navikt/ds-react";
 import type { BoxProps } from "@navikt/ds-react";
 import type {
@@ -146,8 +146,6 @@ export const RatingQuestionField = ({
   const scale = question.scale ?? 5;
   const options = Array.from({ length: scale }, (_, index) => index + 1);
   const activeState = typeof value === "number" ? value : null;
-  const buttonRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  buttonRefs.current.length = options.length;
 
   const fallbackHeadingId = `${question.id}-heading`;
   const fallbackDescriptionId = `${question.id}-description`;
@@ -173,77 +171,6 @@ export const RatingQuestionField = ({
     [disabled, onChange],
   );
 
-  const focusByIndex = useCallback(
-    (index: number): number | undefined => {
-      if (options.length === 0) {
-        return undefined;
-      }
-
-      const normalized = ((index % options.length) + options.length) % options.length;
-      const target = buttonRefs.current[normalized];
-      target?.focus();
-      return normalized;
-    },
-    [options.length],
-  );
-
-  const handleKeyNavigation = useCallback(
-    (event: React.KeyboardEvent<HTMLButtonElement>, currentIndex: number) => {
-      if (disabled) {
-        return;
-      }
-
-      switch (event.key) {
-        case "ArrowRight":
-        case "ArrowDown":
-          event.preventDefault();
-          {
-            const nextIndex = focusByIndex(currentIndex + 1);
-            if (nextIndex !== undefined) {
-              handleSelect(options[nextIndex]);
-            }
-          }
-          break;
-        case "ArrowLeft":
-        case "ArrowUp":
-          event.preventDefault();
-          {
-            const nextIndex = focusByIndex(currentIndex - 1);
-            if (nextIndex !== undefined) {
-              handleSelect(options[nextIndex]);
-            }
-          }
-          break;
-        case "Home":
-          event.preventDefault();
-          {
-            const nextIndex = focusByIndex(0);
-            if (nextIndex !== undefined) {
-              handleSelect(options[nextIndex]);
-            }
-          }
-          break;
-        case "End":
-          event.preventDefault();
-          {
-            const nextIndex = focusByIndex(options.length - 1);
-            if (nextIndex !== undefined) {
-              handleSelect(options[nextIndex]);
-            }
-          }
-          break;
-        case "Enter":
-        case " ":
-        case "Spacebar":
-          event.preventDefault();
-          handleSelect(options[currentIndex]);
-          break;
-        default:
-          break;
-      }
-    },
-    [disabled, focusByIndex, handleSelect, options],
-  );
 
   return (
     <VStack gap="2" className={className}>
@@ -276,9 +203,7 @@ export const RatingQuestionField = ({
           align="center"
           wrap={wrap}
           className={joinClassNames(CLASS_NAMES.row, rowClassName)}
-          role="radiogroup"
-          aria-labelledby={headingId}
-          aria-describedby={describedBy}
+          role="presentation"
         >
           {options.map((option, index) => {
             const variant = resolveVariant(index);
@@ -308,10 +233,6 @@ export const RatingQuestionField = ({
                 renderText={!hideValueLabels}
                 ariaLabel={ariaLabel}
                 disabled={disabled}
-                onKeyDown={(event) => handleKeyNavigation(event, index)}
-                ref={(element) => {
-                  buttonRefs.current[index] = element;
-                }}
               >
                 <Icon fill={isActive ? variant.activeFill : undefined} />
               </EmojiButton>

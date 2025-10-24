@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   Alert,
   BodyShort,
@@ -13,29 +19,49 @@ import { XMarkIcon } from "@navikt/aksel-icons";
 import { useFlexJar } from "../../core/useFlexJar.js";
 import type {
   FlexJarAnswerValue,
+  FlexJarEvents,
   FlexJarQuestion,
+  FlexJarTransport,
   RatingQuestion,
 } from "../../core/types.js";
-import { DefaultQuestionRenderer } from "../questions/index.js";
-import { RatingQuestionField } from "../questions/rating/index.js";
-import { useRatingGate } from "../FlexJarModal/useRatingGate.js";
-import { SuccessContent } from "../FlexJarModal/SuccessContent.js";
-import { useAutoCloseOnSuccess } from "../FlexJarModal/useAutoCloseOnSuccess.js";
+import {
+  DefaultQuestionRenderer,
+  RatingQuestionField,
+} from "../questions/index.js";
+import { useRatingGate } from "./useRatingGate.js";
+import { SuccessContent } from "./SuccessContent.js";
+import { useAutoCloseOnSuccess } from "./useAutoCloseOnSuccess.js";
 import type { FlexJarRenderQuestionProps } from "../../types.js";
 import { buildCanonicalSurvey } from "../shared/canonicalSurvey.js";
 import {
   DEFAULT_COPY,
   DEFAULT_PERSONAL_DATA_NOTICE,
-} from "../FlexJar/commonDefaults.js";
-import type { FlexJarModalProps } from "../FlexJarModal/FlexJarModal.js";
+} from "../shared/commonDefaults.js";
+import type { FlexJarSurveyConfig } from "../surveyTypes.js";
 import styles from "./FlexJarDock.module.css";
 import "./FlexJarDock.fallback.css";
 
-export interface FlexJarDockProps
-  extends Omit<
-    FlexJarModalProps,
-    "open" | "onClose" | "width" | "className"
-  > {
+export interface FlexJarDockProps {
+  feedbackId: string;
+  survey: FlexJarSurveyConfig;
+  transport: FlexJarTransport;
+  events?: FlexJarEvents;
+  context?: Record<string, unknown>;
+  title?: string;
+  submitLabel?: string;
+  submitPendingLabel?: string;
+  cancelLabel?: string;
+  validationErrorMessage?: string;
+  transportErrorMessage?: string;
+  successTitle?: string;
+  successBody?: ReactNode;
+  successPrimaryLabel?: string;
+  renderQuestion?: (props: FlexJarRenderQuestionProps) => ReactNode;
+  resetOnClose?: boolean;
+  autoCloseOnSuccess?: boolean;
+  successCloseDelayMs?: number;
+  showPersonalDataNotice?: boolean;
+  personalDataNotice?: ReactNode;
   /**
    * Controls which side of the viewport the dock sticks to.
    * @default "bottom-right"
@@ -87,7 +113,6 @@ export const FlexJarDock = ({
   events,
   context,
   title = "Gi tilbakemelding",
-  intro: _intro,
   submitLabel = DEFAULT_COPY.submitLabel,
   submitPendingLabel = DEFAULT_COPY.submitPendingLabel,
   cancelLabel = DEFAULT_COPY.cancelLabel,
@@ -109,8 +134,6 @@ export const FlexJarDock = ({
   panelBackground = "surface-default",
   panelBorderColor = "border-subtle",
 }: FlexJarDockProps) => {
-  void _intro;
-
   const storageKey = useMemo(
     () => `flexjar-dock-dismissed:${feedbackId}`,
     [feedbackId],
@@ -153,7 +176,7 @@ export const FlexJarDock = ({
 
   useEffect(() => {
     if (!dismissed) {
-      events?.onViewModal?.(feedbackId);
+      events?.onViewDock?.(feedbackId);
     }
   }, [dismissed, events, feedbackId]);
 

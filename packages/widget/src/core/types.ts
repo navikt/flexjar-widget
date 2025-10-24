@@ -70,7 +70,7 @@ export interface FlexJarTransport {
 }
 
 export interface FlexJarEvents {
-  onViewModal?: (feedbackId: string) => void;
+  onViewDock?: (feedbackId: string) => void;
   onAnswer?: (questionId: string, value: unknown) => void;
   onSubmitStart?: (submission: FlexJarSubmission) => void;
   onSubmitSuccess?: (submission: FlexJarSubmission) => void;

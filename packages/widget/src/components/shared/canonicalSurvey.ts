@@ -1,4 +1,4 @@
-import type { FlexJarQuestion, RatingQuestion } from "../../core/types.js";
+import type { FlexJarQuestion, RatingQuestion } from "../../core";
 import type {
   FlexJarFollowUpQuestion,
   FlexJarSurveyConfig,

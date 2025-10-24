@@ -122,14 +122,14 @@ describe("FlexJarDock", () => {
     );
   });
 
-  it("calls onViewModal when the dock mounts", () => {
+  it("calls onViewDock when the dock mounts", () => {
     const events: FlexJarEvents = {
-      onViewModal: vi.fn(),
+      onViewDock: vi.fn(),
     };
 
     renderDock({ events });
 
-    expect(events.onViewModal).toHaveBeenCalledWith("dock-feedback");
+    expect(events.onViewDock).toHaveBeenCalledWith("dock-feedback");
   });
 
   it("persists dismissal state and triggers reset when closing", async () => {
@@ -142,8 +142,8 @@ describe("FlexJarDock", () => {
 
     expect(window.sessionStorage.getItem("flexjar-dock-dismissed:dock-feedback")).toBeNull();
 
-  const closeButtons = screen.getAllByRole("button", { name: /avbryt/i });
-  await user.click(closeButtons[0]);
+    const closeButtons = screen.getAllByRole("button", { name: /avbryt/i });
+    await user.click(closeButtons[0]);
 
     expect(window.sessionStorage.getItem("flexjar-dock-dismissed:dock-feedback")).toBe("1");
     expect(events.onReset).toHaveBeenCalledTimes(1);

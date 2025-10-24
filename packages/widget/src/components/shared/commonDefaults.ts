@@ -3,7 +3,8 @@ export const DEFAULT_COPY = {
   submitPendingLabel: "Sender…",
   cancelLabel: "Avbryt",
   validationErrorMessage: "Du må svare på spørsmålet.",
-  transportErrorMessage: "Kunne ikke sende tilbakemeldingen. Prøv igjen senere.",
+  transportErrorMessage:
+    "Kunne ikke sende tilbakemeldingen. Prøv igjen senere.",
   successTitle: "Takk for tilbakemeldingen!",
   successBody: undefined,
   successPrimaryLabel: "Lukk",

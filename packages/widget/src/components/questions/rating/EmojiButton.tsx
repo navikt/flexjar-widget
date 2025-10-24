@@ -1,4 +1,4 @@
-import React, { type KeyboardEvent, type ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import { BodyShort } from "@navikt/ds-react";
 
 export interface EmojiButtonProps {
@@ -11,7 +11,6 @@ export interface EmojiButtonProps {
   style?: React.CSSProperties;
   disabled?: boolean;
   ariaLabel?: string;
-  onKeyDown?: (event: KeyboardEvent<HTMLButtonElement>) => void;
   renderText?: boolean;
 }
 
@@ -27,7 +26,6 @@ export const EmojiButton = React.forwardRef<HTMLButtonElement, EmojiButtonProps>
       style,
       disabled,
       ariaLabel,
-      onKeyDown,
       renderText = true,
     },
     ref,
@@ -46,7 +44,6 @@ export const EmojiButton = React.forwardRef<HTMLButtonElement, EmojiButtonProps>
         aria-label={ariaLabel ?? text}
         disabled={disabled}
         style={style}
-        onKeyDown={onKeyDown}
       >
         {children}
         {renderText && <BodyShort>{text}</BodyShort>}

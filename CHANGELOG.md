@@ -5,6 +5,13 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 ## [Unreleased]
 - Add entries here before cutting the next release.
 
+## [0.2.0] - 2025-10-24
+- Remove the `FlexJarModal` and `FlexJarGuidePanel` entry points so the package ships a dock-only UI.
+- Localise the dock success layout and auto-close hooks instead of importing them from the deleted modal module.
+- Rename the `FlexJarEvents.onViewModal` callback to `onViewDock` and update the dock implementation/tests to use the new event.
+- Rewrite the README and Copilot instructions around the dock-centric API, including updated prop documentation.
+- Bump the npm package version to 0.2.0 to signal the breaking API change.
+
 ## [0.1.12] - 2025-10-22
 - Replace the Dock rating styles to avoid CSS Modules `:global` selectors so `@navikt/flexjar-widget/styles.css` works in host apps that don’t process CSS Modules.
 - Align the fallback stylesheet and Dock renderer with the new class names to keep the rating field spacing and legend hiding intact.
