@@ -24,8 +24,55 @@
 }
 
 .closeButton {
+  position: absolute;
+  top: -1rem;
+  right: 1rem;
   min-width: 2rem;
-  align-self: flex-start;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: var(--a-border-radius-full);
+  background-color: var(--a-lightblue-700);
+  color: var(--a-surface-default);
+  box-shadow: var(--a-shadow-medium);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.closeButton:hover,
+.closeButton:focus-visible {
+  background-color: var(--a-lightblue-800);
+  color: var(--a-surface-default);
+}
+
+.closeIcon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.closeIcon::before,
+.closeIcon::after {
+  content: "";
+  position: absolute;
+  width: 0.95rem;
+  height: 0.18rem;
+  background-color: currentColor;
+  border-radius: 999px;
+  transform-origin: center;
+}
+
+.closeIcon::before {
+  transform: rotate(45deg);
+}
+
+.closeIcon::after {
+  transform: rotate(-45deg);
 }
 
 .ratingSection {

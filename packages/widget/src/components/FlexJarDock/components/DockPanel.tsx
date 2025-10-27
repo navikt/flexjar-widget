@@ -9,7 +9,6 @@ import {
   VStack,
   type BoxProps,
 } from "@navikt/ds-react";
-import { XMarkIcon } from "@navikt/aksel-icons";
 import type {
   FlexJarAnswerValue,
   FlexJarQuestion,
@@ -18,7 +17,6 @@ import type {
 import type { FlexJarRenderQuestionProps } from "../../../types.js";
 import { SuccessContent } from "./SuccessContent.js";
 import { CLASS_NAMES, joinClassNames } from "../classNames.js";
-
 interface DockPanelProps {
   panelId: string;
   panelLabel: string;
@@ -90,133 +88,138 @@ export const DockPanel = ({
   onQuestionChange,
 }: DockPanelProps) => {
   return (
-    <Box
-      padding="4"
-      background={panelBackground}
-      borderRadius="large"
-      shadow="large"
-      borderWidth={panelBorderColor ? "1" : undefined}
-      borderColor={panelBorderColor}
-      className={joinClassNames(CLASS_NAMES.panel, panelClassName)}
-      style={panelStyle}
-      aria-label={panelLabel}
-      role="region"
-      id={panelId}
-    >
-      <div className={CLASS_NAMES.header}>
-        <div
-          className={CLASS_NAMES.headerText}
-          role={isSuccess ? "status" : undefined}
-          aria-live={isSuccess ? "polite" : undefined}
-        >
-          {isSuccess ? (
-            <Heading
-              level="2"
-              size="medium"
-              className={CLASS_NAMES.ratingHeading}
-              id={successHeadingId}
-            >
-              {successTitle}
-            </Heading>
-          ) : (
-            <>
+    <div style={{ position: "relative" }}>
+      <Button
+        variant="tertiary"
+        size="small"
+        onClick={onClose}
+        className={CLASS_NAMES.closeButton}
+        type="button"
+        aria-label={cancelLabel}
+        title={cancelLabel}
+      >
+        <span aria-hidden className={CLASS_NAMES.closeIcon} />
+      </Button>
+      <Box
+        padding="4"
+        background={panelBackground}
+        borderRadius="large"
+        shadow="large"
+        borderWidth={panelBorderColor ? "1" : undefined}
+        borderColor={panelBorderColor}
+        className={joinClassNames(CLASS_NAMES.panel, panelClassName)}
+        style={panelStyle}
+        aria-label={panelLabel}
+        role="region"
+        id={panelId}
+      >
+        <div className={CLASS_NAMES.header}>
+          <div
+            className={CLASS_NAMES.headerText}
+            role={isSuccess ? "status" : undefined}
+            aria-live={isSuccess ? "polite" : undefined}
+          >
+            {isSuccess ? (
               <Heading
                 level="2"
                 size="medium"
                 className={CLASS_NAMES.ratingHeading}
-                id={ratingHeadingId}
+                id={successHeadingId}
               >
-                {ratingQuestion.prompt}
+                {successTitle}
               </Heading>
-              {ratingQuestion.description && (
-                <BodyShort
-                  size="small"
-                  className={CLASS_NAMES.ratingDescription}
-                  id={ratingDescriptionId}
+            ) : (
+              <>
+                <Heading
+                  level="2"
+                  size="medium"
+                  className={CLASS_NAMES.ratingHeading}
+                  id={ratingHeadingId}
                 >
-                  {ratingQuestion.description}
-                </BodyShort>
-              )}
-            </>
-          )}
+                  {ratingQuestion.prompt}
+                </Heading>
+                {ratingQuestion.description && (
+                  <BodyShort
+                    size="small"
+                    className={CLASS_NAMES.ratingDescription}
+                    id={ratingDescriptionId}
+                  >
+                    {ratingQuestion.description}
+                  </BodyShort>
+                )}
+              </>
+            )}
+          </div>
         </div>
-        <Button
-          variant="tertiary"
-          size="small"
-          onClick={onClose}
-          className={CLASS_NAMES.closeButton}
-          type="button"
-          aria-label={cancelLabel}
-          icon={<XMarkIcon aria-hidden />}
-        />
-      </div>
-      {isSuccess ? (
-        <VStack gap="4">
-          <SuccessContent
-            title={successTitle}
-            body={successBody}
-            showTitle={false}
-            announce={Boolean(successBody)}
-          />
-          <Button onClick={onClose}>{successPrimaryLabel}</Button>
-        </VStack>
-      ) : (
-        <form onSubmit={onSubmit} noValidate>
+
+        {isSuccess ? (
           <VStack gap="4">
-            {orderedQuestions.map((question) => {
-              if (shouldDeferQuestion(question)) {
-                return null;
-              }
-
-              const value = answers[question.id];
-              const isMissing = validationMissing.includes(question.id);
-              const handleChange = (
-                nextValue: FlexJarAnswerValue | null | undefined,
-              ) => {
-                onQuestionChange(question.id, nextValue);
-              };
-
-              return (
-                <div key={question.id} className="flexjar-question">
-                  {renderQuestion({
-                    question,
-                    value,
-                    onChange: handleChange,
-                    isMissing,
-                    disabled: isSubmitting,
-                  })}
-                </div>
-              );
-            })}
-
-            {hasTransportError && (
-              <Alert variant="error" role="alert">
-                {transportErrorMessage}
-              </Alert>
-            )}
-
-            {showPersonalDataNotice && !isSubmitBlocked && (
-              <Alert variant="warning" role="alert">
-                {personalDataNotice}
-              </Alert>
-            )}
-
-            <HStack gap="2" wrap>
-              <Button
-                type="submit"
-                loading={isSubmitting}
-                disabled={isSubmitting || isSubmitBlocked}
-              >
-                {isSubmitting ? submitPendingLabel : submitLabel}
-              </Button>
-              <Button variant="tertiary" type="button" onClick={onClose}>
-                {cancelLabel}
-              </Button>
-            </HStack>
+            <SuccessContent
+              title={successTitle}
+              body={successBody}
+              showTitle={false}
+              announce={Boolean(successBody)}
+            />
+            <Button onClick={onClose}>{successPrimaryLabel}</Button>
           </VStack>
-        </form>
-      )}
-    </Box>
+        ) : (
+          <form onSubmit={onSubmit} noValidate>
+            <VStack gap="4">
+              {orderedQuestions.map((question) => {
+                if (shouldDeferQuestion(question)) {
+                  return null;
+                }
+
+                const value = answers[question.id];
+                const isMissing = validationMissing.includes(question.id);
+                const handleChange = (
+                  nextValue: FlexJarAnswerValue | null | undefined,
+                ) => {
+                  onQuestionChange(question.id, nextValue);
+                };
+
+                return (
+                  <div key={question.id} className="flexjar-question">
+                    {renderQuestion({
+                      question,
+                      value,
+                      onChange: handleChange,
+                      isMissing,
+                      disabled: isSubmitting,
+                    })}
+                  </div>
+                );
+              })}
+
+              {hasTransportError && (
+                <Alert variant="error" role="alert">
+                  {transportErrorMessage}
+                </Alert>
+              )}
+
+              {showPersonalDataNotice && !isSubmitBlocked && (
+                <Alert variant="warning" role="alert">
+                  {personalDataNotice}
+                </Alert>
+              )}
+
+              <HStack gap="2" wrap>
+                <Button
+                  type="submit"
+                  loading={isSubmitting}
+                  disabled={isSubmitting || isSubmitBlocked}
+                >
+                  {isSubmitting ? submitPendingLabel : submitLabel}
+                </Button>
+                <Button variant="tertiary" type="button" onClick={onClose}>
+                  {cancelLabel}
+                </Button>
+              </HStack>
+            </VStack>
+          </form>
+        )}
+      </Box>
+    </div>
   );
 };
 

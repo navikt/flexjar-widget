@@ -6,6 +6,7 @@ export const CLASS_NAMES = {
   header: styles.header ?? "flexjar-dock__header",
   headerText: styles.headerText ?? "flexjar-dock__header-text",
   closeButton: styles.closeButton ?? "flexjar-dock__close-button",
+  closeIcon: styles.closeIcon ?? "flexjar-dock__close-icon",
   ratingSection: styles.ratingSection ?? "flexjar-dock__rating",
   ratingHeading: styles.ratingHeading ?? "flexjar-dock__rating-heading",
   ratingDescription: styles.ratingDescription ?? "flexjar-dock__rating-description",

@@ -64,7 +64,7 @@ export const usePersistedDismissal = (
   } = options;
 
   const storageKey = useMemo(
-    () => `flexjar-dock-dismissed:${feedbackId}`,
+    () => `flexjar-dismissed-${feedbackId}`,
     [feedbackId],
   );
   const [dismissed, setDismissed] = useState<boolean>(() => !initialOpen);

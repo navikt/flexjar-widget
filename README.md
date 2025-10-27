@@ -114,7 +114,16 @@ export const FeedbackDock = () => (
 - `containerClassName` / `panelClassName`: style overrides for advanced layouts.
 
 The dock opens by default and disappears for the rest of the browser session if
-the user clicks «Avbryt» or the close button. When `sessionStorage` is unavailable
+the user clicks «Avbryt» or the close button.
+
+**Persistence behavior**:
+- **With surveys consent**: The dock uses `localStorage` (via `@navikt/nav-dekoratoren-moduler`) to remember dismissal across sessions. The dock will reappear after the configured cooldown period (see `dismissCooldownDays`).
+- **Without surveys consent**: The dock falls back to `initialOpen` prop behavior with no persistence. State resets on page reload.
+- **Storage key**: `flexjar-dismissed-${feedbackId}` (requires `flexjar-*` to be in NAV's allowed storage list)
+
+> **Note**: For localStorage persistence to work, `flexjar-*` must be added to the allowed storage list in `nav-dekoratoren`. Until then, the widget uses the `initialOpen` fallback. See `CONSENT_STORAGE_ANALYSIS.md` for details.
+
+When `sessionStorage` is unavailable
 (for example, some private browsing modes), the dismissal falls back to in-memory
 state; expose `events.onDismissalPersistFailed` if you want telemetry when that
 persistence step fails.
@@ -152,6 +161,8 @@ persistence step fails.
 | `resetOnClose` | `boolean` | No | `true` | Reset answers when the dock closes. |
 | `autoCloseOnSuccess` | `boolean` | No | `false` | Close the dock automatically after a successful submission. |
 | `successCloseDelayMs` | `number` | No | `1600` | Delay (ms) before auto-closing when `autoCloseOnSuccess` is enabled. |
+| `dismissCooldownDays` | `number` | No | `30` | Number of days before the dock can reappear after being dismissed (requires surveys consent and `flexjar-*` in allowed storage list). |
+| `initialOpen` | `boolean` | No | `true` | Whether the dock should be open by default. When persistence is unavailable, this controls the initial state. |
 | `showPersonalDataNotice` | `boolean` | No | `true` | Toggle the default personal-data warning beneath the form. |
 | `personalDataNotice` | `React.ReactNode` | No | Default warning element | Custom content for the personal-data warning. |
 

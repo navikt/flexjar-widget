@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen, act, waitFor, within } from "@testing-library/react";
+import { render, screen, act, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FlexJarDock } from "../FlexJarDock.js";
 import type {
@@ -145,6 +145,7 @@ describe("FlexJarDock", () => {
   it("persists dismissal state and triggers reset when closing", async () => {
     const events: FlexJarEvents = {
       onReset: vi.fn(),
+      onDismissalPersistFailed: vi.fn(),
     };
 
     const user = userEvent.setup();
@@ -162,26 +163,28 @@ describe("FlexJarDock", () => {
 
     expect(events.onReset).toHaveBeenCalledTimes(1);
 
-    const reopenedButton = await waitFor(() => {
+    // Without consent storage, the dismissal doesn't persist
+    // The dock closes but doesn't show minimized button
+    await waitFor(() => {
       const nextContainer = document.querySelector(
         '[data-feedback-id="dock-feedback"]',
       ) as HTMLElement | null;
 
       expect(nextContainer?.getAttribute("data-state")).toBe("dismissed");
-
-      return within(nextContainer!).getByRole("button", {
-        name: /gi tilbakemelding/i,
-      });
     });
 
-    expect(reopenedButton).toBeInTheDocument();
+    // onDismissalPersistFailed should NOT be called when storage is simply not available
+    // (it's only called when storage IS allowed but the write operation fails)
+    expect(events.onDismissalPersistFailed).not.toHaveBeenCalled();
 
     unmount();
 
+    // When remounting without consent storage, dock respects initialOpen (true by default)
     renderDock();
 
+    // The dock should be open again since there's no persistence
     expect(
-      await screen.findByRole("button", { name: /gi tilbakemelding/i }),
+      screen.getByRole("heading", { name: /hvor fornøyd er du/i }),
     ).toBeInTheDocument();
   });
 

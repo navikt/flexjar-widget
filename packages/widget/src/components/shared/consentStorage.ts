@@ -21,8 +21,6 @@ interface WriteResult {
   error?: unknown;
 }
 
-const memoryFallback = new Map<string, string>();
-
 let modulePromise: Promise<ConsentModule | null> | null = null;
 
 const loadConsentModule = async (): Promise<ConsentModule | null> => {
@@ -52,9 +50,8 @@ const loadConsentModule = async (): Promise<ConsentModule | null> => {
       } catch (error) {
         if (process.env.NODE_ENV === "development") {
           // eslint-disable-next-line no-console -- development diagnostics only
-          console.warn(
-            "FlexJar: nav-dekoratoren-moduler not available, falling back to in-memory storage.",
-            error,
+          console.log(
+            "[FlexJar] @navikt/nav-dekoratoren-moduler not available - using initialOpen without persistence",
           );
         }
         return null;
@@ -68,7 +65,13 @@ const loadConsentModule = async (): Promise<ConsentModule | null> => {
 const getStorage = async (key: string): Promise<StorageResult> => {
   const module = await loadConsentModule();
 
-  if (!module || !module.navLocalStorage) {
+  if (!module) {
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console -- development diagnostics only
+      console.log(
+        "[FlexJar] Consent module not available - using initialOpen without persistence",
+      );
+    }
     return {
       storage: null,
       allowed: false,
@@ -77,15 +80,52 @@ const getStorage = async (key: string): Promise<StorageResult> => {
 
   const { navLocalStorage, isStorageKeyAllowed } = module;
 
-  const allowed = typeof isStorageKeyAllowed === "function"
-    ? Boolean(isStorageKeyAllowed(key))
-    : true;
-
-  if (!allowed) {
+  if (!navLocalStorage) {
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console -- development diagnostics only
+      console.log(
+        "[FlexJar] navLocalStorage not available - using initialOpen without persistence",
+      );
+    }
     return {
       storage: null,
       allowed: false,
     };
+  }
+
+  if (typeof isStorageKeyAllowed !== "function") {
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console -- development diagnostics only
+      console.log(
+        "[FlexJar] isStorageKeyAllowed not available - using initialOpen without persistence",
+      );
+    }
+    return {
+      storage: null,
+      allowed: false,
+    };
+  }
+
+  const allowed = isStorageKeyAllowed(key);
+
+  if (!allowed) {
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console -- development diagnostics only
+      console.log(
+        `[FlexJar] Storage key "${key}" not in allowed list or user has not given surveys consent - using initialOpen without persistence`,
+      );
+    }
+    return {
+      storage: null,
+      allowed: false,
+    };
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    // eslint-disable-next-line no-console -- development diagnostics only
+    console.log(
+      `[FlexJar] Storage key "${key}" is allowed - persistence enabled`,
+    );
   }
 
   return {
@@ -95,39 +135,40 @@ const getStorage = async (key: string): Promise<StorageResult> => {
 };
 
 export const readConsentValue = async (key: string): Promise<string | null> => {
-  const { storage, allowed } = await getStorage(key);
+  const { storage } = await getStorage(key);
   if (storage) {
     try {
       return storage.getItem(key);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         // eslint-disable-next-line no-console -- development diagnostics only
-        console.warn("FlexJar: failed to read consent storage", error);
+        console.warn("[FlexJar] Failed to read from consent storage", error);
       }
     }
   }
 
-  return allowed ? null : memoryFallback.get(key) ?? null;
+  // No storage available - return null to use initialOpen behavior
+  return null;
 };
 
 export const writeConsentValue = async (key: string, value: string): Promise<WriteResult> => {
   const { storage, allowed } = await getStorage(key);
 
-  if (storage) {
+  if (storage && allowed) {
     try {
       storage.setItem(key, value);
       return { persisted: true, allowed: true };
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         // eslint-disable-next-line no-console -- development diagnostics only
-        console.warn("FlexJar: failed to write consent storage", error);
+        console.warn("[FlexJar] Failed to write to consent storage", error);
       }
-      return { persisted: false, allowed: true, error };
+      return { persisted: false, allowed: false, error };
     }
   }
 
-  memoryFallback.set(key, value);
-  return { persisted: false, allowed };
+  // No storage available - don't persist, just return not persisted
+  return { persisted: false, allowed: false };
 };
 
 export const removeConsentValue = async (key: string): Promise<void> => {
@@ -138,12 +179,11 @@ export const removeConsentValue = async (key: string): Promise<void> => {
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         // eslint-disable-next-line no-console -- development diagnostics only
-        console.warn("FlexJar: failed to remove consent storage", error);
+        console.warn("[FlexJar] Failed to remove from consent storage", error);
       }
     }
   }
-
-  memoryFallback.delete(key);
+  // No need to manage memoryFallback since we don't use it anymore
 };
 
 export type { WriteResult };
