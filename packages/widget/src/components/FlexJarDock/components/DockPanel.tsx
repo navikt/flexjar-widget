@@ -9,6 +9,7 @@ import {
   VStack,
   type BoxProps,
 } from "@navikt/ds-react";
+import { XMarkIcon } from "@navikt/aksel-icons";
 import type {
   FlexJarAnswerValue,
   FlexJarQuestion,
@@ -146,6 +147,7 @@ export const DockPanel = ({
           className={CLASS_NAMES.closeButton}
           type="button"
           aria-label={cancelLabel}
+          icon={<XMarkIcon aria-hidden />}
         />
       </div>
       {isSuccess ? (
