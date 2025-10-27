@@ -5,6 +5,7 @@ export default defineConfig({
   format: ["esm", "cjs"],
   dts: true,
   clean: true,
+  external: ["@navikt/nav-dekoratoren-moduler"],
   loader: {
     ".module.css": "local-css",
     ".css": "css",

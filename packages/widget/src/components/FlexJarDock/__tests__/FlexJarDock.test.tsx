@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FlexJarDock } from "../FlexJarDock.js";
 import type {
@@ -7,6 +7,7 @@ import type {
   FlexJarTransport,
 } from "../../../core/types.js";
 import type { FlexJarSurveyConfig } from "../../surveyTypes.js";
+import { removeConsentValue } from "../../shared/consentStorage.js";
 
 function createSurvey(): FlexJarSurveyConfig {
   return {
@@ -42,30 +43,28 @@ function renderDock(options?: {
   events?: FlexJarEvents;
   survey?: FlexJarSurveyConfig;
   context?: Record<string, unknown>;
+  initialOpen?: boolean;
 }) {
   const transport: FlexJarTransport =
     options?.transport ?? {
       submit: vi.fn().mockResolvedValue(undefined),
     };
 
-  render(
+  return render(
     <FlexJarDock
       feedbackId="dock-feedback"
       survey={options?.survey ?? createSurvey()}
       transport={transport}
       events={options?.events}
       context={options?.context}
+      initialOpen={options?.initialOpen}
     />,
   );
-
-  return { transport };
 }
 
 describe("FlexJarDock", () => {
-  beforeEach(() => {
-    if (typeof window !== "undefined") {
-      window.sessionStorage.clear();
-    }
+  beforeEach(async () => {
+    await removeConsentValue("flexjar-dock-dismissed:dock-feedback");
   });
 
   it("gates follow-up questions until the rating is answered", async () => {
@@ -132,22 +131,58 @@ describe("FlexJarDock", () => {
     expect(events.onViewDock).toHaveBeenCalledWith("dock-feedback");
   });
 
+  it("renders the minimized button when initialOpen is false", () => {
+    renderDock({ initialOpen: false });
+
+    expect(
+      screen.getByRole("button", { name: /gi tilbakemelding/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: /gi tilbakemelding/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it("persists dismissal state and triggers reset when closing", async () => {
     const events: FlexJarEvents = {
       onReset: vi.fn(),
     };
 
     const user = userEvent.setup();
-    renderDock({ events });
+    const { unmount } = renderDock({ events });
+    const initialContainer = document.querySelector(
+      '[data-feedback-id="dock-feedback"]',
+    ) as HTMLElement;
 
-    expect(window.sessionStorage.getItem("flexjar-dock-dismissed:dock-feedback")).toBeNull();
+    expect(initialContainer?.getAttribute("data-state")).toBe("open");
 
-    const closeButtons = screen.getAllByRole("button", { name: /avbryt/i });
-    await user.click(closeButtons[0]);
+    const closeButton = screen.getByLabelText(/avbryt/i);
+    await act(async () => {
+      await user.click(closeButton);
+    });
 
-    expect(window.sessionStorage.getItem("flexjar-dock-dismissed:dock-feedback")).toBe("1");
     expect(events.onReset).toHaveBeenCalledTimes(1);
-    expect(screen.queryByRole("region", { name: /gi tilbakemelding/i })).toBeNull();
+
+    const reopenedButton = await waitFor(() => {
+      const nextContainer = document.querySelector(
+        '[data-feedback-id="dock-feedback"]',
+      ) as HTMLElement | null;
+
+      expect(nextContainer?.getAttribute("data-state")).toBe("dismissed");
+
+      return within(nextContainer!).getByRole("button", {
+        name: /gi tilbakemelding/i,
+      });
+    });
+
+    expect(reopenedButton).toBeInTheDocument();
+
+    unmount();
+
+    renderDock();
+
+    expect(
+      await screen.findByRole("button", { name: /gi tilbakemelding/i }),
+    ).toBeInTheDocument();
   });
 
   it("shows transport error message when submission fails", async () => {

@@ -78,7 +78,7 @@ export interface FlexJarEvents {
   onValidationFailed?: (missingQuestionIds: string[]) => void;
   onReset?: () => void;
   /**
-   * Fired when the dock cannot persist its dismissal flag to sessionStorage (for example in private browsing).
+   * Fired when the dock cannot persist its dismissal flag due to storage restrictions (for example when consent is denied).
    */
   onDismissalPersistFailed?: (cause: unknown) => void;
 }

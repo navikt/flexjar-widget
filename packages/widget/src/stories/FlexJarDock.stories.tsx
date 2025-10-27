@@ -4,69 +4,119 @@ import { Button } from "@navikt/ds-react";
 import { FlexJarDock, type FlexJarDockProps } from "../components/FlexJarDock/index.js";
 import type {
   FlexJarSurveyConfig,
+  FlexJarFollowUpQuestion,
   FlexJarMainQuestion,
   FlexJarRatingQuestion,
-  FlexJarFollowUpQuestion,
 } from "../components/surveyTypes.js";
+import { removeConsentValue } from "../components/shared/consentStorage.js";
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const RATING_QUESTION: FlexJarRatingQuestion = {
   type: "rating",
-  prompt: "Hvordan var det å bruke oppfølgingsplanen?",
-  description:
-    "Svarene du sender inn er anonyme, og blir brukt til videreutvikling av oppfølgingsplanen.",
+  prompt: "Hvor fornøyd er du med denne løsningen?",
+  description: "Tilbakemeldingene dine hjelper oss å prioritere forbedringer.",
+  scale: 5,
+  required: true,
 };
 
-const MAIN_QUESTION: FlexJarMainQuestion = {
+const MAIN_TEXT_QUESTION: FlexJarMainQuestion = {
   type: "text",
-  prompt: "Opplever du at oppfølgingsplanen er et nyttig verktøy for å følge opp den ansatte?",
+  prompt: "Hva fungerte bra, og hva kan vi gjøre bedre?",
   minRows: 3,
-  maxLength: 500,
+  maxLength: 600,
+  placeholder: "Del gjerne konkrete forslag.",
+  required: true,
 };
 
-const SURVEY: FlexJarSurveyConfig = {
+const OPTIONAL_FOLLOW_UPS: FlexJarFollowUpQuestion[] = [
+  {
+    id: "best-del",
+    type: "text",
+    prompt: "Hva var det beste med opplevelsen?",
+    maxLength: 400,
+    required: false,
+  },
+  {
+    id: "forbedringstype",
+    type: "singleChoice",
+    prompt: "Hva ønsker du mest at vi jobber videre med?",
+    options: [
+      { value: "speed", label: "Ytelse og hastighet" },
+      { value: "content", label: "Innhold og forklaringer" },
+      { value: "accessibility", label: "Tilgjengelighet" },
+      { value: "other", label: "Noe annet" },
+    ],
+    required: false,
+  },
+];
+
+const DEFAULT_SURVEY: FlexJarSurveyConfig = {
   rating: RATING_QUESTION,
-  mainQuestion: MAIN_QUESTION,
-};
-
-const CHOICE_MAIN_QUESTION: FlexJarMainQuestion = {
-  type: "singleChoice",
-  prompt: "Opplever du at oppfølgingsplanen er et nyttig verktøy for å følge opp den ansatte?",
-  options: [
-    { value: "yes", label: "Ja" },
-    { value: "no", label: "Nei" },
-    { value: "unsure", label: "Vet ikke" },
-  ],
-};
-
-const OPTIONAL_TEXT_FOLLOW_UP: FlexJarFollowUpQuestion = {
-  id: "oppfolgingsplan-detaljer",
-  type: "text",
-  prompt: "Hva bør vi vite for å forbedre oppfølgingsplanen?",
-  minRows: 3,
-  maxLength: 500,
+  mainQuestion: MAIN_TEXT_QUESTION,
+  followUpQuestions: OPTIONAL_FOLLOW_UPS,
 };
 
 const OPTIONAL_MAIN_SURVEY: FlexJarSurveyConfig = {
   rating: RATING_QUESTION,
   mainQuestion: {
-    ...MAIN_QUESTION,
-    prompt:
-      "Hvordan kan oppfølgingsplanen bli et bedre verktøy for deg? (Valgfritt)",
+    ...MAIN_TEXT_QUESTION,
+    prompt: "Vil du dele noe mer? (Valgfritt)",
     required: false,
   },
-  followUpQuestions: [OPTIONAL_TEXT_FOLLOW_UP],
+  followUpQuestions: OPTIONAL_FOLLOW_UPS,
+};
+
+const CHOICE_MAIN_QUESTION: FlexJarMainQuestion = {
+  type: "singleChoice",
+  prompt: "Hvordan beskriver du helhetsopplevelsen?",
+  options: [
+    { value: "great", label: "Veldig bra" },
+    { value: "good", label: "Bra" },
+    { value: "neutral", label: "Helt greit" },
+    { value: "poor", label: "Ikke bra" },
+  ],
+  required: true,
 };
 
 const CHOICE_SURVEY: FlexJarSurveyConfig = {
   rating: RATING_QUESTION,
   mainQuestion: CHOICE_MAIN_QUESTION,
-  followUpQuestions: [OPTIONAL_TEXT_FOLLOW_UP],
+  followUpQuestions: [
+    {
+      id: "choice-oppfolging",
+      type: "text",
+      prompt: "Hva skulle vært annerledes for at du skulle gitt en bedre score?",
+      maxLength: 500,
+      required: false,
+    },
+  ],
 };
 
-const TRANSPORT: FlexJarDockProps["transport"] = {
+const QUICK_FORM_SURVEY: FlexJarSurveyConfig = {
+  rating: {
+    ...RATING_QUESTION,
+    description: undefined,
+  },
+  mainQuestion: {
+    type: "text",
+    prompt: "Beskriv kort hva som ikke fungerte.",
+    maxLength: 300,
+    minRows: 2,
+  },
+};
+
+const SUCCESS_TRANSPORT: FlexJarDockProps["transport"] = {
   async submit(submission) {
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await delay(800);
     console.info("Simulert innsending", submission);
+  },
+};
+
+const FAILING_TRANSPORT: FlexJarDockProps["transport"] = {
+  async submit() {
+    await delay(600);
+    throw new Error("Kunne ikke nå tjenesten");
   },
 };
 
@@ -75,19 +125,28 @@ const meta: Meta<typeof FlexJarDock> = {
   component: FlexJarDock,
   parameters: {
     layout: "fullscreen",
+    docs: {
+      description: {
+        component:
+          "Eksempelsamling som viser hvordan FlexJarDock kan konfigureres med ulike spørresett, tekster og plasseringer.",
+      },
+    },
   },
   args: {
     feedbackId: "storybook-dock",
-    survey: SURVEY,
-    transport: TRANSPORT,
+    survey: DEFAULT_SURVEY,
+    transport: SUCCESS_TRANSPORT,
     title: "Gi tilbakemelding",
+    dismissCooldownDays: 0,
   },
   argTypes: {
-    transport: {
-      control: false,
-    },
-    survey: {
-      control: false,
+    transport: { control: false },
+    survey: { control: false },
+    events: { control: false },
+    context: { control: false },
+    position: {
+      options: ["bottom-right", "bottom-left"],
+      control: { type: "inline-radio" },
     },
   },
 };
@@ -96,34 +155,39 @@ export default meta;
 
 type Story = StoryObj<typeof FlexJarDock>;
 
-const PageWrapper = (props: FlexJarDockProps) => {
+const ExamplePage = (props: FlexJarDockProps) => {
   const [resetToken, setResetToken] = useState(0);
 
   const handleReset = useCallback(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    window.sessionStorage.removeItem(`flexjar-dock-dismissed:${props.feedbackId}`);
-    setResetToken((token) => token + 1);
+    void (async () => {
+      await removeConsentValue(`flexjar-dock-dismissed:${props.feedbackId}`);
+      setResetToken((token) => token + 1);
+    })();
   }, [props.feedbackId]);
 
   return (
     <div
       style={{
         minHeight: "120vh",
-        padding: "var(--a-spacing-10)",
+        padding: "var(--a-spacing-12)",
         background: "var(--a-surface-subtle)",
+        color: "var(--a-text-default)",
       }}
     >
-      <div style={{ maxWidth: "620px", display: "grid", gap: "var(--a-spacing-2)" }}>
-        <h2>Prototype-side</h2>
-        <p>
-          Scroll gjerne for å se at docken holder seg i hjørnet. Skjemaet er åpent som
-          standard, og når du lukker det med «Avbryt» eller krysset forblir det lukket
-          resten av økten.
+      <div style={{ maxWidth: "640px", display: "grid", gap: "var(--a-spacing-2)" }}>
+        <h2 style={{ margin: 0 }}>Designflate</h2>
+        <p style={{ margin: 0 }}>
+          Scroll litt for å se at docken holder seg i hjørnet. Bruk knappen under for å
+          nullstille den lokale lagringen som holder docken minimert etter at du har
+          lukket den.
         </p>
-        <Button size="small" variant="secondary" onClick={handleReset} style={{ width: "fit-content" }}>
-          Vis Flexjar igjen
+        <Button
+          size="small"
+          variant="secondary"
+          onClick={handleReset}
+          style={{ width: "fit-content" }}
+        >
+          Nullstill docken
         </Button>
       </div>
       <FlexJarDock key={resetToken} {...props} />
@@ -132,19 +196,52 @@ const PageWrapper = (props: FlexJarDockProps) => {
 };
 
 export const Default: Story = {
-  render: (args) => <PageWrapper {...args} />,
+  render: (args) => <ExamplePage {...args} />,
 };
 
-export const ChoiceAsMainQuestion: Story = {
+export const InitiallyMinimized: Story = {
   render: Default.render,
   args: {
-    survey: CHOICE_SURVEY,
+    feedbackId: "storybook-minimized",
+    initialOpen: false,
+    minimizedButtonLabel: "Åpne tilbakemeldingsskjema",
   },
 };
 
 export const OptionalMainQuestion: Story = {
   render: Default.render,
   args: {
+    feedbackId: "storybook-optional",
     survey: OPTIONAL_MAIN_SURVEY,
+  },
+};
+
+export const ChoiceAsMainQuestion: Story = {
+  render: Default.render,
+  args: {
+    feedbackId: "storybook-choice",
+    survey: CHOICE_SURVEY,
+  },
+};
+
+export const BottomLeftPlacement: Story = {
+  render: Default.render,
+  args: {
+    feedbackId: "storybook-left",
+    position: "bottom-left",
+    offset: 32,
+  },
+};
+
+export const TransportErrorState: Story = {
+  render: Default.render,
+  args: {
+    feedbackId: "storybook-error",
+    survey: QUICK_FORM_SURVEY,
+    transport: FAILING_TRANSPORT,
+    title: "Meld fra om en feil",
+    submitLabel: "Send inn",
+    transportErrorMessage: "Vi klarte ikke å sende inn akkurat nå. Prøv igjen om litt.",
+    showPersonalDataNotice: false,
   },
 };

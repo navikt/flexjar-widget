@@ -1,26 +1,8 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
-import {
-  Alert,
-  BodyShort,
-  Box,
-  type BoxProps,
-  Button,
-  HStack,
-  Heading,
-  VStack,
-} from "@navikt/ds-react";
-import { XMarkIcon } from "@navikt/aksel-icons";
+import React, { useCallback, useMemo, type ReactNode } from "react";
+import type { BoxProps } from "@navikt/ds-react";
 import { useFlexJar } from "../../core/useFlexJar.js";
 import type {
-  FlexJarAnswerValue,
   FlexJarEvents,
-  FlexJarQuestion,
   FlexJarTransport,
   RatingQuestion,
 } from "../../core/types.js";
@@ -28,9 +10,8 @@ import {
   DefaultQuestionRenderer,
   RatingQuestionField,
 } from "../questions/index.js";
-import { useRatingGate } from "./useRatingGate.js";
-import { SuccessContent } from "./SuccessContent.js";
-import { useAutoCloseOnSuccess } from "./useAutoCloseOnSuccess.js";
+import { useRatingGate } from "./hooks/useRatingGate.js";
+import { useAutoCloseOnSuccess } from "./hooks/useAutoCloseOnSuccess.js";
 import type { FlexJarRenderQuestionProps } from "../../types.js";
 import { buildCanonicalSurvey } from "../shared/canonicalSurvey.js";
 import {
@@ -38,7 +19,10 @@ import {
   DEFAULT_PERSONAL_DATA_NOTICE,
 } from "../shared/commonDefaults.js";
 import type { FlexJarSurveyConfig } from "../surveyTypes.js";
-import styles from "./FlexJarDock.module.css";
+import { DockPanel } from "./components/DockPanel.js";
+import { MinimizedDock } from "./components/MinimizedDock.js";
+import { CLASS_NAMES, joinClassNames } from "./classNames.js";
+import { usePersistedDismissal } from "./hooks/usePersistedDismissal.js";
 import "./FlexJarDock.fallback.css";
 
 export interface FlexJarDockProps {
@@ -62,49 +46,16 @@ export interface FlexJarDockProps {
   successCloseDelayMs?: number;
   showPersonalDataNotice?: boolean;
   personalDataNotice?: ReactNode;
-  /**
-   * Controls which side of the viewport the dock sticks to.
-   * @default "bottom-right"
-   */
   position?: "bottom-right" | "bottom-left";
-  /**
-   * Offset (in px) from the viewport edge.
-   * @default 24
-   */
   offset?: number;
-  /** Optional class for the outer floating container. */
   containerClassName?: string;
-  /** Optional class for the inner panel. */
   panelClassName?: string;
-  /**
-   * Background token applied to the dock panel. Defaults to a subtle surface tone to lift the panel from white pages.
-   * @default "surface-subtle"
-   */
   panelBackground?: BoxProps["background"];
-  /**
-   * Border token applied to the dock panel. Set to `undefined` to remove the border.
-   * @default "border-subtle"
-   */
   panelBorderColor?: BoxProps["borderColor"];
+  initialOpen?: boolean;
+  minimizedButtonLabel?: string;
+  dismissCooldownDays?: number;
 }
-
-const CLASS_NAMES = {
-  container: styles.container ?? "flexjar-dock",
-  panel: styles.panel ?? "flexjar-dock__panel",
-  header: styles.header ?? "flexjar-dock__header",
-  headerText: styles.headerText ?? "flexjar-dock__header-text",
-  closeButton: styles.closeButton ?? "flexjar-dock__close-button",
-  ratingSection: styles.ratingSection ?? "flexjar-dock__rating",
-  ratingHeading: styles.ratingHeading ?? "flexjar-dock__rating-heading",
-  ratingDescription: styles.ratingDescription ?? "flexjar-dock__rating-description",
-  ratingField: styles.ratingField ?? "flexjar-dock__rating-field",
-  ratingFieldset: styles.ratingFieldset ?? "flexjar-dock__rating-fieldset",
-  ratingRow: styles.ratingRow ?? "flexjar-dock__rating-row",
-  ratingButton: styles.ratingButton ?? "flexjar-dock__rating-button",
-};
-
-const joinClassNames = (...classNames: Array<string | false | undefined>) =>
-  classNames.filter(Boolean).join(" ");
 
 export const FlexJarDock = ({
   feedbackId,
@@ -133,23 +84,10 @@ export const FlexJarDock = ({
   panelClassName,
   panelBackground = "surface-default",
   panelBorderColor = "border-subtle",
+  initialOpen = true,
+  minimizedButtonLabel,
+  dismissCooldownDays = 30,
 }: FlexJarDockProps) => {
-  const storageKey = useMemo(
-    () => `flexjar-dock-dismissed:${feedbackId}`,
-    [feedbackId],
-  );
-
-  const [dismissed, setDismissed] = useState<boolean>(() => {
-    if (typeof window === "undefined") {
-      return false;
-    }
-    try {
-      return window.sessionStorage.getItem(storageKey) === "1";
-    } catch {
-      return false;
-    }
-  });
-
   const canonicalSurvey = useMemo(() => buildCanonicalSurvey(survey), [survey]);
   const { ratingQuestion, mainQuestion, followUpQuestions, coreQuestionIds } =
     canonicalSurvey;
@@ -164,6 +102,7 @@ export const FlexJarDock = ({
     ? `${ratingQuestion.id}-dock-description`
     : undefined;
   const successHeadingId = `${feedbackId}-dock-success-heading`;
+  const panelId = `${feedbackId}-dock-panel`;
 
   const { answers, status, error, setAnswer, submit, reset } = useFlexJar({
     feedbackId,
@@ -174,46 +113,20 @@ export const FlexJarDock = ({
     coreQuestionIds,
   });
 
-  useEffect(() => {
-    if (!dismissed) {
-      events?.onViewDock?.(feedbackId);
-    }
-  }, [dismissed, events, feedbackId]);
-
-  const persistDismissed = useCallback(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    try {
-      window.sessionStorage.setItem(storageKey, "1");
-    } catch (persistError) {
-      if (process.env.NODE_ENV === "development") {
-        // eslint-disable-next-line no-console -- development-time diagnostics only
-        console.warn(
-          "FlexJar: failed to persist dock dismissal in sessionStorage. The dock may reappear if the page reloads.",
-          persistError,
-        );
-      }
-      events?.onDismissalPersistFailed?.(persistError);
-    }
-  }, [events, storageKey]);
-
-  const handleClose = useCallback(() => {
-    if (dismissed) {
-      return;
-    }
-    if (resetOnClose) {
-      reset();
-    }
-    setDismissed(true);
-    persistDismissed();
-  }, [dismissed, persistDismissed, reset, resetOnClose]);
+  const { dismissed, closeDock, reopenDock } = usePersistedDismissal({
+    feedbackId,
+    initialOpen,
+    dismissCooldownDays,
+    events,
+    resetOnClose,
+    onReset: reset,
+  });
 
   useAutoCloseOnSuccess({
     enabled: autoCloseOnSuccess,
     status,
     delayMs: successCloseDelayMs,
-    onClose: handleClose,
+    onClose: closeDock,
   });
 
   const { shouldDeferQuestion, isSubmitBlocked } = useRatingGate(
@@ -232,15 +145,22 @@ export const FlexJarDock = ({
   const isSubmitting = status === "submitting";
   const isSuccess = status === "success";
   const validationMissing = error?.type === "validation" ? error.missing : [];
+  const hasTransportError = error?.type === "transport";
 
-  const containerStyle: React.CSSProperties = {
+  const baseContainerStyle: React.CSSProperties = {
     position: "fixed",
     bottom: offset,
     right: position === "bottom-right" ? offset : undefined,
     left: position === "bottom-left" ? offset : undefined,
     zIndex: 1000,
-    width: `min(24rem, calc(100vw - ${offset * 2}px))`,
   };
+
+  const containerStyle: React.CSSProperties = dismissed
+    ? baseContainerStyle
+    : {
+        ...baseContainerStyle,
+        width: `min(24rem, calc(100vw - ${offset * 2}px))`,
+      };
 
   const panelStyle: React.CSSProperties = {
     maxHeight: "calc(100vh - 2rem)",
@@ -293,144 +213,58 @@ export const FlexJarDock = ({
   );
 
   const questionRenderer = renderQuestion ?? defaultQuestionRenderer;
-
-  const panelAriaLabel = title;
-
-  if (dismissed) {
-    return null;
-  }
+  const reopenLabel = minimizedButtonLabel ?? title;
+  const noticeContent = personalDataNotice ?? DEFAULT_PERSONAL_DATA_NOTICE;
 
   return (
     <div
       className={joinClassNames(CLASS_NAMES.container, containerClassName)}
       style={containerStyle}
       data-feedback-id={feedbackId}
+      data-state={dismissed ? "dismissed" : "open"}
     >
-      <Box
-        padding="4"
-        background={panelBackground}
-        borderRadius="large"
-        shadow="large"
-        borderWidth={panelBorderColor ? "1" : undefined}
-        borderColor={panelBorderColor}
-        className={joinClassNames(CLASS_NAMES.panel, panelClassName)}
-        style={panelStyle}
-        aria-label={panelAriaLabel}
-      >
-          <div className={CLASS_NAMES.header}>
-            <div
-              className={CLASS_NAMES.headerText}
-              role={isSuccess ? "status" : undefined}
-              aria-live={isSuccess ? "polite" : undefined}
-            >
-              {isSuccess ? (
-                <Heading
-                  level="2"
-                  size="medium"
-                  className={CLASS_NAMES.ratingHeading}
-                  id={successHeadingId}
-                >
-                  {successTitle}
-                </Heading>
-              ) : (
-                <>
-                  <Heading
-                    level="2"
-                    size="medium"
-                    className={CLASS_NAMES.ratingHeading}
-                    id={ratingHeadingId}
-                  >
-                    {ratingQuestion.prompt}
-                  </Heading>
-                  {ratingQuestion.description && (
-                    <BodyShort
-                      size="small"
-                      className={CLASS_NAMES.ratingDescription}
-                      id={ratingDescriptionId}
-                    >
-                      {ratingQuestion.description}
-                    </BodyShort>
-                  )}
-                </>
-              )}
-            </div>
-            <Button
-              variant="tertiary"
-              size="small"
-              onClick={handleClose}
-              icon={<XMarkIcon aria-hidden />}
-              aria-label={cancelLabel}
-              className={CLASS_NAMES.closeButton}
-              type="button"
-            />
-          </div>
-          {isSuccess ? (
-            <VStack gap="4">
-              <SuccessContent
-                title={successTitle}
-                body={successBody}
-                showTitle={false}
-                announce={Boolean(successBody)}
-              />
-              <Button onClick={handleClose}>{successPrimaryLabel}</Button>
-            </VStack>
-          ) : (
-            <form onSubmit={handleSubmit} noValidate>
-              <VStack gap="4">
-                {orderedQuestions.map((question: FlexJarQuestion) => {
-                  if (shouldDeferQuestion(question)) {
-                    return null;
-                  }
-
-                  const value = answers[question.id];
-                  const isMissing = validationMissing.includes(question.id);
-                  const onChange = (
-                    nextValue: FlexJarAnswerValue | null | undefined,
-                  ) => {
-                    setAnswer(question.id, nextValue);
-                  };
-
-                  return (
-                    <div key={question.id} className="flexjar-question">
-                      {questionRenderer({
-                        question,
-                        value,
-                        onChange,
-                        isMissing,
-                        disabled: isSubmitting,
-                      })}
-                    </div>
-                  );
-                })}
-
-                {error?.type === "transport" && (
-                  <Alert variant="error" role="alert">
-                    {transportErrorMessage}
-                  </Alert>
-                )}
-
-                {showPersonalDataNotice && !isSubmitBlocked && (
-                  <Alert variant="warning" role="alert">
-                    {personalDataNotice ?? DEFAULT_PERSONAL_DATA_NOTICE}
-                  </Alert>
-                )}
-
-                <HStack gap="2" wrap>
-                  <Button
-                    type="submit"
-                    loading={isSubmitting}
-                    disabled={isSubmitting || isSubmitBlocked}
-                  >
-                    {isSubmitting ? submitPendingLabel : submitLabel}
-                  </Button>
-                  <Button variant="tertiary" type="button" onClick={handleClose}>
-                    {cancelLabel}
-                  </Button>
-                </HStack>
-              </VStack>
-            </form>
-          )}
-      </Box>
+      {dismissed ? (
+        <MinimizedDock
+          label={reopenLabel}
+          panelId={panelId}
+          onReopen={reopenDock}
+          className={CLASS_NAMES.minimizedButton}
+        />
+      ) : (
+        <DockPanel
+          panelId={panelId}
+          panelLabel={title}
+          panelClassName={panelClassName}
+          panelStyle={panelStyle}
+          panelBackground={panelBackground}
+          panelBorderColor={panelBorderColor}
+          ratingQuestion={ratingQuestion}
+          ratingHeadingId={ratingHeadingId}
+          ratingDescriptionId={ratingDescriptionId}
+          successHeadingId={successHeadingId}
+          successTitle={successTitle}
+          successBody={successBody}
+          successPrimaryLabel={successPrimaryLabel}
+          isSuccess={isSuccess}
+          onClose={closeDock}
+          onSubmit={handleSubmit}
+          orderedQuestions={orderedQuestions}
+          answers={answers}
+          renderQuestion={questionRenderer}
+          validationMissing={validationMissing}
+          isSubmitting={isSubmitting}
+          submitLabel={submitLabel}
+          submitPendingLabel={submitPendingLabel}
+          cancelLabel={cancelLabel}
+          showPersonalDataNotice={showPersonalDataNotice}
+          personalDataNotice={noticeContent}
+          isSubmitBlocked={isSubmitBlocked}
+          hasTransportError={Boolean(hasTransportError)}
+          transportErrorMessage={transportErrorMessage}
+          shouldDeferQuestion={shouldDeferQuestion}
+          onQuestionChange={setAnswer}
+        />
+      )}
     </div>
   );
 };
