@@ -74,7 +74,7 @@ export const survey: FlexJarSurveyConfig = {
 };
 ```
 
-### FlexJarDock (recommended)
+### FlexJarDock
 
 Need the survey available at all times? `FlexJarDock` renders a compact, sticky
 panel that lets users answer the rating question immediately and complete the
