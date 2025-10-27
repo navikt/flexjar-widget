@@ -5,6 +5,13 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 ## [Unreleased]
 - Add entries here before cutting the next release.
 
+## [0.2.2] - 2025-10-27
+- Remove memory fallback storage to ensure consent compliance—dock now uses `initialOpen` behavior when consent is unavailable or denied.
+- Update storage key format from `flexjar-dock-dismissed:${feedbackId}` to `flexjar-dismissed-${feedbackId}` for consistency with NAV's allowed storage list.
+- Add comprehensive development logging to help diagnose consent storage availability and permission status.
+- Document the consent-dependent persistence behavior in README, clarifying that `flexjar-*` keys must be in the allowed storage list for cross-session persistence.
+- Refine `writeConsentValue` to return `allowed: false` when storage is unavailable, ensuring `onDismissalPersistFailed` fires correctly.
+
 ## [0.2.1] - 2025-10-27
 - Persist dock dismissals via `@navikt/nav-dekoratoren-moduler` storage, adding the `dismissCooldownDays` option and `minimizedButtonLabel` override for the minimized reopen button.
 - Refactor `FlexJarDock` into smaller hooks and subcomponents for easier maintenance while restoring the close-button icon that regressed during the restructuring.
