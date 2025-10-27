@@ -5,6 +5,11 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 ## [Unreleased]
 - Add entries here before cutting the next release.
 
+## [0.2.1] - 2025-10-27
+- Persist dock dismissals via `@navikt/nav-dekoratoren-moduler` storage, adding the `dismissCooldownDays` option and `minimizedButtonLabel` override for the minimized reopen button.
+- Refactor `FlexJarDock` into smaller hooks and subcomponents for easier maintenance while restoring the close-button icon that regressed during the restructuring.
+- Relax the `@navikt/nav-dekoratoren-moduler` peer requirement to `>=1.6.0` (from an unpublished 3.x range) so `npm install` succeeds without pointing at a non-existent version.
+
 ## [0.2.0] - 2025-10-24
 - Remove the `FlexJarModal` and `FlexJarGuidePanel` entry points so the package ships a dock-only UI.
 - Localise the dock success layout and auto-close hooks instead of importing them from the deleted modal module.
