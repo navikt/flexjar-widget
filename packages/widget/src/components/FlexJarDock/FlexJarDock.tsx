@@ -1,15 +1,15 @@
 import React, { useCallback, useMemo, type ReactNode } from "react";
 import type { BoxProps } from "@navikt/ds-react";
-import { useFlexJar } from "../../core/useFlexJar.js";
+import { useFlexJar } from "../../core";
 import type {
   FlexJarEvents,
   FlexJarTransport,
   RatingQuestion,
-} from "../../core/types.js";
+} from "../../core";
 import {
   DefaultQuestionRenderer,
   RatingQuestionField,
-} from "../questions/index.js";
+} from "../questions";
 import { useRatingGate } from "./hooks/useRatingGate.js";
 import { useAutoCloseOnSuccess } from "./hooks/useAutoCloseOnSuccess.js";
 import type { FlexJarRenderQuestionProps } from "../../types.js";
