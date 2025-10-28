@@ -23,7 +23,7 @@
   min-width: 0;
 }
 
-.closeButton {
+.closeButton.closeButton {
   position: absolute;
   top: -0.75rem;
   right: 1rem;
@@ -37,12 +37,12 @@
   padding: 0;
 }
 
-.closeButton:hover {
+.closeButton.closeButton:hover {
   background-color: var(--a-surface-action-hover);
   color: var(--a-icon-on-action);
 }
 
-.closeButton:focus-visible {
+.closeButton.closeButton:focus-visible {
   outline: none;
   box-shadow: var(--a-shadow-focus), var(--a-shadow-medium);
 }

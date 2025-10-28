@@ -23,7 +23,7 @@
   min-width: 0;
 }
 
-.flexjar-dock__close-button {
+.flexjar-dock__close-button.flexjar-dock__close-button {
   position: absolute;
   top: -0.75rem;
   right: 1rem;
@@ -37,12 +37,12 @@
   padding: 0;
 }
 
-.flexjar-dock__close-button:hover {
+.flexjar-dock__close-button.flexjar-dock__close-button:hover {
   background-color: var(--a-surface-action-hover);
   color: var(--a-icon-on-action);
 }
 
-.flexjar-dock__close-button:focus-visible {
+.flexjar-dock__close-button.flexjar-dock__close-button:focus-visible {
   outline: none;
   box-shadow: var(--a-shadow-focus), var(--a-shadow-medium);
 }
