@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useCallback, useState } from "react";
 import { Button } from "@navikt/ds-react";
-import { FlexJarDock, type FlexJarDockProps } from "../components/FlexJarDock/index.js";
+import { FlexJarDock, type FlexJarDockProps } from "../components/FlexJarDock";
 import type {
-  FlexJarSurveyConfig,
   FlexJarFollowUpQuestion,
   FlexJarMainQuestion,
   FlexJarRatingQuestion,
+  FlexJarSurveyConfig,
 } from "../components/surveyTypes.js";
 import { removeConsentValue } from "../components/shared/consentStorage.js";
 
@@ -14,19 +14,25 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const RATING_QUESTION: FlexJarRatingQuestion = {
   type: "rating",
-  prompt: "Hvor fornøyd er du med denne løsningen?",
-  description: "Tilbakemeldingene dine hjelper oss å prioritere forbedringer.",
+  prompt: "Hvordan opplevde du å svare på spørsmålene?",
+  description:
+    "Svarene du sender inn er anonyme, og blir brukt til videreutvikling av tjenesten.",
   scale: 5,
   required: true,
 };
 
 const MAIN_TEXT_QUESTION: FlexJarMainQuestion = {
   type: "text",
-  prompt: "Hva fungerte bra, og hva kan vi gjøre bedre?",
-  minRows: 3,
-  maxLength: 600,
-  placeholder: "Del gjerne konkrete forslag.",
-  required: true,
+  prompt: "Legg gjerne til en begrunnelse (valgfritt)",
+  description: "Alle tilbakemeldinger er til stor nytte for oss",
+  minRows: 4,
+  maxLength: 500,
+  required: false,
+};
+
+const DEFAULT_SURVEY: FlexJarSurveyConfig = {
+  rating: RATING_QUESTION,
+  mainQuestion: MAIN_TEXT_QUESTION,
 };
 
 const OPTIONAL_FOLLOW_UPS: FlexJarFollowUpQuestion[] = [
@@ -51,7 +57,7 @@ const OPTIONAL_FOLLOW_UPS: FlexJarFollowUpQuestion[] = [
   },
 ];
 
-const DEFAULT_SURVEY: FlexJarSurveyConfig = {
+const SURVEY_WITH_FOLLOW_UPS: FlexJarSurveyConfig = {
   rating: RATING_QUESTION,
   mainQuestion: MAIN_TEXT_QUESTION,
   followUpQuestions: OPTIONAL_FOLLOW_UPS,
@@ -64,7 +70,6 @@ const OPTIONAL_MAIN_SURVEY: FlexJarSurveyConfig = {
     prompt: "Vil du dele noe mer? (Valgfritt)",
     required: false,
   },
-  followUpQuestions: OPTIONAL_FOLLOW_UPS,
 };
 
 const CHOICE_MAIN_QUESTION: FlexJarMainQuestion = {
@@ -213,6 +218,14 @@ export const OptionalMainQuestion: Story = {
   args: {
     feedbackId: "storybook-optional",
     survey: OPTIONAL_MAIN_SURVEY,
+  },
+};
+
+export const WithFollowUpQuestions: Story = {
+  render: Default.render,
+  args: {
+    feedbackId: "storybook-followups",
+    survey: SURVEY_WITH_FOLLOW_UPS,
   },
 };
 
