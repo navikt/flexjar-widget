@@ -55,6 +55,13 @@ export interface FlexJarDockProps {
   initialOpen?: boolean;
   minimizedButtonLabel?: string;
   dismissCooldownDays?: number;
+  /**
+   * Controls dock behavior after successful submission.
+   * - true: Dock is completely hidden (no minimized button) and stays hidden across page reloads for the cooldown period
+   * - false: Dock is minimized (shows small button) and can be reopened
+   * @default false
+   */
+  hideAfterSubmit?: boolean;
 }
 
 export const FlexJarDock = ({
@@ -87,6 +94,7 @@ export const FlexJarDock = ({
   initialOpen = true,
   minimizedButtonLabel,
   dismissCooldownDays = 30,
+  hideAfterSubmit = false,
 }: FlexJarDockProps) => {
   const canonicalSurvey = useMemo(() => buildCanonicalSurvey(survey), [survey]);
   const { ratingQuestion, mainQuestion, followUpQuestions, coreQuestionIds } =
@@ -113,20 +121,13 @@ export const FlexJarDock = ({
     coreQuestionIds,
   });
 
-  const { dismissed, closeDock, reopenDock } = usePersistedDismissal({
+  const { dismissed, shouldHideCompletely, closeDock, reopenDock } = usePersistedDismissal({
     feedbackId,
     initialOpen,
     dismissCooldownDays,
     events,
     resetOnClose,
     onReset: reset,
-  });
-
-  useAutoCloseOnSuccess({
-    enabled: autoCloseOnSuccess,
-    status,
-    delayMs: successCloseDelayMs,
-    onClose: closeDock,
   });
 
   const { shouldDeferQuestion, isSubmitBlocked } = useRatingGate(
@@ -144,6 +145,21 @@ export const FlexJarDock = ({
 
   const isSubmitting = status === "submitting";
   const isSuccess = status === "success";
+
+  const handleCloseDock = useCallback(() => {
+    if (isSuccess && hideAfterSubmit) {
+      closeDock(true);
+    } else {
+      closeDock();
+    }
+  }, [closeDock, isSuccess, hideAfterSubmit]);
+
+  useAutoCloseOnSuccess({
+    enabled: autoCloseOnSuccess,
+    status,
+    delayMs: successCloseDelayMs,
+    onClose: handleCloseDock,
+  });
   const validationMissing = error?.type === "validation" ? error.missing : [];
   const hasTransportError = error?.type === "transport";
 
@@ -216,6 +232,11 @@ export const FlexJarDock = ({
   const reopenLabel = minimizedButtonLabel ?? title;
   const noticeContent = personalDataNotice ?? DEFAULT_PERSONAL_DATA_NOTICE;
 
+  // Don't render anything when dismissed with hideCompletely flag
+  if (dismissed && shouldHideCompletely) {
+    return null;
+  }
+
   return (
     <div
       className={joinClassNames(CLASS_NAMES.container, containerClassName)}
@@ -246,7 +267,7 @@ export const FlexJarDock = ({
           successBody={successBody}
           successPrimaryLabel={successPrimaryLabel}
           isSuccess={isSuccess}
-          onClose={closeDock}
+          onClose={handleCloseDock}
           onSubmit={handleSubmit}
           orderedQuestions={orderedQuestions}
           answers={answers}

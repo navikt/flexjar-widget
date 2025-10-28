@@ -90,7 +90,9 @@ export const DockPanel = ({
                           }: DockPanelProps) => {
     return (
         <div style={{ position: "relative" }}>
-            <CloseButton onClose={onClose} cancelLabel={cancelLabel} />
+            {!isSuccess && (
+                <CloseButton onClose={onClose} cancelLabel={cancelLabel} />
+            )}
             <Box
                 padding="4"
                 background={panelBackground}

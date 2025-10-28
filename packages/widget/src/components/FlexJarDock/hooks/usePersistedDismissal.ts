@@ -13,6 +13,7 @@ interface PersistedDismissalState {
   state?: "dismissed";
   dismissedAt?: string;
   resumeAt?: string | null;
+  hideCompletely?: boolean;
 }
 
 const parsePersistedDismissal = (raw: string): PersistedDismissalState | null => {
@@ -47,7 +48,8 @@ export interface UsePersistedDismissalOptions {
 
 export interface UsePersistedDismissalReturn {
   dismissed: boolean;
-  closeDock: () => void;
+  shouldHideCompletely: boolean;
+  closeDock: (hideCompletely?: boolean) => void;
   reopenDock: () => void;
 }
 
@@ -68,6 +70,7 @@ export const usePersistedDismissal = (
     [feedbackId],
   );
   const [dismissed, setDismissed] = useState<boolean>(() => !initialOpen);
+  const [shouldHideCompletely, setShouldHideCompletely] = useState<boolean>(false);
   const userInteractedRef = useRef(false);
 
   useEffect(() => {
@@ -110,12 +113,14 @@ export const usePersistedDismissal = (
         await removeConsentValue(storageKey);
         if (!cancelled && !userInteractedRef.current) {
           setDismissed(!initialOpen);
+          setShouldHideCompletely(false);
         }
         return;
       }
 
       if (!userInteractedRef.current) {
         setDismissed(true);
+        setShouldHideCompletely(parsed.hideCompletely ?? false);
       }
     };
 
@@ -133,7 +138,7 @@ export const usePersistedDismissal = (
   }, [dismissed, events, feedbackId]);
 
   const persistDismissedState = useCallback(
-    async (nextDismissed: boolean) => {
+    async (nextDismissed: boolean, hideCompletely?: boolean) => {
       if (nextDismissed) {
         const now = new Date();
         const resumeAt =
@@ -147,6 +152,7 @@ export const usePersistedDismissal = (
           state: "dismissed",
           dismissedAt: now.toISOString(),
           resumeAt: resumeAt ?? null,
+          hideCompletely: hideCompletely ?? false,
         };
 
         try {
@@ -172,7 +178,7 @@ export const usePersistedDismissal = (
     [dismissCooldownDays, events, storageKey],
   );
 
-  const closeDock = useCallback(() => {
+  const closeDock = useCallback((hideCompletely?: boolean) => {
     if (dismissed) {
       return;
     }
@@ -183,7 +189,8 @@ export const usePersistedDismissal = (
 
     userInteractedRef.current = true;
     setDismissed(true);
-    void persistDismissedState(true);
+    setShouldHideCompletely(hideCompletely ?? false);
+    void persistDismissedState(true, hideCompletely);
   }, [dismissed, persistDismissedState, resetOnClose, onReset]);
 
   const reopenDock = useCallback(() => {
@@ -193,11 +200,13 @@ export const usePersistedDismissal = (
 
     userInteractedRef.current = true;
     setDismissed(false);
+    setShouldHideCompletely(false);
     void persistDismissedState(false);
   }, [dismissed, persistDismissedState]);
 
   return {
     dismissed,
+    shouldHideCompletely,
     closeDock,
     reopenDock,
   };

@@ -258,3 +258,14 @@ export const TransportErrorState: Story = {
     showPersonalDataNotice: false,
   },
 };
+
+export const HideAfterSubmit: Story = {
+  render: Default.render,
+  args: {
+    feedbackId: "storybook-hide",
+    hideAfterSubmit: true,
+    dismissCooldownDays: 30,
+    successTitle: "Takk for tilbakemeldingen!",
+    successBody: "Docken vil nå være helt skjult i 30 dager (eller til du nullstiller).",
+  },
+};
