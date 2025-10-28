@@ -6,6 +6,10 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 - Add entries here before cutting the next release.
 
+## [0.2.5] - 2025-10-28
+
+- Fix close button styling specificity issue by using doubled class selectors (`.flexjar-dock__close-button.flexjar-dock__close-button`) instead of `!important` to properly override NAV Design System's `.navds-button` styles in consuming applications.
+
 ## [0.2.4] - 2025-10-28
 
 - Migrate all color tokens from global palette tokens (e.g., `--a-red-500`, `--a-green-700`) to semantic design tokens (e.g., `--a-text-danger`, `--a-icon-success`) for better consistency with the NAV Aksel design system and improved theming support.
