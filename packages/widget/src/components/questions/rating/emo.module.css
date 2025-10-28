@@ -20,7 +20,7 @@
   gap: 0.25rem;
   align-items: center;
   justify-content: center;
-  color: var(--a-gray-900);
+  color: var(--a-text-default);
   background: transparent;
   border: 0;
   cursor: pointer;
@@ -52,23 +52,24 @@
 }
 
 .sinnaButton:hover {
-  color: var(--a-red-500);
+  color: var(--a-text-danger);
 }
 
 .leiButton:hover {
-  color: var(--a-orange-500);
+  color: var(--a-icon-warning);
 }
 
 .noytralButton:hover {
-  color: var(--a-blue-500);
+  color: var(--a-icon-info);
 }
 
 .gladButton:hover {
-  color: var(--a-green-400);
+  color: var(--a-icon-success);
 }
 
 .veldigGladButton:hover {
-  color: var(--a-green-700);
+  color: var(--a-icon-success);
+  filter: brightness(0.8);
 }
 
 .legend {
