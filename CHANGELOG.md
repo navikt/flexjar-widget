@@ -6,6 +6,10 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 - Add entries here before cutting the next release.
 
+## [0.2.6] - 2025-10-28
+
+- Export missing survey-related types (`FlexJarSurveyConfig`, `FlexJarRatingQuestion`, `FlexJarMainQuestion`, `FlexJarFollowUpQuestion`) from the package entry point to match the documented API in README.
+
 ## [0.2.5] - 2025-10-28
 
 - Fix close button styling specificity issue by using doubled class selectors (`.flexjar-dock__close-button.flexjar-dock__close-button`) instead of `!important` to properly override NAV Design System's `.navds-button` styles in consuming applications.
