@@ -8,7 +8,7 @@ interface CloseButtonProps {
   cancelLabel: string;
 }
 
-export const CloseButton = ({ onClose, cancelLabel }: CloseButtonProps) => {
+export const CloseButton = React.memo(({ onClose, cancelLabel }: CloseButtonProps) => {
   return (
     <Button
       variant="tertiary-neutral"
@@ -21,4 +21,6 @@ export const CloseButton = ({ onClose, cancelLabel }: CloseButtonProps) => {
       icon={<XMarkIcon aria-hidden />}
     />
   );
-};
+});
+
+CloseButton.displayName = "CloseButton";

@@ -8,7 +8,7 @@ interface SuccessContentProps {
   announce?: boolean;
 }
 
-export const SuccessContent = ({
+export const SuccessContent = React.memo(({
   title,
   body,
   showTitle = true,
@@ -28,4 +28,6 @@ export const SuccessContent = ({
       {body && <BodyLong>{body}</BodyLong>}
     </VStack>
   );
-};
+});
+
+SuccessContent.displayName = "SuccessContent";
