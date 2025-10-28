@@ -6,6 +6,13 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 - Add entries here before cutting the next release.
 
+## [0.2.4] - 2025-10-28
+
+- Migrate all color tokens from global palette tokens (e.g., `--a-red-500`, `--a-green-700`) to semantic design tokens (e.g., `--a-text-danger`, `--a-icon-success`) for better consistency with the NAV Aksel design system and improved theming support.
+- Enhance visual distinction between "glad" (rating 4) and "veldig glad" (rating 5) emoji buttons by using `--a-surface-success-moderate` and `--a-text-success` for the highest rating, with a darker hover state via `filter: brightness(0.8)`.
+- Add `React.memo` optimization to `CloseButton` and `SuccessContent` components to reduce unnecessary re-renders and improve overall performance.
+- Remove duplicate component files (`MinimizedDock.tsx`, `SuccessContent.tsx`, `usePersistedDismissal.ts`, `useRatingGate.ts`, `useAutoCloseOnSuccess.ts`) to streamline the codebase and improve maintainability.
+
 ## [0.2.3] - 2025-10-28
 
 - Improve styling for the CloseButton in `FlexJarDock` to ensure proper alignment and appearance.
