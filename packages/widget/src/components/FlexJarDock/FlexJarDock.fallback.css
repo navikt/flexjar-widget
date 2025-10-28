@@ -24,34 +24,27 @@
 }
 
 .flexjar-dock__close-button {
-  position: absolute !important;
-  top: -1rem !important;
-  right: 1rem !important;
-  min-width: 2rem !important;
-  width: 2rem !important;
-  height: 2rem !important;
-  padding: 0 !important;
-  border-radius: var(--a-border-radius-full) !important;
-  background-color: var(--a-lightblue-700) !important;
-  color: var(--a-surface-default) !important;
-  box-shadow: var(--a-shadow-medium) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  z-index: 10 !important;
-  border: none !important;
+  position: absolute;
+  top: -0.75rem;
+  right: 1rem;
+  z-index: 10;
+  background-color: var(--a-surface-action);
+  color: var(--a-icon-on-action);
+  border-radius: var(--a-border-radius-full);
+  box-shadow: var(--a-shadow-medium);
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0;
 }
 
-.flexjar-dock__close-button:hover,
+.flexjar-dock__close-button:hover {
+  background-color: var(--a-surface-action-hover);
+  color: var(--a-icon-on-action);
+}
+
 .flexjar-dock__close-button:focus-visible {
-  background-color: var(--a-lightblue-800) !important;
-  color: var(--a-surface-default) !important;
-}
-
-.flexjar-dock__close-button > svg {
-  width: 1.25rem !important;
-  height: 1.25rem !important;
-  color: var(--a-surface-default) !important;
+  outline: none;
+  box-shadow: var(--a-shadow-focus), var(--a-shadow-medium);
 }
 
 .flexjar-dock__rating {
