@@ -7,5 +7,6 @@
     "emitDeclarationOnly": false,
     "types": ["vitest", "@testing-library/jest-dom"]
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [".storybook"]
 }
