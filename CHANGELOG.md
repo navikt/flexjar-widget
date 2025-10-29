@@ -6,9 +6,34 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 - Add entries here before cutting the next release.
 
+## [0.2.11] - 2025-10-29
+
+### Fixed
+- **Improved error messaging for storage persistence**
+  - Clarified error message when storage key is not in NAV's allowed list
+  - Removed misleading "or user has not given surveys consent" text (consent is already verified before this check)
+  - Error now clearly states: "Storage key not in NAV's allowed storage list" with instructions to contact NAV
+  
+### Changed
+- **Type definitions aligned with official nav-dekoratoren-moduler API**
+  - Changed `getCurrentConsent()` from async (`Promise<Consent>`) to synchronous (`Consent`) to match official implementation
+  - Made all `Consent` properties required (not optional) to match official types
+  - Added `Storage` type and `getAllowedStorage()` function to type definitions
+  - Updated all mocks and tests to use synchronous `getCurrentConsent()`
+- **Updated documentation**
+  - Clarified two-step requirement for persistence: user consent AND NAV storage allowlist
+  - Added clear instructions that `flexjar-*` pattern must be added to decorator's allowed storage configuration
+  - Explained fallback behavior when storage key is not allowed (no persistence, reopens on page reload)
+
 ## [0.2.10] - 2025-10-29
 
 ### Fixed
+- **Critical: Fixed consent API structure mismatch**
+  - Corrected `getCurrentConsent()` to access nested `consent.surveys` property instead of top-level `surveys`
+  - Real API returns `{ consent: { surveys, statistics }, userActionTaken, meta }`, not flat `{ surveys, statistics }`
+  - Updated type definitions to match actual nav-dekoratoren-moduler v1.6.0+ API structure
+  - Fixed Storybook mock to return correct nested structure for realistic testing
+  - Updated all test mocks to use proper API response format
 - **Critical: Fixed hooks violation error** in consent checking implementation
   - Moved consent check to occur after all hooks are called, resolving "Rendered more hooks than during the previous render" error
   - Widget now properly follows React's Rules of Hooks, ensuring stable hook order across all renders
@@ -21,6 +46,7 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
   - Mock module listens for custom `__flexjar_consent_change__` events for same-window updates
 
 ### Changed
+- Consent checking now accesses `consent?.consent?.surveys` instead of `consent?.surveys`
 - Consent checking now happens after all other hooks to maintain consistent hook execution order
 - Storybook mock consent state persists in localStorage (`__flexjar_storybook_consent__`) for more realistic behavior
 

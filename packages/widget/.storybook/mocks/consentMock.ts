@@ -35,13 +35,23 @@ if (typeof window !== 'undefined') {
   console.log('[FlexJar Mock] Global API exposed as window.__FLEXJAR_MOCK_CONSENT__');
 }
 
-// Mock getCurrentConsent - reads from localStorage
-export const getCurrentConsent = async () => {
-  const consent = getStoredConsent();
-  console.log('[FlexJar Mock] getCurrentConsent called, returning:', { surveys: consent });
+// Mock getCurrentConsent - reads from localStorage (synchronous like the real API)
+export const getCurrentConsent = () => {
+  const consentGranted = getStoredConsent();
+  console.log('[FlexJar Mock] getCurrentConsent called, returning:', { 
+    consent: { surveys: consentGranted, statistics: consentGranted }
+  });
   return {
-    surveys: consent,
-    statistics: consent,
+    consent: {
+      surveys: consentGranted,
+      statistics: consentGranted,
+    },
+    userActionTaken: true,
+    meta: {
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      version: 2,
+    },
   };
 };
 

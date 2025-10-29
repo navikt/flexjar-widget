@@ -17,7 +17,11 @@ describe("useConsentCheck", () => {
   });
 
   it("returns true when surveys consent is granted", async () => {
-    mockGetCurrentConsent.mockResolvedValue({ surveys: true });
+    mockGetCurrentConsent.mockReturnValue({ 
+      consent: { surveys: true, statistics: true },
+      userActionTaken: true,
+      meta: { createdAt: '', updatedAt: '', version: 2 },
+    });
 
     const { result } = renderHook(() => useConsentCheck());
 
@@ -31,7 +35,11 @@ describe("useConsentCheck", () => {
   });
 
   it("returns false when surveys consent is denied", async () => {
-    mockGetCurrentConsent.mockResolvedValue({ surveys: false });
+    mockGetCurrentConsent.mockReturnValue({ 
+      consent: { surveys: false, statistics: true },
+      userActionTaken: true,
+      meta: { createdAt: '', updatedAt: '', version: 2 },
+    });
 
     const { result } = renderHook(() => useConsentCheck());
 
@@ -43,7 +51,11 @@ describe("useConsentCheck", () => {
   });
 
   it("returns false when surveys consent is undefined", async () => {
-    mockGetCurrentConsent.mockResolvedValue({});
+    mockGetCurrentConsent.mockReturnValue({
+      consent: { surveys: false, statistics: false },
+      userActionTaken: false,
+      meta: { createdAt: '', updatedAt: '', version: 2 },
+    });
 
     const { result } = renderHook(() => useConsentCheck());
 

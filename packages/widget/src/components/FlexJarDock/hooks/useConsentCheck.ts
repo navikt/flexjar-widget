@@ -30,10 +30,12 @@ export const useConsentCheck = (): boolean | null => {
           return;
         }
 
-        const consent = await mod.getCurrentConsent();
+        // Note: getCurrentConsent is synchronous, not async
+        const consent = mod.getCurrentConsent();
         
         // Only render if user has explicitly given surveys consent
-        const surveysConsent = consent?.surveys === true;
+        // API structure: { consent: { surveys, statistics }, userActionTaken, meta }
+        const surveysConsent = consent?.consent?.surveys === true;
         
         if (process.env.NODE_ENV === "development") {
           // eslint-disable-next-line no-console

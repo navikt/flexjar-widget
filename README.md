@@ -140,11 +140,23 @@ This ensures that nothing related to the survey is sent from the client if the u
 has not explicitly granted surveys consent, per NAV's privacy requirements.
 
 **Persistence behavior**:
-- **With surveys consent**: The dock uses `localStorage` (via `@navikt/nav-dekoratoren-moduler`) to remember dismissal across sessions. The dock will reappear after the configured cooldown period (see `dismissCooldownDays`).
-- **Without surveys consent**: The dock falls back to `initialOpen` prop behavior with no persistence. State resets on page reload.
-- **Storage key**: `flexjar-dismissed-${feedbackId}` (requires `flexjar-*` to be in NAV's allowed storage list)
 
-> **Note**: For localStorage persistence to work, `flexjar-*` must be added to the allowed storage list in `nav-dekoratoren`. Until then, the widget uses the `initialOpen` fallback. See `CONSENT_STORAGE_ANALYSIS.md` for details.
+Dismissal state persistence requires **both** user consent **and** NAV configuration:
+
+1. **User must grant surveys consent**: Widget checks `getCurrentConsent()` before rendering
+2. **NAV must allow storage key**: The pattern `flexjar-*` must be in the decorator's allowed storage list
+
+When both conditions are met:
+- The dock uses `localStorage` (via `@navikt/nav-dekoratoren-moduler`) to remember dismissal across sessions
+- Storage key format: `flexjar-dismissed-${feedbackId}` (e.g., `flexjar-dismissed-oppfolgingsplan`)
+- The dock will reappear after the configured cooldown period (see `dismissCooldownDays`)
+
+When either condition is **not** met:
+- The widget falls back to `initialOpen` prop behavior with no persistence
+- State resets on page reload
+- In development mode, console logs explain why persistence is unavailable
+
+> **Important**: Contact NAV to add `flexjar-*` to the decorator's allowed storage list before expecting persistence to work. Until then, the dock will always reopen on page reload.
 
 When `sessionStorage` is unavailable
 (for example, some private browsing modes), the dismissal falls back to in-memory

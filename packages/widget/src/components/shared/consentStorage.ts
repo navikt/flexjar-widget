@@ -112,7 +112,8 @@ const getStorage = async (key: string): Promise<StorageResult> => {
     if (process.env.NODE_ENV === "development") {
       // eslint-disable-next-line no-console -- development diagnostics only
       console.log(
-        `[FlexJar] Storage key "${key}" not in allowed list or user has not given surveys consent - using initialOpen without persistence`,
+        `[FlexJar] Storage key "${key}" not in NAV's allowed storage list - using initialOpen without persistence. ` +
+        `Contact NAV to add "flexjar-*" pattern to the decorator's allowed storage configuration.`,
       );
     }
     return {
