@@ -6,6 +6,14 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 - Add entries here before cutting the next release.
 
+## [0.2.13] - 2025-10-29
+
+### Changed
+- **Renamed cancel button label from "Avbryt" to "Lukk"**
+  - Changed default `cancelLabel` from "Avbryt" (Cancel) to "Lukk" (Close) for better semantic clarity
+  - Updated all documentation and tests to reflect the new label
+  - This provides a clearer indication that the button closes the dock rather than cancelling an action
+
 ## [0.2.12] - 2025-10-29
 
 ### Fixed
