@@ -254,13 +254,28 @@ const ExamplePage = (props: FlexJarDockProps) => {
         </div>
         <div style={{ 
           padding: "var(--a-spacing-4)", 
-          background: hasConsent ? "var(--a-surface-success-subtle)" : "var(--a-surface-danger-subtle)",
+          background: hasConsent ? "var(--a-surface-success-subtle)" : "var(--a-surface-warning-subtle)",
           borderRadius: "var(--a-border-radius-medium)",
         }}>
-          <strong>Status:</strong> {hasConsent ? "Samtykke gitt ✓" : "Samtykke ikke gitt ✗"}
-          {!hasConsent && <p style={{ margin: "var(--a-spacing-2) 0 0", fontSize: "0.875rem" }}>
-            Docken vil ikke vises når brukeren ikke har gitt samtykke til undersøkelser.
-          </p>}
+          <strong>Samtykke status:</strong> {hasConsent ? "Gitt ✓" : "Ikke gitt ✗"}
+          <p style={{ margin: "var(--a-spacing-2) 0 0", fontSize: "0.875rem" }}>
+            {hasConsent 
+              ? "Docken kan bruke localStorage til å huske at den ble lukket." 
+              : "Docken vises fortsatt, men kan ikke huske at den ble lukket (ingen localStorage-persistering)."}
+          </p>
+        </div>
+        <div style={{ 
+          padding: "var(--a-spacing-4)", 
+          background: "var(--a-surface-info-subtle)",
+          borderRadius: "var(--a-border-radius-medium)",
+          fontSize: "0.875rem"
+        }}>
+          <strong>Tips for testing:</strong>
+          <ul style={{ margin: "var(--a-spacing-2) 0 0", paddingLeft: "var(--a-spacing-6)" }}>
+            <li>Med <code>hideAfterSubmit=true</code> (standard): Docken forsvinner helt etter innsending</li>
+            <li>Bruk "Nullstill docken" for å vise den igjen etter innsending</li>
+            <li>Uten samtykke: localStorage fungerer ikke, men docken vises fortsatt</li>
+          </ul>
         </div>
       </div>
       <FlexJarDock key={resetToken} {...props} />
@@ -270,6 +285,21 @@ const ExamplePage = (props: FlexJarDockProps) => {
 
 export const Default: Story = {
   render: (args) => <ExamplePage {...args} />,
+};
+
+export const StaysOpenAfterSubmit: Story = {
+  render: Default.render,
+  args: {
+    feedbackId: "storybook-stays-open",
+    hideAfterSubmit: false,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Med hideAfterSubmit={false} forblir docken synlig (minimert) etter innsending, slik at brukeren kan åpne den igjen. Dette gjør testing enklere.",
+      },
+    },
+  },
 };
 
 export const InitiallyMinimized: Story = {
@@ -333,6 +363,13 @@ export const HideAfterSubmit: Story = {
     hideAfterSubmit: true,
     dismissCooldownDays: 30,
     successTitle: "Takk for tilbakemeldingen!",
-    successBody: "Docken vil nå være helt skjult i 30 dager (eller til du nullstiller).",
+    successBody: "Docken er nå skjult. Med samtykke vil den forbli skjult i 30 dager. Uten samtykke vil den vises igjen ved ny lasting av siden.",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Demonstrerer hvordan docken skjules permanent etter innsending. Skjulevarighet avhenger av om brukeren har gitt samtykke.",
+      },
+    },
   },
 };

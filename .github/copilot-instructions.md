@@ -4,10 +4,11 @@
 
 ## Current Code
 - **Entry point**: `packages/widget/src/index.ts` re-exports the dock, question components, hooks, and types.
-- **Dock**: `components/FlexJarDock/FlexJarDock.tsx` exposes a sticky inline variant that keeps the survey on screen via the shared hook and question renderers.
+- **Dock**: `components/FlexJarDock/FlexJarDock.tsx` exposes a sticky inline variant that keeps the survey on screen via the shared hook and question renderers. Always renders regardless of consent status.
 - **Core logic**: `packages/widget/src/core/useFlexJar.ts` manages validation, submission lifecycle, and builds the Flexjar transport payload. All shared types live beside it in `core/types.ts`.
 - **Questions**: rating, choice, and text renderers sit under `components/questions`. Keep the emoji UX accessible.
 - **Styling**: relies on `@navikt/ds-react` tokens with CSS modules plus a bundled fallback stylesheet for emoji styling. Preserve NAV tokens, live-region feedback, and keep the fallback classes in sync with the module names.
+- **Consent & storage**: Widget always renders. User consent only affects localStorage persistence via `consentStorage.ts` - with consent: dismissal persists; without consent: respects `initialOpen` on every page load.
 
 ## Target Architecture
 - **Single package**: ship everything from `@navikt/flexjar-widget`. Keep React and `@navikt/ds-react` as peer dependencies while exposing the hook and types through the same entry point.

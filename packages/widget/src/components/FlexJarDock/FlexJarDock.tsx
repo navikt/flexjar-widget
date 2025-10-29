@@ -12,7 +12,6 @@ import {
 } from "../questions";
 import { useRatingGate } from "./hooks/useRatingGate.js";
 import { useAutoCloseOnSuccess } from "./hooks/useAutoCloseOnSuccess.js";
-import { useConsentCheck } from "./hooks/useConsentCheck.js";
 import type { FlexJarRenderQuestionProps } from "../../types.js";
 import { buildCanonicalSurvey } from "../shared/canonicalSurvey.js";
 import {
@@ -229,9 +228,6 @@ export const FlexJarDock = ({
   hideAfterSubmit = true,
 }: FlexJarDockProps) => {
   // IMPORTANT: Call all hooks before any conditional returns to comply with Rules of Hooks
-  
-  // Check if user has given surveys consent via nav-dekoratoren
-  const hasConsent = useConsentCheck();
 
   const canonicalSurvey = useMemo(() => buildCanonicalSurvey(survey), [survey]);
   const { ratingQuestion, mainQuestion, followUpQuestions, coreQuestionIds } =
@@ -258,7 +254,7 @@ export const FlexJarDock = ({
     coreQuestionIds,
   });
 
-  const { dismissed, shouldHideCompletely, closeDock, reopenDock } = usePersistedDismissal({
+  const { dismissed, shouldHideCompletely, isLoading, closeDock, reopenDock } = usePersistedDismissal({
     feedbackId,
     initialOpen,
     dismissCooldownDays,
@@ -368,9 +364,8 @@ export const FlexJarDock = ({
   const reopenLabel = minimizedButtonLabel ?? "Gi tilbakemelding";
   const noticeContent = personalDataNotice ?? DEFAULT_PERSONAL_DATA_NOTICE;
 
-  // Don't render anything if consent check is still loading or consent was denied
-  // This check must be after all hooks are called (Rules of Hooks)
-  if (hasConsent === null || hasConsent === false) {
+  // Don't render anything while loading persisted state
+  if (isLoading) {
     return null;
   }
 

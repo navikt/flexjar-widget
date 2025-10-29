@@ -49,6 +49,7 @@ export interface UsePersistedDismissalOptions {
 export interface UsePersistedDismissalReturn {
   dismissed: boolean;
   shouldHideCompletely: boolean;
+  isLoading: boolean;
   closeDock: (hideCompletely?: boolean) => void;
   reopenDock: () => void;
 }
@@ -71,6 +72,7 @@ export const usePersistedDismissal = (
   );
   const [dismissed, setDismissed] = useState<boolean>(() => !initialOpen);
   const [shouldHideCompletely, setShouldHideCompletely] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const userInteractedRef = useRef(false);
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export const usePersistedDismissal = (
 
     const loadDismissedState = async () => {
       if (typeof window === "undefined") {
+        setIsLoading(false);
         return;
       }
 
@@ -91,6 +94,7 @@ export const usePersistedDismissal = (
         if (!userInteractedRef.current) {
           setDismissed(!initialOpen);
         }
+        setIsLoading(false);
         return;
       }
 
@@ -98,6 +102,7 @@ export const usePersistedDismissal = (
         if (!userInteractedRef.current) {
           setDismissed(true);
         }
+        setIsLoading(false);
         return;
       }
 
@@ -106,6 +111,7 @@ export const usePersistedDismissal = (
         if (!userInteractedRef.current) {
           setDismissed(true);
         }
+        setIsLoading(false);
         return;
       }
 
@@ -115,6 +121,7 @@ export const usePersistedDismissal = (
           setDismissed(!initialOpen);
           setShouldHideCompletely(false);
         }
+        setIsLoading(false);
         return;
       }
 
@@ -122,6 +129,7 @@ export const usePersistedDismissal = (
         setDismissed(true);
         setShouldHideCompletely(parsed.hideCompletely ?? false);
       }
+      setIsLoading(false);
     };
 
     void loadDismissedState();
@@ -207,6 +215,7 @@ export const usePersistedDismissal = (
   return {
     dismissed,
     shouldHideCompletely,
+    isLoading,
     closeDock,
     reopenDock,
   };

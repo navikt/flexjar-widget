@@ -122,6 +122,39 @@ const getStorage = async (key: string): Promise<StorageResult> => {
     };
   }
 
+  // Check if user has granted surveys consent
+  try {
+    const getCurrentConsent = module.awaitDecoratorData 
+      ? (await import("@navikt/nav-dekoratoren-moduler")).getCurrentConsent
+      : undefined;
+    
+    if (getCurrentConsent) {
+      const consent = getCurrentConsent();
+      if (!consent?.consent?.surveys) {
+        if (process.env.NODE_ENV === "development") {
+          // eslint-disable-next-line no-console -- development diagnostics only
+          console.log(
+            `[FlexJar] User has not granted surveys consent - using initialOpen without persistence`,
+          );
+        }
+        return {
+          storage: null,
+          allowed: false,
+        };
+      }
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console -- development diagnostics only
+      console.log("[FlexJar] Could not check consent:", error);
+    }
+    // If we can't check consent, don't allow persistence to be safe
+    return {
+      storage: null,
+      allowed: false,
+    };
+  }
+
   if (process.env.NODE_ENV === "development") {
     // eslint-disable-next-line no-console -- development diagnostics only
     console.log(

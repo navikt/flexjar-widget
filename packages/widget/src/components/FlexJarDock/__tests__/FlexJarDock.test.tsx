@@ -9,11 +9,6 @@ import type {
 import type { FlexJarSurveyConfig } from "../../surveyTypes.js";
 import { removeConsentValue } from "../../shared/consentStorage.js";
 
-// Mock useConsentCheck to always return true in tests
-vi.mock("../hooks/useConsentCheck.js", () => ({
-  useConsentCheck: () => true,
-}));
-
 function createSurvey(): FlexJarSurveyConfig {
   return {
     rating: {
@@ -76,6 +71,11 @@ describe("FlexJarDock", () => {
     const user = userEvent.setup();
     renderDock();
 
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(screen.queryByRole("radio", { name: /5\./i })).toBeInTheDocument();
+    });
+
     expect(screen.queryByLabelText(/hva kan vi forbedre/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/andre kommentarer/i)).not.toBeInTheDocument();
 
@@ -90,6 +90,11 @@ describe("FlexJarDock", () => {
     renderDock({ transport: { submit: transportSubmit } });
 
     const user = userEvent.setup();
+
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(screen.queryByRole("radio", { name: /5\./i })).toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole("radio", { name: /5\./i }));
     await user.type(screen.getByLabelText(/hva kan vi forbedre/i), "Alt bra");
@@ -115,6 +120,11 @@ describe("FlexJarDock", () => {
 
     renderDock({ events, transport });
 
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(screen.queryByRole("radio", { name: /4\./i })).toBeInTheDocument();
+    });
+
     await user.click(screen.getByRole("radio", { name: /4\./i }));
 
     const submitButton = screen.getByRole("button", { name: /send/i });
@@ -136,12 +146,16 @@ describe("FlexJarDock", () => {
     expect(events.onViewDock).toHaveBeenCalledWith("dock-feedback");
   });
 
-  it("renders the minimized button when initialOpen is false", () => {
+  it("renders the minimized button when initialOpen is false", async () => {
     renderDock({ initialOpen: false });
 
-    expect(
-      screen.getByRole("button", { name: /gi tilbakemelding/i }),
-    ).toBeInTheDocument();
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /gi tilbakemelding/i }),
+      ).toBeInTheDocument();
+    });
+
     expect(
       screen.queryByRole("region", { name: /gi tilbakemelding/i }),
     ).not.toBeInTheDocument();
@@ -155,11 +169,18 @@ describe("FlexJarDock", () => {
 
     const user = userEvent.setup();
     const { unmount } = renderDock({ events });
+    
+    // Wait for loading to complete
+    await waitFor(() => {
+      const initialContainer = document.querySelector(
+        '[data-feedback-id="dock-feedback"]',
+      ) as HTMLElement;
+      expect(initialContainer?.getAttribute("data-state")).toBe("open");
+    });
+
     const initialContainer = document.querySelector(
       '[data-feedback-id="dock-feedback"]',
     ) as HTMLElement;
-
-    expect(initialContainer?.getAttribute("data-state")).toBe("open");
 
     const closeButton = screen.getByRole("button", { name: /avbryt/i });
     await act(async () => {
@@ -187,10 +208,12 @@ describe("FlexJarDock", () => {
     // When remounting without consent storage, dock respects initialOpen (true by default)
     renderDock();
 
-    // The dock should be open again since there's no persistence
-    expect(
-      screen.getByRole("heading", { name: /hvor fornøyd er du/i }),
-    ).toBeInTheDocument();
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: /hvor fornøyd er du/i }),
+      ).toBeInTheDocument();
+    });
   });
 
   it("shows transport error message when submission fails", async () => {
@@ -198,6 +221,11 @@ describe("FlexJarDock", () => {
     renderDock({ transport: { submit: transportSubmit } });
 
     const user = userEvent.setup();
+
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(screen.queryByRole("radio", { name: /4\./i })).toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole("radio", { name: /4\./i }));
     await user.type(screen.getByLabelText(/hva kan vi forbedre/i), "Alt bra");

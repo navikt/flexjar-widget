@@ -39,10 +39,13 @@ collect feedback with a configurable question set.
 	npm install @navikt/nav-dekoratoren-moduler@^1.6.0
 	```
 
-	The widget automatically checks for user consent via `getCurrentConsent()` before
-	rendering. If the user has not granted surveys consent (or has declined), the
-	widget returns `null` and renders nothing. This ensures compliance with NAV's
-	consent requirements.
+	The widget now renders for all users regardless of consent status. User consent
+	only controls localStorage persistence:
+	- **With consent**: Dismissal state persists across page reloads
+	- **Without consent**: Widget respects `initialOpen` on every page load
+	
+	This allows you to collect feedback from all users while respecting their
+	storage preferences.
 
 4. Follow the usage guide below to describe your survey, wire a transport handler,
 	and render the widget entry point that fits your product.
@@ -125,42 +128,34 @@ export const FeedbackDock = () => (
 - `containerClassName` / `panelClassName`: style overrides for advanced layouts.
 
 The dock opens by default and disappears for the rest of the browser session if
-the user clicks «Avbryt» or the close button.
-
-**Consent checking**:
-
-The widget automatically checks for user consent before rendering anything. This is
-done via `@navikt/nav-dekoratoren-moduler`'s `getCurrentConsent()` API:
-
-- **No consent / declined**: Widget returns `null` and renders nothing
-- **Consent granted**: Widget renders normally
-- **Loading**: Widget returns `null` while checking consent status
-
-This ensures that nothing related to the survey is sent from the client if the user
-has not explicitly granted surveys consent, per NAV's privacy requirements.
+the user clicks «Avbryt».
 
 **Persistence behavior**:
 
-Dismissal state persistence requires **both** user consent **and** NAV configuration:
+The widget **always renders** regardless of consent status. Consent only affects
+localStorage persistence:
 
-1. **User must grant surveys consent**: Widget checks `getCurrentConsent()` before rendering
-2. **NAV must allow storage key**: The pattern `flexjar-*` must be in the decorator's allowed storage list
-
-When both conditions are met:
-- The dock uses `localStorage` (via `@navikt/nav-dekoratoren-moduler`) to remember dismissal across sessions
-- Storage key format: `flexjar-dismissed-${feedbackId}` (e.g., `flexjar-dismissed-oppfolgingsplan`)
+**With surveys consent granted**:
+- Dismissal state persists across page reloads using `localStorage`
+- Storage is managed via `@navikt/nav-dekoratoren-moduler`
+- Storage key format: `flexjar-dismissed-${feedbackId}`
 - The dock will reappear after the configured cooldown period (see `dismissCooldownDays`)
+- Requires the `flexjar-*` pattern in the decorator's allowed storage list
 
-When either condition is **not** met:
-- The widget falls back to `initialOpen` prop behavior with no persistence
+**Without surveys consent**:
+- Widget still renders normally
+- No localStorage persistence
 - State resets on page reload
+- The dock respects `initialOpen` prop on every page load
+
+**When storage key is not in allowed list**:
+- Widget renders normally
+- Behavior same as without consent (no persistence)
 - In development mode, console logs explain why persistence is unavailable
 
-> **Important**: Contact NAV to add `flexjar-*` to the decorator's allowed storage list before expecting persistence to work. Until then, the dock will always reopen on page reload.
+> **Important**: To enable persistence, contact NAV to add `flexjar-*` to the decorator's allowed storage list. Until then, the dock will always reopen on page reload (but still functions normally).
 
-When `sessionStorage` is unavailable
-(for example, some private browsing modes), the dismissal falls back to in-memory
-state; expose `events.onDismissalPersistFailed` if you want telemetry when that
+Expose `events.onDismissalPersistFailed` if you want telemetry when the
 persistence step fails.
 
 #### FlexJarDock props

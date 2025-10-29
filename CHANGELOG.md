@@ -8,6 +8,26 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 ## [0.2.12] - 2025-10-29
 
+### Fixed
+- **localStorage persistence now properly respects consent**
+  - Fixed issue where widget persisted to localStorage even when consent was not granted
+  - Added consent check in `consentStorage.ts` to verify surveys consent before enabling persistence
+  - Widget now correctly skips localStorage when user hasn't granted surveys consent
+  
+- **Fixed flash of content during dock initialization**
+  - Added loading state (`isLoading`) to `usePersistedDismissal` hook
+  - Dock now waits for localStorage check to complete before rendering
+  - Eliminates brief flash where dock appeared and then immediately hid
+
+### Changed
+- **Widget now always renders regardless of consent status**
+  - Removed consent gating that prevented widget rendering when surveys consent was not granted
+  - Widget now displays for all users, with localStorage persistence controlled by consent:
+    - **With consent**: localStorage persistence works (dismissal state persists across page reloads)
+    - **Without consent**: No localStorage persistence (widget respects `initialOpen` on every page load)
+  - This allows feedback collection from all users while respecting their storage preferences
+  - Removed `useConsentCheck` hook from render path since it's no longer needed for gating
+
 ### Removed
 - **Removed blue X close button from dock**
   - Deleted `CloseButton` component entirely per designer request
