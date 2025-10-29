@@ -128,7 +128,7 @@ export const FeedbackDock = () => (
 - `containerClassName` / `panelClassName`: style overrides for advanced layouts.
 
 The dock opens by default and disappears for the rest of the browser session if
-the user clicks «Avbryt».
+the user clicks «Lukk».
 
 **Persistence behavior**:
 
@@ -181,7 +181,7 @@ persistence step fails.
 | `title` | `string` | No | `"Gi tilbakemelding"` | Accessible label for the dock panel; useful when the rating prompt is not self-explanatory. |
 | `submitLabel` | `string` | No | `"Send"` | Text for the primary submit button when idle. |
 | `submitPendingLabel` | `string` | No | `"Sender…"` | Text for the primary button while a submission is pending. |
-| `cancelLabel` | `string` | No | `"Avbryt"` | Text for the secondary cancel button and close icon aria-label. |
+| `cancelLabel` | `string` | No | `"Lukk"` | Text for the secondary cancel button and close icon aria-label. |
 | `validationErrorMessage` | `string` | No | `"Du må svare på spørsmålet."` | Message used by question components when required answers are missing. |
 | `transportErrorMessage` | `string` | No | `"Kunne ikke sende tilbakemeldingen. Prøv igjen senere."` | Message displayed when the transport throws. |
 | `successTitle` | `string` | No | `"Takk for tilbakemeldingen!"` | Title shown after a successful submission. |

@@ -70,7 +70,7 @@ export interface FlexJarDockProps {
   
   /**
    * Label for the cancel button (currently not used in dock UI).
-   * @default "Avbryt"
+   * @default "Lukk"
    */
   cancelLabel?: string;
   

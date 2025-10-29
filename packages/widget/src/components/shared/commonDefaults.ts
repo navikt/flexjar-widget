@@ -1,7 +1,7 @@
 export const DEFAULT_COPY = {
   submitLabel: "Send",
   submitPendingLabel: "Sender…",
-  cancelLabel: "Avbryt",
+  cancelLabel: "Lukk",
   validationErrorMessage: "Du må svare på spørsmålet.",
   transportErrorMessage:
     "Kunne ikke sende tilbakemeldingen. Prøv igjen senere.",
