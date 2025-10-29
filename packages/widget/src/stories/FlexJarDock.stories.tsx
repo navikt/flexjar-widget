@@ -10,6 +10,18 @@ import type {
 } from "../components/surveyTypes.js";
 import { removeConsentValue } from "../components/shared/consentStorage.js";
 
+// Type for the Storybook mock consent API
+interface FlexJarMockConsentAPI {
+  setConsent: (granted: boolean) => void;
+  getConsent: () => boolean;
+}
+
+declare global {
+  interface Window {
+    __FLEXJAR_MOCK_CONSENT__?: FlexJarMockConsentAPI;
+  }
+}
+
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const RATING_QUESTION: FlexJarRatingQuestion = {
@@ -174,7 +186,7 @@ const ExamplePage = (props: FlexJarDockProps) => {
   }, [props.feedbackId]);
 
   const handleGrantConsent = useCallback(() => {
-    const mockAPI = (window as any).__FLEXJAR_MOCK_CONSENT__;
+    const mockAPI = window.__FLEXJAR_MOCK_CONSENT__;
     if (mockAPI) {
       mockAPI.setConsent(true);
       setHasConsent(true);
@@ -182,7 +194,7 @@ const ExamplePage = (props: FlexJarDockProps) => {
   }, []);
 
   const handleRevokeConsent = useCallback(() => {
-    const mockAPI = (window as any).__FLEXJAR_MOCK_CONSENT__;
+    const mockAPI = window.__FLEXJAR_MOCK_CONSENT__;
     if (mockAPI) {
       mockAPI.setConsent(false);
       setHasConsent(false);
