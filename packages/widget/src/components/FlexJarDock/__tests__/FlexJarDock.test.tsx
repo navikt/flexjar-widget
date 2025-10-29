@@ -178,10 +178,6 @@ describe("FlexJarDock", () => {
       expect(initialContainer?.getAttribute("data-state")).toBe("open");
     });
 
-    const initialContainer = document.querySelector(
-      '[data-feedback-id="dock-feedback"]',
-    ) as HTMLElement;
-
     const closeButton = screen.getByRole("button", { name: /avbryt/i });
     await act(async () => {
       await user.click(closeButton);
