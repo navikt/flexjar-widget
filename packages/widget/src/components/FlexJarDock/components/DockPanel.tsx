@@ -17,7 +17,7 @@ import type {
 import type { FlexJarRenderQuestionProps } from "../../../types.js";
 import { SuccessContent } from "./SuccessContent.js";
 import { CLASS_NAMES, joinClassNames } from "../classNames.js";
-import {CloseButton} from "./CloseButton";
+
 interface DockPanelProps {
     panelId: string;
     panelLabel: string;
@@ -90,9 +90,6 @@ export const DockPanel = ({
                           }: DockPanelProps) => {
     return (
         <div style={{ position: "relative" }}>
-            {!isSuccess && (
-                <CloseButton onClose={onClose} cancelLabel={cancelLabel} />
-            )}
             <Box
                 padding="4"
                 background={panelBackground}

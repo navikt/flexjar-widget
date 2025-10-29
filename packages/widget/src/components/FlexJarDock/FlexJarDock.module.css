@@ -23,30 +23,6 @@
   min-width: 0;
 }
 
-.closeButton.closeButton {
-  position: absolute;
-  top: -0.75rem;
-  right: 1rem;
-  z-index: 10;
-  background-color: var(--a-surface-action);
-  color: var(--a-icon-on-action);
-  border-radius: var(--a-border-radius-full);
-  box-shadow: var(--a-shadow-medium);
-  min-width: 2rem;
-  min-height: 2rem;
-  padding: 0;
-}
-
-.closeButton.closeButton:hover {
-  background-color: var(--a-surface-action-hover);
-  color: var(--a-icon-on-action);
-}
-
-.closeButton.closeButton:focus-visible {
-  outline: none;
-  box-shadow: var(--a-shadow-focus), var(--a-shadow-medium);
-}
-
 .ratingSection {
   display: flex;
   flex-direction: column;

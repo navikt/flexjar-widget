@@ -6,6 +6,19 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 - Add entries here before cutting the next release.
 
+## [0.2.12] - 2025-10-29
+
+### Removed
+- **Removed blue X close button from dock**
+  - Deleted `CloseButton` component entirely per designer request
+  - Users can now only close the dock using the "Avbryt" button within the form
+  - This simplifies the UI and ensures consistent close behavior
+
+### Changed
+- **Updated test to find cancel button by role instead of label**
+  - Changed test selector from `getByLabelText` to `getByRole("button", { name: /avbryt/i })`
+  - Ensures tests work with new button-only close mechanism
+
 ## [0.2.11] - 2025-10-29
 
 ### Fixed
