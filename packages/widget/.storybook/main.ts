@@ -1,5 +1,5 @@
 import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import type { StorybookConfig } from "@storybook/react-vite";
 
 const customRequire = createRequire(import.meta.url);
@@ -14,6 +14,35 @@ const config: StorybookConfig = {
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
     options: {},
+  },
+
+  viteFinal: async (config) => {
+    const mockPath = resolve(__dirname, './mocks/consentMock.ts');
+    console.log('[Storybook] Setting up mock alias for @navikt/nav-dekoratoren-moduler');
+    console.log('[Storybook] Mock path:', mockPath);
+    
+    config.resolve = config.resolve || {};
+    config.resolve.alias = Array.isArray(config.resolve.alias)
+      ? config.resolve.alias
+      : config.resolve.alias
+      ? Object.entries(config.resolve.alias).map(([find, replacement]) => ({ find, replacement }))
+      : [];
+    
+    // Add our mock as the first alias (highest priority)
+    if (Array.isArray(config.resolve.alias)) {
+      config.resolve.alias.unshift({
+        find: '@navikt/nav-dekoratoren-moduler',
+        replacement: mockPath,
+      });
+    } else {
+      config.resolve.alias = {
+        '@navikt/nav-dekoratoren-moduler': mockPath,
+        ...config.resolve.alias,
+      };
+    }
+    
+    console.log('[Storybook] Vite aliases:', config.resolve.alias);
+    return config;
   },
 };
 

@@ -33,7 +33,18 @@ collect feedback with a configurable question set.
 	> Using a global CSS file instead of JavaScript imports? Add
 	> `@import "@navikt/flexjar-widget/styles.css";` below the Aksel import.
 
-3. Follow the usage guide below to describe your survey, wire a transport handler,
+3. Ensure you have `@navikt/nav-dekoratoren-moduler` v1.6.0 or later installed:
+
+	```sh
+	npm install @navikt/nav-dekoratoren-moduler@^1.6.0
+	```
+
+	The widget automatically checks for user consent via `getCurrentConsent()` before
+	rendering. If the user has not granted surveys consent (or has declined), the
+	widget returns `null` and renders nothing. This ensures compliance with NAV's
+	consent requirements.
+
+4. Follow the usage guide below to describe your survey, wire a transport handler,
 	and render the widget entry point that fits your product.
 
 ### See it in action
@@ -115,6 +126,18 @@ export const FeedbackDock = () => (
 
 The dock opens by default and disappears for the rest of the browser session if
 the user clicks «Avbryt» or the close button.
+
+**Consent checking**:
+
+The widget automatically checks for user consent before rendering anything. This is
+done via `@navikt/nav-dekoratoren-moduler`'s `getCurrentConsent()` API:
+
+- **No consent / declined**: Widget returns `null` and renders nothing
+- **Consent granted**: Widget renders normally
+- **Loading**: Widget returns `null` while checking consent status
+
+This ensures that nothing related to the survey is sent from the client if the user
+has not explicitly granted surveys consent, per NAV's privacy requirements.
 
 **Persistence behavior**:
 - **With surveys consent**: The dock uses `localStorage` (via `@navikt/nav-dekoratoren-moduler`) to remember dismissal across sessions. The dock will reappear after the configured cooldown period (see `dismissCooldownDays`).

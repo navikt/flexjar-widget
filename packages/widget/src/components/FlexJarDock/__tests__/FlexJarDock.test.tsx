@@ -9,6 +9,11 @@ import type {
 import type { FlexJarSurveyConfig } from "../../surveyTypes.js";
 import { removeConsentValue } from "../../shared/consentStorage.js";
 
+// Mock useConsentCheck to always return true in tests
+vi.mock("../hooks/useConsentCheck.js", () => ({
+  useConsentCheck: () => true,
+}));
+
 function createSurvey(): FlexJarSurveyConfig {
   return {
     rating: {

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { Button } from "@navikt/ds-react";
 import { FlexJarDock, type FlexJarDockProps } from "../components/FlexJarDock";
 import type {
@@ -161,6 +161,10 @@ type Story = StoryObj<typeof FlexJarDock>;
 
 const ExamplePage = (props: FlexJarDockProps) => {
   const [resetToken, setResetToken] = useState(0);
+  const [hasConsent, setHasConsent] = useState(() => {
+    const stored = localStorage.getItem('__flexjar_storybook_consent__');
+    return stored === null ? true : stored === 'true';
+  });
 
   const handleReset = useCallback(() => {
     void (async () => {
@@ -168,6 +172,33 @@ const ExamplePage = (props: FlexJarDockProps) => {
       setResetToken((token) => token + 1);
     })();
   }, [props.feedbackId]);
+
+  const handleGrantConsent = useCallback(() => {
+    const mockAPI = (window as any).__FLEXJAR_MOCK_CONSENT__;
+    if (mockAPI) {
+      mockAPI.setConsent(true);
+      setHasConsent(true);
+    }
+  }, []);
+
+  const handleRevokeConsent = useCallback(() => {
+    const mockAPI = (window as any).__FLEXJAR_MOCK_CONSENT__;
+    if (mockAPI) {
+      mockAPI.setConsent(false);
+      setHasConsent(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Listen for consent changes from controls
+    const handleConsentChange = () => {
+      const stored = localStorage.getItem('__flexjar_storybook_consent__');
+      setHasConsent(stored === null ? true : stored === 'true');
+    };
+
+    window.addEventListener('__flexjar_consent_change__', handleConsentChange);
+    return () => window.removeEventListener('__flexjar_consent_change__', handleConsentChange);
+  }, []);
 
   return (
     <div
@@ -178,21 +209,47 @@ const ExamplePage = (props: FlexJarDockProps) => {
         color: "var(--a-text-default)",
       }}
     >
-      <div style={{ maxWidth: "640px", display: "grid", gap: "var(--a-spacing-2)" }}>
+      <div style={{ maxWidth: "640px", display: "grid", gap: "var(--a-spacing-4)" }}>
         <h2 style={{ margin: 0 }}>Designflate</h2>
         <p style={{ margin: 0 }}>
-          Scroll litt for å se at docken holder seg i hjørnet. Bruk knappen under for å
-          nullstille den lokale lagringen som holder docken minimert etter at du har
-          lukket den.
+          Scroll litt for å se at docken holder seg i hjørnet. Bruk knappene under for å
+          teste ulike scenarier.
         </p>
-        <Button
-          size="small"
-          variant="secondary"
-          onClick={handleReset}
-          style={{ width: "fit-content" }}
-        >
-          Nullstill docken
-        </Button>
+        <div style={{ display: "flex", gap: "var(--a-spacing-2)", flexWrap: "wrap" }}>
+          <Button
+            size="small"
+            variant="secondary"
+            onClick={handleReset}
+          >
+            Nullstill docken
+          </Button>
+          <Button
+            size="small"
+            variant={hasConsent ? "secondary" : "primary"}
+            onClick={handleGrantConsent}
+            disabled={hasConsent}
+          >
+            Gi samtykke
+          </Button>
+          <Button
+            size="small"
+            variant={!hasConsent ? "secondary" : "danger"}
+            onClick={handleRevokeConsent}
+            disabled={!hasConsent}
+          >
+            Fjern samtykke
+          </Button>
+        </div>
+        <div style={{ 
+          padding: "var(--a-spacing-4)", 
+          background: hasConsent ? "var(--a-surface-success-subtle)" : "var(--a-surface-danger-subtle)",
+          borderRadius: "var(--a-border-radius-medium)",
+        }}>
+          <strong>Status:</strong> {hasConsent ? "Samtykke gitt ✓" : "Samtykke ikke gitt ✗"}
+          {!hasConsent && <p style={{ margin: "var(--a-spacing-2) 0 0", fontSize: "0.875rem" }}>
+            Docken vil ikke vises når brukeren ikke har gitt samtykke til undersøkelser.
+          </p>}
+        </div>
       </div>
       <FlexJarDock key={resetToken} {...props} />
     </div>

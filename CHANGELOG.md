@@ -6,6 +6,21 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 - Add entries here before cutting the next release.
 
+## [0.2.9] - 2025-10-29
+
+### Added
+- **Consent checking**: Widget now automatically checks for user consent via `@navikt/nav-dekoratoren-moduler`'s `getCurrentConsent()` API before rendering
+  - Returns `null` (renders nothing) if the user has not granted surveys consent or has declined
+  - Returns `null` while checking consent status (loading state)
+  - Only renders when user has explicitly granted surveys consent
+  - Ensures compliance with NAV's privacy requirements: nothing related to the survey is sent from the client without user consent
+- New `useConsentCheck` hook to handle consent checking logic
+- Comprehensive test coverage for consent checking behavior (5 new test cases)
+
+### Changed
+- Widget requires `@navikt/nav-dekoratoren-moduler` v1.6.0 or later for consent checking
+- Updated README with consent checking documentation and installation requirements
+
 ## [0.2.8] - 2025-10-29
 
 ### Added
