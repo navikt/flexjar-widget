@@ -6,6 +6,21 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 - Add entries here before cutting the next release.
 
+## [0.2.7] - 2025-10-29
+
+### Added
+- New `hideAfterSubmit` prop to control dock behavior after successful submission:
+  - `false` (default): Dock minimizes to a small button that can be reopened
+  - `true`: Dock completely disappears with no minimized button, and stays hidden across page reloads for the full cooldown period
+- Persist the `hideCompletely` flag in localStorage so the hiding behavior survives page reloads
+- Add new Storybook example "Hide After Submit" demonstrating the complete hiding behavior
+
+### Changed
+- Updated `usePersistedDismissal` hook to track and persist `shouldHideCompletely` state
+- `closeDock()` now accepts an optional `hideCompletely` parameter to control the dismissal behavior
+- Close button is now conditionally hidden on the success screen (already implemented in previous version)
+- Refactored dismissal logic to use persistent state instead of refs for more reliable behavior across sessions
+
 ## [0.2.6] - 2025-10-28
 
 - Export missing survey-related types (`FlexJarSurveyConfig`, `FlexJarRatingQuestion`, `FlexJarMainQuestion`, `FlexJarFollowUpQuestion`) from the package entry point to match the documented API in README.
