@@ -6,6 +6,24 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 - Add entries here before cutting the next release.
 
+## [0.2.10] - 2025-10-29
+
+### Fixed
+- **Critical: Fixed hooks violation error** in consent checking implementation
+  - Moved consent check to occur after all hooks are called, resolving "Rendered more hooks than during the previous render" error
+  - Widget now properly follows React's Rules of Hooks, ensuring stable hook order across all renders
+  - Consent check conditional return now happens after all hooks (useFlexJar, usePersistedDismissal, useRatingGate, etc.) are invoked
+- **Storybook improvements**: 
+  - Added mock consent module that uses localStorage for realistic testing
+  - Added three interactive buttons: "Nullstill docken" (reset), "Gi samtykke" (grant consent), "Fjern samtykke" (revoke consent)
+  - Live consent status indicator shows current state with visual feedback
+  - Properly typed `window.__FLEXJAR_MOCK_CONSENT__` API to resolve TypeScript linting errors
+  - Mock module listens for custom `__flexjar_consent_change__` events for same-window updates
+
+### Changed
+- Consent checking now happens after all other hooks to maintain consistent hook execution order
+- Storybook mock consent state persists in localStorage (`__flexjar_storybook_consent__`) for more realistic behavior
+
 ## [0.2.9] - 2025-10-29
 
 ### Added
