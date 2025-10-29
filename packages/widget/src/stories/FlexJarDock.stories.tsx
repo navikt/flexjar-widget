@@ -141,7 +141,6 @@ const meta: Meta<typeof FlexJarDock> = {
     feedbackId: "storybook-dock",
     survey: DEFAULT_SURVEY,
     transport: SUCCESS_TRANSPORT,
-    title: "Gi tilbakemelding",
     dismissCooldownDays: 0,
   },
   argTypes: {
@@ -252,7 +251,6 @@ export const TransportErrorState: Story = {
     feedbackId: "storybook-error",
     survey: QUICK_FORM_SURVEY,
     transport: FAILING_TRANSPORT,
-    title: "Meld fra om en feil",
     submitLabel: "Send inn",
     transportErrorMessage: "Vi klarte ikke å sende inn akkurat nå. Prøv igjen om litt.",
     showPersonalDataNotice: false,
