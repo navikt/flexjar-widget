@@ -39,25 +39,16 @@ collect feedback with a configurable question set.
 	npm install @navikt/nav-dekoratoren-moduler@^1.6.0
 	```
 
-	The widget now renders for all users regardless of consent status. User consent
-	only controls localStorage persistence:
-	- **With consent**: Dismissal state persists across page reloads
-	- **Without consent**: Widget respects `initialOpen` on every page load
-	
-	This allows you to collect feedback from all users while respecting their
-	storage preferences.
-
 4. Follow the usage guide below to describe your survey, wire a transport handler,
 	and render the widget entry point that fits your product.
 
-### See it in action
+## See it in action
 
 <img src="./demo-flexjar.png" alt="Flexjar dock with rating and text fields" width="320" />
 
-### Describe your survey schema
+## Describe your survey schema
 
-Most teams start by extracting the shared survey configuration to
-`components/flexjar/survey.ts` so it can be imported from any entry point:
+Survey example with `survey.ts`:
 
 ```ts
 import {
@@ -88,12 +79,11 @@ export const survey: FlexJarSurveyConfig = {
 };
 ```
 
-### FlexJarDock
+## FlexJarDock
 
-Need the survey available at all times? `FlexJarDock` renders a compact, sticky
+`FlexJarDock` renders a compact, sticky
 panel that lets users answer the rating question immediately and complete the
-rest of the form inline—without opening a modal. The dock is the default entry
-point for Flexjar.
+rest of the form inline—without opening a modal.
 
 ```tsx
 "use client";
@@ -121,44 +111,7 @@ export const FeedbackDock = () => (
 );
 ```
 
-`FlexJarDock` exposes the core survey and copy controls alongside a few dock-specific layout options:
-
-- `position`: stick to `"bottom-right"` (default) or `"bottom-left"`.
-- `offset`: pixel distance from the viewport edge (defaults to `24`).
-- `containerClassName` / `panelClassName`: style overrides for advanced layouts.
-
-The dock opens by default and disappears for the rest of the browser session if
-the user clicks «Lukk».
-
-**Persistence behavior**:
-
-The widget **always renders** regardless of consent status. Consent only affects
-localStorage persistence:
-
-**With surveys consent granted**:
-- Dismissal state persists across page reloads using `localStorage`
-- Storage is managed via `@navikt/nav-dekoratoren-moduler`
-- Storage key format: `flexjar-dismissed-${feedbackId}`
-- The dock will reappear after the configured cooldown period (see `dismissCooldownDays`)
-- Requires the `flexjar-*` pattern in the decorator's allowed storage list
-
-**Without surveys consent**:
-- Widget still renders normally
-- No localStorage persistence
-- State resets on page reload
-- The dock respects `initialOpen` prop on every page load
-
-**When storage key is not in allowed list**:
-- Widget renders normally
-- Behavior same as without consent (no persistence)
-- In development mode, console logs explain why persistence is unavailable
-
-> **Important**: To enable persistence, contact NAV to add `flexjar-*` to the decorator's allowed storage list. Until then, the dock will always reopen on page reload (but still functions normally).
-
-Expose `events.onDismissalPersistFailed` if you want telemetry when the
-persistence step fails.
-
-#### FlexJarDock props
+## FlexJarDock props
 
 | Prop | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -169,7 +122,7 @@ persistence step fails.
 | `panelBackground` | `BoxProps['background']` | No | `'surface-default'` | Token applied to the dock panel background. |
 | `panelBorderColor` | `BoxProps['borderColor']` | No | `'border-subtle'` | Token used for the panel border; set to `undefined` to remove it. |
 
-#### Core props
+## Core props
 
 | Prop | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -196,7 +149,7 @@ persistence step fails.
 | `showPersonalDataNotice` | `boolean` | No | `true` | Toggle the default personal-data warning beneath the form. |
 | `personalDataNotice` | `React.ReactNode` | No | Default warning element | Custom content for the personal-data warning. |
 
-### Customise the experience
+## Customise the experience
 
 - **Always-on feedback**: `FlexJarDock` keeps the survey visible and only reveals follow-ups once the rating is answered.
 - **Copy & layout**: customise `title`, `submitLabel`, `cancelLabel`, `successTitle`, and `personalDataNotice` to match your product language.
@@ -228,7 +181,7 @@ Send that payload directly to the Flexjar backend, or transform it further if yo
 
 The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencies. Consumers stay in full control of network transport, analytics, and question configuration.
 
-### FlexJarSurveyConfig
+## FlexJarSurveyConfig
 
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
@@ -236,17 +189,40 @@ The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencie
 | `mainQuestion` | `FlexJarMainQuestion` | Yes | Captures the main answer (text or single choice) that Flexjar expects in the `feedback` field. Defaults to `required: true`; set `required: false` to make it optional. |
 | `followUpQuestions` | `FlexJarFollowUpQuestion[]` | No | Additional questions rendered after the rating has been answered. |
 
-<details>
-<summary><strong>Developer documentation</strong></summary>
+## Persistence behavior
 
-#### Work on the widget locally
+The widget **always renders** regardless of consent status. Consent only affects
+localStorage persistence:
+
+**With surveys consent granted**:
+- Dismissal state persists across page reloads using `localStorage`
+- Storage is managed via `@navikt/nav-dekoratoren-moduler`
+- Storage key format: `flexjar-dismissed-${feedbackId}`
+- The dock will reappear after the configured cooldown period (see `dismissCooldownDays`)
+- Requires the `flexjar-*` pattern in the decorator's allowed storage list
+
+**Without surveys consent**:
+- Widget still renders normally
+- No localStorage persistence
+- State resets on page reload
+- The dock respects `initialOpen` prop on every page load
+
+**When storage key is not in allowed list**:
+- Widget renders normally
+- Behavior same as without consent (no persistence)
+- In development mode, console logs explain why persistence is unavailable
+
+<details>
+<summary><strong>Flexjar-widget: Internal developer documentation</strong></summary>
+
+### Work on the widget locally
 
 ```sh
 npm install
 npm run build
 ```
 
-#### Publish to GitHub Packages
+### Publish to GitHub Packages
 
 1. **Prepare the workspace**
 	- Ensure you are on the branch you want to release from (typically `main`).
