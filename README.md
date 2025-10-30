@@ -52,7 +52,7 @@ collect feedback with a configurable question set.
 
 ### See it in action
 
-<img src="./demo-closeup.png" alt="Flexjar dock with rating and text fields" width="320" />
+<img src="./demo-flexjar.png" alt="Flexjar dock with rating and text fields" width="320" />
 
 ### Describe your survey schema
 
