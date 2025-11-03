@@ -3,9 +3,11 @@
   "version": "0.2.13",
   "description": "Aksel-based React widget for configurable NAV Flexjar surveys.",
   "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./styles.css": "./dist/index.css"
+  },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "public"
@@ -13,14 +15,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/navikt/flexjar-widget.git"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./styles.css": "./dist/index.css"
   },
   "files": [
     "dist"
