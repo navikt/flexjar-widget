@@ -1,6 +1,6 @@
 {
   "name": "@navikt/flexjar-widget",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "description": "Aksel-based React widget for configurable NAV Flexjar surveys.",
   "type": "module",
   "types": "./dist/index.d.ts",

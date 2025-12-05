@@ -6,6 +6,31 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 - Add entries here before cutting the next release.
 
+## [0.2.14] - 2025-12-05
+
+### Changed
+- **Migrated to Aksel Darkside theming**
+  - Upgraded `@navikt/ds-react` and `@navikt/ds-css` peer dependencies to `>=7`
+  - Consuming apps should now import `@navikt/ds-css/darkside` instead of `@navikt/ds-css`
+  - Migrated all CSS variables from `--a-*` to `--ax-*` tokens
+  - Migrated `Box` to `Box.New` component with new token format
+  - Updated spacing props to use `space-X` format (e.g., `space-24` instead of `6`)
+
+### Added
+- **Theme component wrapper** for proper Darkside theming support in Storybook
+- **`@types/node`** dev dependency for Storybook configuration TypeScript support
+
+### Fixed
+- **ESM-only package** - removed CJS build for simpler module resolution
+- **Storybook configuration** - fixed addon-docs error and esbuild binary issues
+
+### Migration Guide
+If upgrading from 0.2.13, update your CSS import:
+```diff
+- import "@navikt/ds-css";
++ import "@navikt/ds-css/darkside";
+```
+
 ## [0.2.13] - 2025-10-29
 
 ### Changed
