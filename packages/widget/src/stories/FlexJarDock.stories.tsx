@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "@navikt/ds-react";
 import { FlexJarDock, type FlexJarDockProps } from "../components/FlexJarDock";
 import type {
@@ -174,8 +174,8 @@ type Story = StoryObj<typeof FlexJarDock>;
 const ExamplePage = (props: FlexJarDockProps) => {
   const [resetToken, setResetToken] = useState(0);
   const [hasConsent, setHasConsent] = useState(() => {
-    const stored = localStorage.getItem('__flexjar_storybook_consent__');
-    return stored === null ? true : stored === 'true';
+    const stored = localStorage.getItem("__flexjar_storybook_consent__");
+    return stored === null ? true : stored === "true";
   });
 
   const handleReset = useCallback(() => {
@@ -204,12 +204,13 @@ const ExamplePage = (props: FlexJarDockProps) => {
   useEffect(() => {
     // Listen for consent changes from controls
     const handleConsentChange = () => {
-      const stored = localStorage.getItem('__flexjar_storybook_consent__');
-      setHasConsent(stored === null ? true : stored === 'true');
+      const stored = localStorage.getItem("__flexjar_storybook_consent__");
+      setHasConsent(stored === null ? true : stored === "true");
     };
 
-    window.addEventListener('__flexjar_consent_change__', handleConsentChange);
-    return () => window.removeEventListener('__flexjar_consent_change__', handleConsentChange);
+    window.addEventListener("__flexjar_consent_change__", handleConsentChange);
+    return () =>
+      window.removeEventListener("__flexjar_consent_change__", handleConsentChange);
   }, []);
 
   return (
@@ -228,11 +229,7 @@ const ExamplePage = (props: FlexJarDockProps) => {
           teste ulike scenarier.
         </p>
         <div style={{ display: "flex", gap: "var(--a-spacing-2)", flexWrap: "wrap" }}>
-          <Button
-            size="small"
-            variant="secondary"
-            onClick={handleReset}
-          >
+          <Button size="small" variant="secondary" onClick={handleReset}>
             Nullstill docken
           </Button>
           <Button
@@ -252,29 +249,45 @@ const ExamplePage = (props: FlexJarDockProps) => {
             Fjern samtykke
           </Button>
         </div>
-        <div style={{ 
-          padding: "var(--a-spacing-4)", 
-          background: hasConsent ? "var(--a-surface-success-subtle)" : "var(--a-surface-warning-subtle)",
-          borderRadius: "var(--a-border-radius-medium)",
-        }}>
+        <div
+          style={{
+            padding: "var(--a-spacing-4)",
+            background: hasConsent
+              ? "var(--a-surface-success-subtle)"
+              : "var(--a-surface-warning-subtle)",
+            borderRadius: "var(--a-border-radius-medium)",
+          }}
+        >
           <strong>Samtykke status:</strong> {hasConsent ? "Gitt ✓" : "Ikke gitt ✗"}
           <p style={{ margin: "var(--a-spacing-2) 0 0", fontSize: "0.875rem" }}>
-            {hasConsent 
-              ? "Docken kan bruke localStorage til å huske at den ble lukket." 
+            {hasConsent
+              ? "Docken kan bruke localStorage til å huske at den ble lukket."
               : "Docken vises fortsatt, men kan ikke huske at den ble lukket (ingen localStorage-persistering)."}
           </p>
         </div>
-        <div style={{ 
-          padding: "var(--a-spacing-4)", 
-          background: "var(--a-surface-info-subtle)",
-          borderRadius: "var(--a-border-radius-medium)",
-          fontSize: "0.875rem"
-        }}>
+        <div
+          style={{
+            padding: "var(--a-spacing-4)",
+            background: "var(--a-surface-info-subtle)",
+            borderRadius: "var(--a-border-radius-medium)",
+            fontSize: "0.875rem",
+          }}
+        >
           <strong>Tips for testing:</strong>
-          <ul style={{ margin: "var(--a-spacing-2) 0 0", paddingLeft: "var(--a-spacing-6)" }}>
-            <li>Med <code>hideAfterSubmit=true</code> (standard): Docken forsvinner helt etter innsending</li>
+          <ul
+            style={{
+              margin: "var(--a-spacing-2) 0 0",
+              paddingLeft: "var(--a-spacing-6)",
+            }}
+          >
+            <li>
+              Med <code>hideAfterSubmit=true</code> (standard): Docken forsvinner helt
+              etter innsending
+            </li>
             <li>Bruk "Nullstill docken" for å vise den igjen etter innsending</li>
-            <li>Uten samtykke: localStorage fungerer ikke, men docken vises fortsatt</li>
+            <li>
+              Uten samtykke: localStorage fungerer ikke, men docken vises fortsatt
+            </li>
           </ul>
         </div>
       </div>
@@ -296,7 +309,8 @@ export const StaysOpenAfterSubmit: Story = {
   parameters: {
     docs: {
       description: {
-        story: "Med hideAfterSubmit={false} forblir docken synlig (minimert) etter innsending, slik at brukeren kan åpne den igjen. Dette gjør testing enklere.",
+        story:
+          "Med hideAfterSubmit={false} forblir docken synlig (minimert) etter innsending, slik at brukeren kan åpne den igjen. Dette gjør testing enklere.",
       },
     },
   },
@@ -363,12 +377,14 @@ export const HideAfterSubmit: Story = {
     hideAfterSubmit: true,
     dismissCooldownDays: 30,
     successTitle: "Takk for tilbakemeldingen!",
-    successBody: "Docken er nå skjult. Med samtykke vil den forbli skjult i 30 dager. Uten samtykke vil den vises igjen ved ny lasting av siden.",
+    successBody:
+      "Docken er nå skjult. Med samtykke vil den forbli skjult i 30 dager. Uten samtykke vil den vises igjen ved ny lasting av siden.",
   },
   parameters: {
     docs: {
       description: {
-        story: "Demonstrerer hvordan docken skjules permanent etter innsending. Skjulevarighet avhenger av om brukeren har gitt samtykke.",
+        story:
+          "Demonstrerer hvordan docken skjules permanent etter innsending. Skjulevarighet avhenger av om brukeren har gitt samtykke.",
       },
     },
   },

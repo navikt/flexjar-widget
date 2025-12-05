@@ -1,10 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { BodyShort, Box, Heading, HStack, VStack } from "@navikt/ds-react";
 import type { BoxProps } from "@navikt/ds-react";
-import type {
-  FlexJarAnswerValue,
-  RatingQuestion,
-} from "../../../core/types.js";
+import type { FlexJarAnswerValue, RatingQuestion } from "../../../core/types.js";
 import { EmojiButton } from "./EmojiButton.js";
 import { Glad, Lei, Noytral, Sinna, VeldigGlad } from "./emojies.js";
 import styles from "./emo.module.css";
@@ -63,8 +60,7 @@ const CLASS_NAMES = {
     lei: styles.leiButton ?? "flexjar-rating__emoji-button--lei",
     noytral: styles.noytralButton ?? "flexjar-rating__emoji-button--noytral",
     glad: styles.gladButton ?? "flexjar-rating__emoji-button--glad",
-    veldigGlad:
-      styles.veldigGladButton ?? "flexjar-rating__emoji-button--veldig-glad",
+    veldigGlad: styles.veldigGladButton ?? "flexjar-rating__emoji-button--veldig-glad",
   },
 } as const;
 
@@ -106,9 +102,8 @@ const VARIANTS: EmojiVariant[] = [
   },
 ];
 
-const joinClassNames = (
-  ...classNames: Array<string | false | undefined>
-): string => classNames.filter(Boolean).join(" ");
+const joinClassNames = (...classNames: Array<string | false | undefined>): string =>
+  classNames.filter(Boolean).join(" ");
 
 const resolveVariant = (index: number): EmojiVariant =>
   VARIANTS[Math.min(index, VARIANTS.length - 1)];
@@ -149,16 +144,13 @@ export const RatingQuestionField = ({
 
   const fallbackHeadingId = `${question.id}-heading`;
   const fallbackDescriptionId = `${question.id}-description`;
-  const headingId =
-    ariaLabelledBy ?? (!hidePrompt ? fallbackHeadingId : undefined);
-  const descriptionId = ariaDescribedBy ?? (
-    !hideDescription && question.description ? fallbackDescriptionId : undefined
-  );
+  const headingId = ariaLabelledBy ?? (!hidePrompt ? fallbackHeadingId : undefined);
+  const descriptionId =
+    ariaDescribedBy ??
+    (!hideDescription && question.description ? fallbackDescriptionId : undefined);
   const errorId = `${question.id}-error`;
   const describedBy = useMemo(() => {
-    const references = [descriptionId, isMissing ? errorId : undefined].filter(
-      Boolean,
-    );
+    const references = [descriptionId, isMissing ? errorId : undefined].filter(Boolean);
     return references.length > 0 ? references.join(" ") : undefined;
   }, [descriptionId, errorId, isMissing]);
 
@@ -171,9 +163,8 @@ export const RatingQuestionField = ({
     [disabled, onChange],
   );
 
-
   return (
-    <VStack gap="2" className={className}>
+    <VStack gap="space-8" className={className}>
       {!hidePrompt && (
         <Heading
           id={ariaLabelledBy ? undefined : fallbackHeadingId}
@@ -193,12 +184,12 @@ export const RatingQuestionField = ({
         className={joinClassNames(CLASS_NAMES.fieldset, fieldsetClassName)}
         aria-labelledby={headingId}
         aria-describedby={describedBy}
-        paddingBlock={fieldsetPaddingBlock ?? "3"}
-        paddingInline={fieldsetPaddingInline ?? "4"}
+        paddingBlock={fieldsetPaddingBlock ?? "space-12"}
+        paddingInline={fieldsetPaddingInline ?? "space-16"}
       >
         <legend className={CLASS_NAMES.legend}>{question.prompt}</legend>
         <HStack
-          gap="4"
+          gap="space-16"
           justify="start"
           align="center"
           wrap={wrap}
@@ -215,9 +206,7 @@ export const RatingQuestionField = ({
               isActive ? CLASS_NAMES.active : undefined,
               buttonClassName,
             );
-            const buttonStyle = isActive
-              ? { color: variant.activeColor }
-              : undefined;
+            const buttonStyle = isActive ? { color: variant.activeColor } : undefined;
             const Icon = variant.Icon;
             const ariaLabel = `${option}. ${labelText}`;
 

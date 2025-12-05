@@ -1,9 +1,6 @@
 import React from "react";
 import { Textarea } from "@navikt/ds-react";
-import type {
-  FlexJarAnswerValue,
-  TextQuestion,
-} from "../../../core/types.js";
+import type { FlexJarAnswerValue, TextQuestion } from "../../../core";
 
 interface TextQuestionFieldProps {
   question: TextQuestion;
@@ -29,7 +26,7 @@ export const TextQuestionField = ({
     onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
       onChange(event.target.value)
     }
-  maxLength={question.maxLength ?? 1000}
+    maxLength={question.maxLength ?? 1000}
     minRows={question.minRows}
     placeholder={question.placeholder}
     autoComplete={question.autoComplete}

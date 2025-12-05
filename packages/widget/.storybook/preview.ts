@@ -1,4 +1,4 @@
-import "@navikt/ds-css";
+import "@navikt/ds-css/darkside";
 
 // Initialize mock consent module for Storybook
 import "./mocks/consentMock";

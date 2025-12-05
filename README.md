@@ -8,39 +8,39 @@ collect feedback with a configurable question set.
 
 1. Configure npm to read from GitHub Packages if you have not already:
 
-	```sh
-	npm config set @navikt:registry https://npm.pkg.github.com
-	```
+   ```sh
+   npm config set @navikt:registry https://npm.pkg.github.com
+   ```
 
-	Provide an auth token with `read:packages` scope via
-	`npm login --registry=https://npm.pkg.github.com` or by exporting
-	`NODE_AUTH_TOKEN` in CI.
+   Provide an auth token with `read:packages` scope via
+   `npm login --registry=https://npm.pkg.github.com` or by exporting
+   `NODE_AUTH_TOKEN` in CI.
 
 2. Install the widget along with its peer dependencies:
 
-	```sh
-	npm install @navikt/flexjar-widget react react-dom @navikt/ds-react
-	```
+   ```sh
+   npm install @navikt/flexjar-widget react react-dom @navikt/ds-react @navikt/ds-css
+   ```
 
-	Include the Aksel design system styles and the widget stylesheet once in your
-	app entry point:
+   Include the Aksel Darkside design system styles and the widget stylesheet once in your
+   app entry point:
 
-	```ts
-	import "@navikt/ds-css";
-	import "@navikt/flexjar-widget/styles.css";
-	```
+   ```ts
+   import "@navikt/ds-css/darkside";
+   import "@navikt/flexjar-widget/styles.css";
+   ```
 
-	> Using a global CSS file instead of JavaScript imports? Add
-	> `@import "@navikt/flexjar-widget/styles.css";` below the Aksel import.
+   > Using a global CSS file instead of JavaScript imports? Add
+   > `@import "@navikt/flexjar-widget/styles.css";` below the Aksel import.
 
 3. Ensure you have `@navikt/nav-dekoratoren-moduler` v1.6.0 or later installed:
 
-	```sh
-	npm install @navikt/nav-dekoratoren-moduler@^1.6.0
-	```
+   ```sh
+   npm install @navikt/nav-dekoratoren-moduler@^1.6.0
+   ```
 
 4. Follow the usage guide below to describe your survey, wire a transport handler,
-	and render the widget entry point that fits your product.
+   and render the widget entry point that fits your product.
 
 ## See it in action
 
@@ -113,53 +113,63 @@ export const FeedbackDock = () => (
 
 ## FlexJarDock props
 
-| Prop | Type | Required | Default | Description |
-| --- | --- | --- | --- | --- |
-| `position` | `'bottom-right' \| 'bottom-left'` | No | `'bottom-right'` | Which corner of the viewport the dock sticks to. |
-| `offset` | `number` | No | `24` | Pixel distance from the viewport edge. |
-| `containerClassName` | `string` | No | – | Custom class applied to the fixed outer container. |
-| `panelClassName` | `string` | No | – | Custom class applied to the inner panel element. |
-| `panelBackground` | `BoxProps['background']` | No | `'surface-default'` | Token applied to the dock panel background. |
-| `panelBorderColor` | `BoxProps['borderColor']` | No | `'border-subtle'` | Token used for the panel border; set to `undefined` to remove it. |
+| Prop                 | Type                              | Required | Default             | Description                                                       |
+|----------------------|-----------------------------------|----------|---------------------|-------------------------------------------------------------------|
+| `position`           | `'bottom-right' \| 'bottom-left'` | No       | `'bottom-right'`    | Which corner of the viewport the dock sticks to.                  |
+| `offset`             | `number`                          | No       | `24`                | Pixel distance from the viewport edge.                            |
+| `containerClassName` | `string`                          | No       | –                   | Custom class applied to the fixed outer container.                |
+| `panelClassName`     | `string`                          | No       | –                   | Custom class applied to the inner panel element.                  |
+| `panelBackground`    | `BoxProps['background']`          | No       | `'surface-default'` | Token applied to the dock panel background.                       |
+| `panelBorderColor`   | `BoxProps['borderColor']`         | No       | `'border-subtle'`   | Token used for the panel border; set to `undefined` to remove it. |
 
 ## Core props
 
-| Prop | Type | Required | Default | Description |
-| --- | --- | --- | --- | --- |
-| `feedbackId` | `string` | Yes | – | Identifier included with the submission payload and analytics callbacks. |
-| `survey` | `FlexJarSurveyConfig` | Yes | – | Bundles the mandatory rating + main question along with optional follow-ups. |
-| `transport` | `FlexJarTransport` | Yes | – | Implementation responsible for persisting a submission. |
-| `events` | `FlexJarEvents` | No | – | Lifecycle callbacks for analytics, validation, and dismissal persistence (see below). |
-| `context` | `Record<string, unknown>` | No | – | Extra metadata merged into the submission payload. |
-| `title` | `string` | No | `"Gi tilbakemelding"` | Accessible label for the dock panel; useful when the rating prompt is not self-explanatory. |
-| `submitLabel` | `string` | No | `"Send"` | Text for the primary submit button when idle. |
-| `submitPendingLabel` | `string` | No | `"Sender…"` | Text for the primary button while a submission is pending. |
-| `cancelLabel` | `string` | No | `"Lukk"` | Text for the secondary cancel button and close icon aria-label. |
-| `validationErrorMessage` | `string` | No | `"Du må svare på spørsmålet."` | Message used by question components when required answers are missing. |
-| `transportErrorMessage` | `string` | No | `"Kunne ikke sende tilbakemeldingen. Prøv igjen senere."` | Message displayed when the transport throws. |
-| `successTitle` | `string` | No | `"Takk for tilbakemeldingen!"` | Title shown after a successful submission. |
-| `successBody` | `React.ReactNode` | No | `undefined` | Body text in the success view; omitted by default. |
-| `successPrimaryLabel` | `string` | No | `"Lukk"` | Label for the button in the success view. |
-| `renderQuestion` | `(props: FlexJarRenderQuestionProps) => React.ReactNode` | No | – | Custom renderer if you want to override the default question components. |
-| `resetOnClose` | `boolean` | No | `true` | Reset answers when the dock closes. |
-| `autoCloseOnSuccess` | `boolean` | No | `false` | Close the dock automatically after a successful submission. |
-| `successCloseDelayMs` | `number` | No | `1600` | Delay (ms) before auto-closing when `autoCloseOnSuccess` is enabled. |
-| `dismissCooldownDays` | `number` | No | `30` | Number of days before the dock can reappear after being dismissed (requires surveys consent and `flexjar-*` in allowed storage list). |
-| `initialOpen` | `boolean` | No | `true` | Whether the dock should be open by default. When persistence is unavailable, this controls the initial state. |
-| `showPersonalDataNotice` | `boolean` | No | `true` | Toggle the default personal-data warning beneath the form. |
-| `personalDataNotice` | `React.ReactNode` | No | Default warning element | Custom content for the personal-data warning. |
+| Prop                     | Type                                                     | Required | Default                                                   | Description                                                                                                                           |
+|--------------------------|----------------------------------------------------------|----------|-----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| `feedbackId`             | `string`                                                 | Yes      | –                                                         | Identifier included with the submission payload and analytics callbacks.                                                              |
+| `survey`                 | `FlexJarSurveyConfig`                                    | Yes      | –                                                         | Bundles the mandatory rating + main question along with optional follow-ups.                                                          |
+| `transport`              | `FlexJarTransport`                                       | Yes      | –                                                         | Implementation responsible for persisting a submission.                                                                               |
+| `events`                 | `FlexJarEvents`                                          | No       | –                                                         | Lifecycle callbacks for analytics, validation, and dismissal persistence (see below).                                                 |
+| `context`                | `Record<string, unknown>`                                | No       | –                                                         | Extra metadata merged into the submission payload.                                                                                    |
+| `title`                  | `string`                                                 | No       | `"Gi tilbakemelding"`                                     | Accessible label for the dock panel; useful when the rating prompt is not self-explanatory.                                           |
+| `submitLabel`            | `string`                                                 | No       | `"Send"`                                                  | Text for the primary submit button when idle.                                                                                         |
+| `submitPendingLabel`     | `string`                                                 | No       | `"Sender…"`                                               | Text for the primary button while a submission is pending.                                                                            |
+| `cancelLabel`            | `string`                                                 | No       | `"Lukk"`                                                  | Text for the secondary cancel button and close icon aria-label.                                                                       |
+| `validationErrorMessage` | `string`                                                 | No       | `"Du må svare på spørsmålet."`                            | Message used by question components when required answers are missing.                                                                |
+| `transportErrorMessage`  | `string`                                                 | No       | `"Kunne ikke sende tilbakemeldingen. Prøv igjen senere."` | Message displayed when the transport throws.                                                                                          |
+| `successTitle`           | `string`                                                 | No       | `"Takk for tilbakemeldingen!"`                            | Title shown after a successful submission.                                                                                            |
+| `successBody`            | `React.ReactNode`                                        | No       | `undefined`                                               | Body text in the success view; omitted by default.                                                                                    |
+| `successPrimaryLabel`    | `string`                                                 | No       | `"Lukk"`                                                  | Label for the button in the success view.                                                                                             |
+| `renderQuestion`         | `(props: FlexJarRenderQuestionProps) => React.ReactNode` | No       | –                                                         | Custom renderer if you want to override the default question components.                                                              |
+| `resetOnClose`           | `boolean`                                                | No       | `true`                                                    | Reset answers when the dock closes.                                                                                                   |
+| `autoCloseOnSuccess`     | `boolean`                                                | No       | `false`                                                   | Close the dock automatically after a successful submission.                                                                           |
+| `successCloseDelayMs`    | `number`                                                 | No       | `1600`                                                    | Delay (ms) before auto-closing when `autoCloseOnSuccess` is enabled.                                                                  |
+| `dismissCooldownDays`    | `number`                                                 | No       | `30`                                                      | Number of days before the dock can reappear after being dismissed (requires surveys consent and `flexjar-*` in allowed storage list). |
+| `initialOpen`            | `boolean`                                                | No       | `true`                                                    | Whether the dock should be open by default. When persistence is unavailable, this controls the initial state.                         |
+| `showPersonalDataNotice` | `boolean`                                                | No       | `true`                                                    | Toggle the default personal-data warning beneath the form.                                                                            |
+| `personalDataNotice`     | `React.ReactNode`                                        | No       | Default warning element                                   | Custom content for the personal-data warning.                                                                                         |
 
 ## Customise the experience
 
-- **Always-on feedback**: `FlexJarDock` keeps the survey visible and only reveals follow-ups once the rating is answered.
-- **Copy & layout**: customise `title`, `submitLabel`, `cancelLabel`, `successTitle`, and `personalDataNotice` to match your product language.
-- **Events**: pass an `events` object (see `FlexJarEvents`) to react to lifecycle hooks like `onViewDock`, `onSubmitSuccess`, validation failures, or dismissal persistence issues via `onDismissalPersistFailed`.
-- **Success handling**: enable `autoCloseOnSuccess` and tune `successCloseDelayMs` if you want the dock to close automatically after feedback is sent.
-- **Custom rendering**: provide `renderQuestion` for advanced layouts while keeping accessibility and validation wiring from `useFlexJar`.
+- **Always-on feedback**: `FlexJarDock` keeps the survey visible and only reveals follow-ups once the rating is
+  answered.
+- **Copy & layout**: customise `title`, `submitLabel`, `cancelLabel`, `successTitle`, and `personalDataNotice` to match
+  your product language.
+- **Events**: pass an `events` object (see `FlexJarEvents`) to react to lifecycle hooks like `onViewDock`,
+  `onSubmitSuccess`, validation failures, or dismissal persistence issues via `onDismissalPersistFailed`.
+- **Success handling**: enable `autoCloseOnSuccess` and tune `successCloseDelayMs` if you want the dock to close
+  automatically after feedback is sent.
+- **Custom rendering**: provide `renderQuestion` for advanced layouts while keeping accessibility and validation wiring
+  from `useFlexJar`.
 
-Flexjar’s backend expects three core fields: `feedbackId`, `svar` (the rating), and `feedback` (a string value for the main answer). The components always render the rating question first and require you to provide a `mainQuestion` in the survey configuration. That main question defaults to required, but you can pass `required: false` to let respondents skip it—in that case the canonical `feedback` value is omitted from the transport payload.
+Flexjar’s backend expects three core fields: `feedbackId`, `svar` (the rating), and `feedback` (a string value for the
+main answer). The components always render the rating question first and require you to provide a `mainQuestion` in the
+survey configuration. That main question defaults to required, but you can pass `required: false` to let respondents
+skip it—in that case the canonical `feedback` value is omitted from the transport payload.
 
-Every call to your `transport.submit` handler receives a `submission` object with a ready-to-send `transportPayload`. The widget enriches the payload with the human-readable question text so downstream logs keep answers and prompts together:
+Every call to your `transport.submit` handler receives a `submission` object with a ready-to-send `transportPayload`.
+The widget enriches the payload with the human-readable question text so downstream logs keep answers and prompts
+together:
 
 ```ts
 submission.transportPayload satisfies {
@@ -171,7 +181,9 @@ submission.transportPayload satisfies {
 };
 ```
 
-The extra keys follow the pattern `question__<questionId>` and contain the exact prompt that was rendered. Core questions use the canonical names `question__svar` and `question__feedback` so Flexjar logs line up with the standard schema.
+The extra keys follow the pattern `question__<questionId>` and contain the exact prompt that was rendered. Core
+questions use the canonical names `question__svar` and `question__feedback` so Flexjar logs line up with the standard
+schema.
 
 - Rating answers are emitted only under `svar`.
 - Main text answers are emitted only under `feedback`.
@@ -179,15 +191,16 @@ The extra keys follow the pattern `question__<questionId>` and contain the exact
 
 Send that payload directly to the Flexjar backend, or transform it further if you need to enrich the request.
 
-The packages ship with React (`>=18`) and `@navikt/ds-react` as peer dependencies. Consumers stay in full control of network transport, analytics, and question configuration.
+The packages ship with React (`>=18`) and `@navikt/aksel` as peer dependencies. Consumers stay in full control of
+network transport, analytics, and question configuration.
 
 ## FlexJarSurveyConfig
 
-| Field | Type | Required | Description |
-| --- | --- | --- | --- |
-| `rating` | `FlexJarRatingQuestion` | Yes | Primary entry question; the dock is gated on an answer here. |
-| `mainQuestion` | `FlexJarMainQuestion` | Yes | Captures the main answer (text or single choice) that Flexjar expects in the `feedback` field. Defaults to `required: true`; set `required: false` to make it optional. |
-| `followUpQuestions` | `FlexJarFollowUpQuestion[]` | No | Additional questions rendered after the rating has been answered. |
+| Field               | Type                        | Required | Description                                                                                                                                                             |
+|---------------------|-----------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `rating`            | `FlexJarRatingQuestion`     | Yes      | Primary entry question; the dock is gated on an answer here.                                                                                                            |
+| `mainQuestion`      | `FlexJarMainQuestion`       | Yes      | Captures the main answer (text or single choice) that Flexjar expects in the `feedback` field. Defaults to `required: true`; set `required: false` to make it optional. |
+| `followUpQuestions` | `FlexJarFollowUpQuestion[]` | No       | Additional questions rendered after the rating has been answered.                                                                                                       |
 
 ## Persistence behavior
 
@@ -195,6 +208,7 @@ The widget **always renders** regardless of consent status. Consent only affects
 localStorage persistence:
 
 **With surveys consent granted**:
+
 - Dismissal state persists across page reloads using `localStorage`
 - Storage is managed via `@navikt/nav-dekoratoren-moduler`
 - Storage key format: `flexjar-dismissed-${feedbackId}`
@@ -202,12 +216,14 @@ localStorage persistence:
 - Requires the `flexjar-*` pattern in the decorator's allowed storage list
 
 **Without surveys consent**:
+
 - Widget still renders normally
 - No localStorage persistence
 - State resets on page reload
 - The dock respects `initialOpen` prop on every page load
 
 **When storage key is not in allowed list**:
+
 - Widget renders normally
 - Behavior same as without consent (no persistence)
 - In development mode, console logs explain why persistence is unavailable
@@ -225,26 +241,28 @@ npm run build
 ### Publish to GitHub Packages
 
 1. **Prepare the workspace**
-	- Ensure you are on the branch you want to release from (typically `main`).
-	- Step into the package folder: `cd packages/widget` before running any version or publish commands.
+    - Ensure you are on the branch you want to release from (typically `main`).
+    - Step into the package folder: `cd packages/widget` before running any version or publish commands.
 2. **Authenticate (one-time setup per machine)**
-	- Create a personal access token with `write:packages`, `read:packages`, and `repo` scopes.
-	- Store it locally: `npm config set //npm.pkg.github.com/:_authToken=<TOKEN>` *(or export `NODE_AUTH_TOKEN=<TOKEN>` in CI pipelines).* 
+    - Create a personal access token with `write:packages`, `read:packages`, and `repo` scopes.
+    - Store it locally: `npm config set //npm.pkg.github.com/:_authToken=<TOKEN>` *(or export `NODE_AUTH_TOKEN=<TOKEN>`
+      in CI pipelines).*
 3. **Choose the version number**
-	- We follow [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
-		- Bug fix only → `npm version patch`
-		- Backwards-compatible feature → `npm version minor`
-		- Breaking change → `npm version major`
-	- `npm version` updates `package.json`, generates a git tag, and commits the bump for you.
+    - We follow [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
+        - Bug fix only → `npm version patch`
+        - Backwards-compatible feature → `npm version minor`
+        - Breaking change → `npm version major`
+    - `npm version` updates `package.json`, generates a git tag, and commits the bump for you.
 4. **Document the release**
-	- Update `CHANGELOG.md` with a short summary of the changes going out.
-	- Stage the changelog and version bump: `git add package.json package-lock.json CHANGELOG.md`.
+    - Update `CHANGELOG.md` with a short summary of the changes going out.
+    - Stage the changelog and version bump: `git add package.json package-lock.json CHANGELOG.md`.
 5. **Verify before publishing**
-	- From the repo root: `npm run lint`, `npm run test`, `npm run build`.
+    - From the repo root: `npm run lint`, `npm run test`, `npm run build`.
 6. **Publish**
-	- Still inside `packages/widget`: `npm publish --registry=https://npm.pkg.github.com`.
-	- Push the release commit and tag to GitHub: `git push && git push --tags`.
+    - Still inside `packages/widget`: `npm publish --registry=https://npm.pkg.github.com`.
+    - Push the release commit and tag to GitHub: `git push && git push --tags`.
 
-The package exposes the dock UI, question components, hooks, and types from the default entry (`@navikt/flexjar-widget`).
+The package exposes the dock UI, question components, hooks, and types from the default entry (
+`@navikt/flexjar-widget`).
 
 </details>
