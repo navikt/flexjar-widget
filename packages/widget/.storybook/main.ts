@@ -1,14 +1,13 @@
-import { createRequire } from "node:module";
-import { dirname, join, resolve } from "node:path";
+import { createRequire } from "module";
+import { dirname, join, resolve } from "path";
 import type { StorybookConfig } from "@storybook/react-vite";
 
 const customRequire = createRequire(import.meta.url);
 
 const config: StorybookConfig = {
-  stories: ["../src/**/*.stories.@(ts|tsx)", "../src/**/*.mdx"],
+  stories: ["../src/**/*.stories.@(ts|tsx)"],
   addons: [
     getAbsolutePath("@storybook/addon-a11y"),
-    getAbsolutePath("@storybook/addon-docs"),
   ],
 
   framework: {
