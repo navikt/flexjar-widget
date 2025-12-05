@@ -217,18 +217,18 @@ const ExamplePage = (props: FlexJarDockProps) => {
     <div
       style={{
         minHeight: "120vh",
-        padding: "var(--a-spacing-12)",
-        background: "var(--a-surface-subtle)",
-        color: "var(--a-text-default)",
+        padding: "var(--ax-space-48)",
+        background: "var(--ax-bg-neutral-soft)",
+        color: "var(--ax-text-neutral)",
       }}
     >
-      <div style={{ maxWidth: "640px", display: "grid", gap: "var(--a-spacing-4)" }}>
+      <div style={{ maxWidth: "640px", display: "grid", gap: "var(--ax-space-16)" }}>
         <h2 style={{ margin: 0 }}>Designflate</h2>
         <p style={{ margin: 0 }}>
           Scroll litt for å se at docken holder seg i hjørnet. Bruk knappene under for å
           teste ulike scenarier.
         </p>
-        <div style={{ display: "flex", gap: "var(--a-spacing-2)", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "var(--ax-space-8)", flexWrap: "wrap" }}>
           <Button size="small" variant="secondary" onClick={handleReset}>
             Nullstill docken
           </Button>
@@ -251,15 +251,15 @@ const ExamplePage = (props: FlexJarDockProps) => {
         </div>
         <div
           style={{
-            padding: "var(--a-spacing-4)",
+            padding: "var(--ax-space-16)",
             background: hasConsent
-              ? "var(--a-surface-success-subtle)"
-              : "var(--a-surface-warning-subtle)",
-            borderRadius: "var(--a-border-radius-medium)",
+              ? "var(--ax-bg-success-soft)"
+              : "var(--ax-bg-warning-soft)",
+            borderRadius: "var(--ax-radius-4)",
           }}
         >
           <strong>Samtykke status:</strong> {hasConsent ? "Gitt ✓" : "Ikke gitt ✗"}
-          <p style={{ margin: "var(--a-spacing-2) 0 0", fontSize: "0.875rem" }}>
+          <p style={{ margin: "var(--ax-space-8) 0 0", fontSize: "0.875rem" }}>
             {hasConsent
               ? "Docken kan bruke localStorage til å huske at den ble lukket."
               : "Docken vises fortsatt, men kan ikke huske at den ble lukket (ingen localStorage-persistering)."}
@@ -267,17 +267,17 @@ const ExamplePage = (props: FlexJarDockProps) => {
         </div>
         <div
           style={{
-            padding: "var(--a-spacing-4)",
-            background: "var(--a-surface-info-subtle)",
-            borderRadius: "var(--a-border-radius-medium)",
+            padding: "var(--ax-space-16)",
+            background: "var(--ax-bg-info-soft)",
+            borderRadius: "var(--ax-radius-4)",
             fontSize: "0.875rem",
           }}
         >
           <strong>Tips for testing:</strong>
           <ul
             style={{
-              margin: "var(--a-spacing-2) 0 0",
-              paddingLeft: "var(--a-spacing-6)",
+              margin: "var(--ax-space-8) 0 0",
+              paddingLeft: "var(--ax-space-24)",
             }}
           >
             <li>
