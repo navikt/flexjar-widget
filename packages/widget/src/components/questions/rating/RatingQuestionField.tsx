@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from "react";
 import { BodyShort, Box, Heading, HStack, VStack } from "@navikt/ds-react";
-import type { BoxProps } from "@navikt/ds-react";
+import type { BoxNewProps } from "@navikt/ds-react/Box";
 import type { FlexJarAnswerValue, RatingQuestion } from "../../../core/types.js";
 import { EmojiButton } from "./EmojiButton.js";
 import { Glad, Lei, Noytral, Sinna, VeldigGlad } from "./emojies.js";
@@ -35,9 +35,9 @@ interface RatingQuestionFieldProps {
   /** Control whether the emoji row should wrap to multiple lines */
   wrap?: boolean;
   /** Override the paddingBlock token on the underlying fieldset */
-  fieldsetPaddingBlock?: BoxProps["paddingBlock"];
+  fieldsetPaddingBlock?: BoxNewProps["paddingBlock"];
   /** Override the paddingInline token on the underlying fieldset */
-  fieldsetPaddingInline?: BoxProps["paddingInline"];
+  fieldsetPaddingInline?: BoxNewProps["paddingInline"];
 }
 
 interface EmojiVariant {
@@ -179,7 +179,7 @@ export const RatingQuestionField = ({
           {question.description}
         </BodyShort>
       )}
-      <Box
+      <Box.New
         as="fieldset"
         className={joinClassNames(CLASS_NAMES.fieldset, fieldsetClassName)}
         aria-labelledby={headingId}
@@ -228,7 +228,7 @@ export const RatingQuestionField = ({
             );
           })}
         </HStack>
-      </Box>
+      </Box.New>
       {isMissing && (
         <BodyShort id={errorId} className={CLASS_NAMES.error} role="alert">
           {validationErrorMessage}
