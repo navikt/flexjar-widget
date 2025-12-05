@@ -7,7 +7,6 @@ import type {
   FlexJarTransport,
 } from "../../../core/types.js";
 import type { FlexJarSurveyConfig } from "../../surveyTypes.js";
-import { removeConsentValue } from "../../shared/consentStorage.js";
 
 function createSurvey(): FlexJarSurveyConfig {
   return {
@@ -63,8 +62,8 @@ function renderDock(options?: {
 }
 
 describe("FlexJarDock", () => {
-  beforeEach(async () => {
-    await removeConsentValue("flexjar-dock-dismissed:dock-feedback");
+  beforeEach(() => {
+    localStorage.clear();
   });
 
   it("gates follow-up questions until the rating is answered", async () => {
@@ -185,8 +184,7 @@ describe("FlexJarDock", () => {
 
     expect(events.onReset).toHaveBeenCalledTimes(1);
 
-    // Without consent storage, the dismissal doesn't persist
-    // The dock closes but doesn't show minimized button
+    // With consent storage, the dismissal persists
     await waitFor(() => {
       const nextContainer = document.querySelector(
         '[data-feedback-id="dock-feedback"]',
@@ -195,13 +193,14 @@ describe("FlexJarDock", () => {
       expect(nextContainer?.getAttribute("data-state")).toBe("dismissed");
     });
 
-    // onDismissalPersistFailed should NOT be called when storage is simply not available
-    // (it's only called when storage IS allowed but the write operation fails)
+    // onDismissalPersistFailed should NOT be called when storage works correctly
     expect(events.onDismissalPersistFailed).not.toHaveBeenCalled();
 
     unmount();
+    // Clear localStorage before remount to test fresh state
+    localStorage.clear();
 
-    // When remounting without consent storage, dock respects initialOpen (true by default)
+    // When remounting with cleared storage, dock respects initialOpen (true by default)
     renderDock();
 
     // Wait for loading to complete

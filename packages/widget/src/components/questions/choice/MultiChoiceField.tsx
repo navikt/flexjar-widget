@@ -37,7 +37,11 @@ export const MultiChoiceField = ({
       error={isMissing ? validationErrorMessage : undefined}
     >
       {options.map((option: ChoiceOption) => (
-        <Checkbox key={option.value} value={option.value} description={option.description}>
+        <Checkbox
+          key={option.value}
+          value={option.value}
+          description={option.description}
+        >
           {option.label}
         </Checkbox>
       ))}

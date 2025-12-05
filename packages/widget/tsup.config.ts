@@ -5,7 +5,11 @@ export default defineConfig({
   format: ["esm"],
   dts: true,
   clean: true,
-  external: ["@navikt/nav-dekoratoren-moduler"],
+  external: [
+    "@navikt/nav-dekoratoren-moduler",
+    "@navikt/ds-react",
+    "@navikt/aksel-icons",
+  ],
   loader: {
     ".module.css": "local-css",
     ".css": "css",

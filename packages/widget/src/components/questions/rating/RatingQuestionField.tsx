@@ -1,10 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { BodyShort, Box, Heading, HStack, VStack } from "@navikt/ds-react";
-import type { BoxProps } from "@navikt/ds-react";
-import type {
-  FlexJarAnswerValue,
-  RatingQuestion,
-} from "../../../core/types.js";
+import type { BoxNewProps } from "@navikt/ds-react/Box";
+import type { FlexJarAnswerValue, RatingQuestion } from "../../../core/types.js";
 import { EmojiButton } from "./EmojiButton.js";
 import { Glad, Lei, Noytral, Sinna, VeldigGlad } from "./emojies.js";
 import styles from "./emo.module.css";
@@ -38,9 +35,9 @@ interface RatingQuestionFieldProps {
   /** Control whether the emoji row should wrap to multiple lines */
   wrap?: boolean;
   /** Override the paddingBlock token on the underlying fieldset */
-  fieldsetPaddingBlock?: BoxProps["paddingBlock"];
+  fieldsetPaddingBlock?: BoxNewProps["paddingBlock"];
   /** Override the paddingInline token on the underlying fieldset */
-  fieldsetPaddingInline?: BoxProps["paddingInline"];
+  fieldsetPaddingInline?: BoxNewProps["paddingInline"];
 }
 
 interface EmojiVariant {
@@ -63,52 +60,50 @@ const CLASS_NAMES = {
     lei: styles.leiButton ?? "flexjar-rating__emoji-button--lei",
     noytral: styles.noytralButton ?? "flexjar-rating__emoji-button--noytral",
     glad: styles.gladButton ?? "flexjar-rating__emoji-button--glad",
-    veldigGlad:
-      styles.veldigGladButton ?? "flexjar-rating__emoji-button--veldig-glad",
+    veldigGlad: styles.veldigGladButton ?? "flexjar-rating__emoji-button--veldig-glad",
   },
 } as const;
 
 const VARIANTS: EmojiVariant[] = [
   {
     className: CLASS_NAMES.variants.sinna,
-    activeFill: "var(--a-surface-danger-subtle)",
-    activeColor: "var(--a-text-danger)",
+    activeFill: "var(--ax-bg-danger-soft)",
+    activeColor: "var(--ax-text-danger-subtle)",
     fallbackLabel: "Veldig dårlig",
     Icon: Sinna,
   },
   {
     className: CLASS_NAMES.variants.lei,
-    activeFill: "var(--a-surface-warning-subtle)",
-    activeColor: "var(--a-icon-warning)",
+    activeFill: "var(--ax-bg-warning-soft)",
+    activeColor: "var(--ax-text-warning-decoration)",
     fallbackLabel: "Dårlig",
     Icon: Lei,
   },
   {
     className: CLASS_NAMES.variants.noytral,
-    activeFill: "var(--a-surface-info-subtle)",
-    activeColor: "var(--a-icon-info)",
+    activeFill: "var(--ax-bg-info-soft)",
+    activeColor: "var(--ax-text-info-decoration)",
     fallbackLabel: "Nøytral",
     Icon: Noytral,
   },
   {
     className: CLASS_NAMES.variants.glad,
-    activeFill: "var(--a-surface-success-subtle)",
-    activeColor: "var(--a-icon-success)",
+    activeFill: "var(--ax-bg-success-soft)",
+    activeColor: "var(--ax-text-success-decoration)",
     fallbackLabel: "Bra",
     Icon: Glad,
   },
   {
     className: CLASS_NAMES.variants.veldigGlad,
-    activeFill: "var(--a-surface-success-moderate)",
+    activeFill: "var(--ax-bg-success-moderate)",
     activeColor: "var(--a-text-success)",
     fallbackLabel: "Veldig bra",
     Icon: VeldigGlad,
   },
 ];
 
-const joinClassNames = (
-  ...classNames: Array<string | false | undefined>
-): string => classNames.filter(Boolean).join(" ");
+const joinClassNames = (...classNames: Array<string | false | undefined>): string =>
+  classNames.filter(Boolean).join(" ");
 
 const resolveVariant = (index: number): EmojiVariant =>
   VARIANTS[Math.min(index, VARIANTS.length - 1)];
@@ -149,16 +144,13 @@ export const RatingQuestionField = ({
 
   const fallbackHeadingId = `${question.id}-heading`;
   const fallbackDescriptionId = `${question.id}-description`;
-  const headingId =
-    ariaLabelledBy ?? (!hidePrompt ? fallbackHeadingId : undefined);
-  const descriptionId = ariaDescribedBy ?? (
-    !hideDescription && question.description ? fallbackDescriptionId : undefined
-  );
+  const headingId = ariaLabelledBy ?? (!hidePrompt ? fallbackHeadingId : undefined);
+  const descriptionId =
+    ariaDescribedBy ??
+    (!hideDescription && question.description ? fallbackDescriptionId : undefined);
   const errorId = `${question.id}-error`;
   const describedBy = useMemo(() => {
-    const references = [descriptionId, isMissing ? errorId : undefined].filter(
-      Boolean,
-    );
+    const references = [descriptionId, isMissing ? errorId : undefined].filter(Boolean);
     return references.length > 0 ? references.join(" ") : undefined;
   }, [descriptionId, errorId, isMissing]);
 
@@ -171,9 +163,8 @@ export const RatingQuestionField = ({
     [disabled, onChange],
   );
 
-
   return (
-    <VStack gap="2" className={className}>
+    <VStack gap="space-8" className={className}>
       {!hidePrompt && (
         <Heading
           id={ariaLabelledBy ? undefined : fallbackHeadingId}
@@ -188,17 +179,17 @@ export const RatingQuestionField = ({
           {question.description}
         </BodyShort>
       )}
-      <Box
+      <Box.New
         as="fieldset"
         className={joinClassNames(CLASS_NAMES.fieldset, fieldsetClassName)}
         aria-labelledby={headingId}
         aria-describedby={describedBy}
-        paddingBlock={fieldsetPaddingBlock ?? "3"}
-        paddingInline={fieldsetPaddingInline ?? "4"}
+        paddingBlock={fieldsetPaddingBlock ?? "space-12"}
+        paddingInline={fieldsetPaddingInline ?? "space-16"}
       >
         <legend className={CLASS_NAMES.legend}>{question.prompt}</legend>
         <HStack
-          gap="4"
+          gap="space-16"
           justify="start"
           align="center"
           wrap={wrap}
@@ -215,9 +206,7 @@ export const RatingQuestionField = ({
               isActive ? CLASS_NAMES.active : undefined,
               buttonClassName,
             );
-            const buttonStyle = isActive
-              ? { color: variant.activeColor }
-              : undefined;
+            const buttonStyle = isActive ? { color: variant.activeColor } : undefined;
             const Icon = variant.Icon;
             const ariaLabel = `${option}. ${labelText}`;
 
@@ -239,7 +228,7 @@ export const RatingQuestionField = ({
             );
           })}
         </HStack>
-      </Box>
+      </Box.New>
       {isMissing && (
         <BodyShort id={errorId} className={CLASS_NAMES.error} role="alert">
           {validationErrorMessage}
