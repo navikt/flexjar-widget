@@ -163,11 +163,9 @@ describe("useFlexJar", () => {
     const payload = submitMock.mock.calls[0][0];
 
     expect(payload.answers).toEqual({ rating: 5 });
-    expect(payload.transportPayload.svar).toBe(5);
-    expect(payload.transportPayload).not.toHaveProperty("feedback");
-    expect(payload.transportPayload["question__feedback"]).toBe(
-      "Hva kan vi forbedre?",
-    );
+    expect(payload.transportPayload.surveyId).toBe(FEEDBACK_ID);
+    expect(payload.transportPayload.answers).toHaveLength(1);
+    expect(payload.transportPayload.answers[0].fieldType).toBe("RATING");
 
     expect(result.current.status).toBe("success");
     expect(result.current.error).toBeNull();
@@ -216,19 +214,23 @@ describe("useFlexJar", () => {
       "free-text": "Alt fungerer fint",
     });
     expect(payload.transportPayload.feedbackId).toBe(FEEDBACK_ID);
-    expect(payload.transportPayload.svar).toBe(4);
-    expect(payload.transportPayload.feedback).toBe("Alt fungerer fint");
-    expect(payload.transportPayload).not.toHaveProperty("rating");
-    expect(payload.transportPayload["free-text"]).toBe("Alt fungerer fint");
-    expect(payload.transportPayload["question__svar"]).toBe(
-      "Hvor fornøyd er du?",
+    expect(payload.transportPayload.surveyId).toBe(FEEDBACK_ID);
+    expect(payload.transportPayload.answers).toHaveLength(3);
+    
+    // Verify structured answers
+    const ratingAnswer = payload.transportPayload.answers.find(
+      (a: { fieldType: string }) => a.fieldType === "RATING"
     );
-    expect(payload.transportPayload["question__feedback"]).toBe(
-      "Hva kan vi forbedre?",
+    expect(ratingAnswer).toBeDefined();
+    expect(ratingAnswer.value).toEqual({ type: "rating", rating: 4 });
+    expect(ratingAnswer.question.label).toBe("Hvor fornøyd er du?");
+
+    const feedbackAnswer = payload.transportPayload.answers.find(
+      (a: { fieldId: string }) => a.fieldId === "feedback"
     );
-    expect(payload.transportPayload["question__free-text"]).toBe(
-      "Andre kommentarer?",
-    );
+    expect(feedbackAnswer).toBeDefined();
+    expect(feedbackAnswer.value).toEqual({ type: "text", text: "Alt fungerer fint" });
+
     expect(payload.startedAt).toBe(INITIAL_TIME.toISOString());
     expect(payload.submittedAt).toBe(SUBMIT_TIME.toISOString());
 

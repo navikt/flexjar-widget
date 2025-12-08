@@ -50,11 +50,73 @@ export type FlexJarQuestion =
 
 export type FlexJarAnswerValue = string | number | string[];
 
-export type FlexJarTransportPayload = {
+// ============================================
+// Structured Answer Format (for backend)
+// ============================================
+
+export type TransportFieldType = "RATING" | "TEXT" | "SINGLE_CHOICE" | "MULTI_CHOICE";
+
+export interface TransportChoiceOption {
+  id: string;
+  label: string;
+}
+
+export interface TransportQuestion {
+  label: string;
+  description?: string;
+  options?: TransportChoiceOption[];
+}
+
+export interface TransportRatingValue {
+  type: "rating";
+  rating: number;
+}
+
+export interface TransportTextValue {
+  type: "text";
+  text: string;
+}
+
+export interface TransportSingleChoiceValue {
+  type: "singleChoice";
+  selectedOptionId: string;
+}
+
+export interface TransportMultiChoiceValue {
+  type: "multiChoice";
+  selectedOptionIds: string[];
+}
+
+export type TransportAnswerValue =
+  | TransportRatingValue
+  | TransportTextValue
+  | TransportSingleChoiceValue
+  | TransportMultiChoiceValue;
+
+export interface TransportAnswer {
+  fieldId: string;
+  fieldType: TransportFieldType;
+  question: TransportQuestion;
+  value: TransportAnswerValue;
+}
+
+// Context metadata (only collected with user consent)
+export type DeviceType = "mobile" | "tablet" | "desktop";
+
+export interface TransportContext {
+  url?: string;
+  pathname?: string;
+  deviceType?: DeviceType;
+  viewportWidth?: number;
+}
+
+export interface FlexJarTransportPayload {
   feedbackId: string;
-  svar?: number;
-  feedback?: string;
-} & Record<string, FlexJarAnswerValue>;
+  surveyId: string;
+  surveyVersion?: string;
+  context?: TransportContext;
+  answers: TransportAnswer[];
+}
 
 export interface FlexJarSubmission {
   feedbackId: string;
