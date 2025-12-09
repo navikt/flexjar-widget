@@ -4,6 +4,31 @@ This workspace hosts `@navikt/flexjar-widget` – the React-based Flexjar survey
 widget. The package bundles the dock UI, hooks, and shared types you need to
 collect feedback with a configurable question set.
 
+## Quick Start
+
+```tsx
+import "@navikt/ds-css/darkside";
+import "@navikt/flexjar-widget/styles.css";
+import { FlexJarDock } from "@navikt/flexjar-widget";
+
+// Minimal example - just 3 props needed
+<FlexJarDock
+  feedbackId="my-app-feedback"
+  survey={{
+    rating: { type: "rating", prompt: "Hvordan var opplevelsen?" },
+    mainQuestion: { type: "text", prompt: "Hva kan vi forbedre?" },
+  }}
+  transport={{
+    submit: async (submission) => {
+      await fetch("/api/feedback", {
+        method: "POST",
+        body: JSON.stringify(submission.transportPayload),
+      });
+    },
+  }}
+/>
+```
+
 ## Getting started
 
 1. Configure npm to read from GitHub Packages if you have not already:
