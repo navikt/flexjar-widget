@@ -188,13 +188,6 @@ export interface FlexJarDockProps {
    * @default true
    */
   hideAfterSubmit?: boolean;
-
-  /**
-   * Whether to collect browser context (url, pathname, deviceType, viewportWidth).
-   * Requires user consent for analytics. Used for feedback analysis in dashboard.
-   * @default false
-   */
-  collectContext?: boolean;
 }
 
 export const FlexJarDock = ({
@@ -226,7 +219,6 @@ export const FlexJarDock = ({
   minimizedButtonLabel,
   dismissCooldownDays = 30,
   hideAfterSubmit = true,
-  collectContext = false,
 }: FlexJarDockProps) => {
   // IMPORTANT: Call all hooks before any conditional returns to comply with Rules of Hooks
 
@@ -253,7 +245,6 @@ export const FlexJarDock = ({
     events,
     context,
     coreQuestionIds,
-    collectContext,
   });
 
   const { dismissed, shouldHideCompletely, isLoading, closeDock, reopenDock } =

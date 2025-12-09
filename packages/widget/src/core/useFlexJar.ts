@@ -25,10 +25,6 @@ export interface UseFlexJarOptions {
     rating: string;
     main: string;
   };
-  /** Version identifier for the survey configuration */
-  surveyVersion?: string;
-  /** If true, collect browser context (url, pathname, device). Requires user consent. */
-  collectContext?: boolean;
 }
 
 export interface UseFlexJarReturn {
@@ -53,8 +49,6 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     context,
     initialAnswers,
     coreQuestionIds,
-    surveyVersion,
-    collectContext,
   } = options;
 
   const { answers, setAnswer, resetAnswers, startedAtRef } = useAnswerState({
@@ -97,7 +91,6 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
         answerSnapshot,
         questions,
         coreQuestionIds,
-        { surveyVersion, collectContext },
       ),
     };
 
@@ -125,8 +118,6 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     transport,
     validate,
     coreQuestionIds,
-    surveyVersion,
-    collectContext,
     startedAtRef,
   ]);
 
