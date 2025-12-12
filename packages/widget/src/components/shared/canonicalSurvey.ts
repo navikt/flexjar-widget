@@ -1,84 +1,42 @@
-import type { FlexJarQuestion, RatingQuestion } from "../../core";
-import type {
-  FlexJarFollowUpQuestion,
-  FlexJarSurveyConfig,
-} from "../surveyTypes.js";
-
-const RESERVED_KEYS = new Set<string>();
+import type { FlexJarQuestion } from "../../core/types.js";
+import type { FlexJarSurveyConfig, SurveyType } from "../surveyTypes.js";
 
 export const RATING_ANSWER_KEY = "svar";
 export const MAIN_ANSWER_KEY = "feedback";
 
-RESERVED_KEYS.add(RATING_ANSWER_KEY);
-RESERVED_KEYS.add(MAIN_ANSWER_KEY);
-
-type AllowedMainQuestion = Extract<
-  FlexJarQuestion,
-  { type: "text" | "singleChoice" }
->;
-
 export interface CanonicalSurvey {
-  ratingQuestion: RatingQuestion;
-  mainQuestion: AllowedMainQuestion;
-  followUpQuestions: FlexJarFollowUpQuestion[];
-  coreQuestionIds: {
-    rating: string;
-    main: string;
-  };
+  type: SurveyType;
+  questions: FlexJarQuestion[];
+  gateQuestionId: string | undefined;
 }
 
-export const buildCanonicalSurvey = (
-  survey: FlexJarSurveyConfig,
-): CanonicalSurvey => {
-  const { rating, mainQuestion, followUpQuestions } = survey;
-
-  const ratingQuestion: RatingQuestion = {
-    ...rating,
-    id: RATING_ANSWER_KEY,
-    analyticsId: rating.analyticsId ?? rating.id ?? RATING_ANSWER_KEY,
-    required: true,
-  };
-
-  const resolvedMainRequired = mainQuestion.required ?? true;
-
-  const mainBase = {
-    ...mainQuestion,
-    id: MAIN_ANSWER_KEY,
-    analyticsId: mainQuestion.analyticsId ?? mainQuestion.id ?? MAIN_ANSWER_KEY,
-    required: resolvedMainRequired,
-  } as FlexJarQuestion;
-
-  if (mainBase.type !== "text" && mainBase.type !== "singleChoice") {
-    throw new Error(
-      `FlexJar mainQuestion must be of type "text" or "singleChoice", received "${mainBase.type}".`,
-    );
+export function buildCanonicalSurvey(survey: FlexJarSurveyConfig): CanonicalSurvey {
+  if (!survey.questions || survey.questions.length === 0) {
+    throw new Error("FlexJar survey must have at least one question");
   }
 
-  const canonicalMain: AllowedMainQuestion = mainBase;
-
-  const sanitizedFollowUps: FlexJarFollowUpQuestion[] = [];
-
-  for (const question of followUpQuestions ?? []) {
-    if (RESERVED_KEYS.has(question.id)) {
-      if (process.env.NODE_ENV === "development") {
-        // eslint-disable-next-line no-console -- development-time diagnostics only
-        console.warn(
-          `FlexJar: follow-up question id "${question.id}" is reserved and will be ignored. ` +
-            `Choose a different id to ensure the question is rendered.`,
-        );
-      }
-      continue;
+  // Validate all questions have IDs
+  for (const question of survey.questions) {
+    if (!question.id) {
+      throw new Error("FlexJar: All questions must have an id");
     }
-    sanitizedFollowUps.push(question);
   }
+
+  // Validate that gateQuestionId exists in questions if provided
+  if (survey.gateQuestionId) {
+    const gateExists = survey.questions.some(q => q.id === survey.gateQuestionId);
+    if (!gateExists) {
+      throw new Error(
+        `FlexJar gateQuestionId "${survey.gateQuestionId}" does not match any question ID`
+      );
+    }
+  }
+
+
 
   return {
-    ratingQuestion,
-    mainQuestion: canonicalMain,
-    followUpQuestions: sanitizedFollowUps,
-    coreQuestionIds: {
-      rating: ratingQuestion.id,
-      main: canonicalMain.id,
-    },
+    type: survey.type ?? "custom",
+    questions: survey.questions,
+    gateQuestionId: survey.gateQuestionId,
   };
-};
+}

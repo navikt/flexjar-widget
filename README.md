@@ -15,8 +15,10 @@ import { FlexJarDock } from "@navikt/flexjar-widget";
 <FlexJarDock
   feedbackId="my-app-feedback"
   survey={{
-    rating: { type: "rating", prompt: "Hvordan var opplevelsen?" },
-    mainQuestion: { type: "text", prompt: "Hva kan vi forbedre?" },
+    questions: [
+      { id: "rating", type: "rating", prompt: "Hvordan var opplevelsen?", required: true },
+      { id: "main", type: "text", prompt: "Hva kan vi forbedre?" },
+    ],
   }}
   transport={{
     submit: async (submission) => {
@@ -73,34 +75,55 @@ import { FlexJarDock } from "@navikt/flexjar-widget";
 
 ## Describe your survey schema
 
-Survey example with `survey.ts`:
+## Describe your survey schema
+
+You can define surveys manually using the `questions` array, or use helper functions for common patterns.
+
+### Option 1: Using Presets (Recommended)
 
 ```ts
-import {
-	type FlexJarMainQuestion,
-	type FlexJarRatingQuestion,
-	type FlexJarSurveyConfig,
-} from "@navikt/flexjar-widget";
+import { createRatingSurvey, createTopTasksSurvey } from "@navikt/flexjar-widget";
 
-const ratingQuestion: FlexJarRatingQuestion = {
-	type: "rating",
-	prompt: "Hvordan var det å bruke oppfølgingsplanen?",
-	description:
-		"Svarene du sender inn er anonyme, og blir brukt til videreutvikling av oppfølgingsplanen.",
-};
+// Standard rating survey
+export const ratingSurvey = createRatingSurvey({
+    ratingPrompt: "Hvordan var det å bruke oppfølgingsplanen?",
+    ratingDescription: "Svarene du sender inn er anonyme.",
+    textPrompt: "Hva kan vi forbedre?",
+});
 
-const mainQuestion: FlexJarMainQuestion = {
-	type: "text",
-	prompt:
-		"Opplever du at oppfølgingsplanen er et nyttig verktøy for å følge opp den ansatte?",
-	minRows: 3,
-	maxLength: 500,
-	// required defaults to true; set required: false to allow skipping the main question.
-};
+// Top Tasks survey
+export const topTasksSurvey = createTopTasksSurvey({
+    tasks: [
+        { value: "apply", label: "Søke om sykepenger" },
+        { value: "status", label: "Sjekke status på søknad" },
+    ],
+    taskPrompt: "Hva prøvde du å gjøre i dag?",
+});
+```
+
+### Option 2: Manual Configuration
+
+```ts
+import { type FlexJarSurveyConfig } from "@navikt/flexjar-widget";
 
 export const survey: FlexJarSurveyConfig = {
-	rating: ratingQuestion,
-	mainQuestion,
+    // Optional: gateQuestionId acts as a visibility gate.
+    // Follow-up questions are hidden until this question is answered.
+    gateQuestionId: "rating",
+    questions: [
+        {
+            id: "rating",
+            type: "rating",
+            prompt: "Hvordan opplevdes dette?",
+            required: true,
+        },
+        {
+            id: "feedback",
+            type: "text",
+            prompt: "Fortell mer (frivillig)",
+            required: false,
+        },
+    ],
 };
 ```
 
@@ -152,7 +175,7 @@ export const FeedbackDock = () => (
 | Prop                     | Type                                                     | Required | Default                                                   | Description                                                                                                                           |
 |--------------------------|----------------------------------------------------------|----------|-----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
 | `feedbackId`             | `string`                                                 | Yes      | –                                                         | Identifier included with the submission payload and analytics callbacks.                                                              |
-| `survey`                 | `FlexJarSurveyConfig`                                    | Yes      | –                                                         | Bundles the mandatory rating + main question along with optional follow-ups.                                                          |
+| `survey`                 | `FlexJarSurveyConfig`                                    | Yes      | –                                                         | Configuration containing the list of questions and survey type.                                                                       |
 | `transport`              | `FlexJarTransport`                                       | Yes      | –                                                         | Implementation responsible for persisting a submission.                                                                               |
 | `events`                 | `FlexJarEvents`                                          | No       | –                                                         | Lifecycle callbacks for analytics, validation, and dismissal persistence (see below).                                                 |
 | `context`                | `Record<string, unknown>`                                | No       | –                                                         | Extra metadata merged into the submission payload.                                                                                    |
@@ -176,8 +199,7 @@ export const FeedbackDock = () => (
 
 ## Customise the experience
 
-- **Always-on feedback**: `FlexJarDock` keeps the survey visible and only reveals follow-ups once the rating is
-  answered.
+- **Always-on feedback**: `FlexJarDock` keeps the survey visible and can reveal follow-ups once a "gate" question is answered.
 - **Copy & layout**: customise `title`, `submitLabel`, `cancelLabel`, `successTitle`, and `personalDataNotice` to match
   your product language.
 - **Events**: pass an `events` object (see `FlexJarEvents`) to react to lifecycle hooks like `onViewDock`,
@@ -187,10 +209,8 @@ export const FeedbackDock = () => (
 - **Custom rendering**: provide `renderQuestion` for advanced layouts while keeping accessibility and validation wiring
   from `useFlexJar`.
 
-Flexjar’s backend expects three core fields: `feedbackId`, `svar` (the rating), and `feedback` (a string value for the
-main answer). The components always render the rating question first and require you to provide a `mainQuestion` in the
-survey configuration. That main question defaults to required, but you can pass `required: false` to let respondents
-skip it—in that case the canonical `feedback` value is omitted from the transport payload.
+Flexjar’s backend generally expects a `feedbackId` plus answers keyed by their question IDs.
+Core questions in presets use standard IDs (e.g., `rating`, `feedback`, `task`), but you can use any IDs you like.
 
 Every call to your `transport.submit` handler receives a `submission` object with a ready-to-send `transportPayload`.
 The widget enriches the payload with the human-readable question text so downstream logs keep answers and prompts
@@ -199,20 +219,14 @@ together:
 ```ts
 submission.transportPayload satisfies {
 	feedbackId: string;
-	svar?: number;
-	feedback?: string;
+	feedbackId: string;
+	[questionId: string]: string | number | string[];
 	[questionIdWithPrefix: `question__${string}`]: string;
-	[key: string]: string | number | string[];
 };
 ```
 
 The extra keys follow the pattern `question__<questionId>` and contain the exact prompt that was rendered. Core
-questions use the canonical names `question__svar` and `question__feedback` so Flexjar logs line up with the standard
-schema.
-
-- Rating answers are emitted only under `svar`.
-- Main text answers are emitted only under `feedback`.
-- Additional questions continue to use their configured IDs for both the value and `question__` metadata.
+- Questions use their configured IDs for both the value and `question__` metadata.
 
 Send that payload directly to the Flexjar backend, or transform it further if you need to enrich the request.
 
@@ -223,9 +237,9 @@ network transport, analytics, and question configuration.
 
 | Field               | Type                        | Required | Description                                                                                                                                                             |
 |---------------------|-----------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `rating`            | `FlexJarRatingQuestion`     | Yes      | Primary entry question; the dock is gated on an answer here.                                                                                                            |
-| `mainQuestion`      | `FlexJarMainQuestion`       | Yes      | Captures the main answer (text or single choice) that Flexjar expects in the `feedback` field. Defaults to `required: true`; set `required: false` to make it optional. |
-| `followUpQuestions` | `FlexJarFollowUpQuestion[]` | No       | Additional questions rendered after the rating has been answered.                                                                                                       |
+| `questions`         | `FlexJarQuestion[]`         | Yes      | Array of questions to display in order.                                                         |
+| `gateQuestionId`    | `string`                    | No       | ID of the question that gates visibility of subsequent questions.                               |
+| `type`              | `SurveyType`                | No       | `"rating" \| "topTasks" \| "custom"`. Used for analytics classification. Defaults to `custom`.  |
 
 ## Persistence behavior
 

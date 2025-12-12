@@ -6,6 +6,18 @@ All notable changes to `@navikt/flexjar-widget` will be documented in this file.
 
 - Add entries here before cutting the next release.
 
+### Breaking
+- **Removed legacy survey configuration support**
+  - Removed `coreQuestionMapping` property from `FlexJarSurveyConfig`.
+  - Removed internal mapping logic that transformed `rating`/`main` keys.
+  - Usage of `rating` and `mainQuestion` props in `survey` config is no longer supported. Use `questions` array instead.
+  - Consumers must now use explicit question IDs or the new helper presets.
+
+### Added
+- **Top Tasks Support**: Added `createTopTasksSurvey` preset and logic to handle purely generic questions.
+- **Generic Presets**: Added `createRatingSurvey` to easily create standard rating surveys without manual JSON config.
+- **SurveyType**: Added `SurveyType` enum ("rating", "topTasks", "custom") to `FlexJarSurveyConfig`.
+
 ## [0.2.14] - 2025-12-05
 
 ### Changed

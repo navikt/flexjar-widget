@@ -3,7 +3,7 @@ import type { BoxNewProps } from "@navikt/ds-react/Box";
 import type { FlexJarEvents, FlexJarTransport, RatingQuestion } from "../../core";
 import { useFlexJar } from "../../core";
 import { DefaultQuestionRenderer, RatingQuestionField } from "../questions";
-import { useRatingGate } from "./hooks/useRatingGate.js";
+import { useQuestionGate } from "./hooks/useQuestionGate.js";
 import { useAutoCloseOnSuccess } from "./hooks/useAutoCloseOnSuccess.js";
 import type { FlexJarRenderQuestionProps } from "../../types.js";
 import { buildCanonicalSurvey } from "../shared/canonicalSurvey.js";
@@ -222,29 +222,31 @@ export const FlexJarDock = ({
 }: FlexJarDockProps) => {
   // IMPORTANT: Call all hooks before any conditional returns to comply with Rules of Hooks
 
+  /* 
+   * Use the new flexible survey builder.
+   * "questions" is the full list of questions in display order.
+   * "gateQuestionId" defines which question acts as the visibility gate.
+   */
   const canonicalSurvey = useMemo(() => buildCanonicalSurvey(survey), [survey]);
-  const { ratingQuestion, mainQuestion, followUpQuestions, coreQuestionIds } =
-    canonicalSurvey;
+  const { type: surveyType, questions, gateQuestionId } = canonicalSurvey;
 
-  const orderedQuestions = useMemo(
-    () => [ratingQuestion, mainQuestion, ...followUpQuestions],
-    [followUpQuestions, mainQuestion, ratingQuestion],
-  );
+  // The first question is used as the "prompt" question in the header
+  const promptQuestion = questions[0];
 
-  const ratingHeadingId = `${ratingQuestion.id}-dock-heading`;
-  const ratingDescriptionId = ratingQuestion.description
-    ? `${ratingQuestion.id}-dock-description`
+  const promptHeadingId = `${promptQuestion.id}-dock-heading`;
+  const promptDescriptionId = promptQuestion.description
+    ? `${promptQuestion.id}-dock-description`
     : undefined;
   const successHeadingId = `${feedbackId}-dock-success-heading`;
   const panelId = `${feedbackId}-dock-panel`;
 
   const { answers, status, error, setAnswer, submit, reset } = useFlexJar({
     feedbackId,
-    questions: orderedQuestions,
+    questions,
     transport,
     events,
     context,
-    coreQuestionIds,
+    surveyType,
   });
 
   const { dismissed, shouldHideCompletely, isLoading, closeDock, reopenDock } =
@@ -257,9 +259,10 @@ export const FlexJarDock = ({
       onReset: reset,
     });
 
-  const { shouldDeferQuestion, isSubmitBlocked } = useRatingGate(
-    ratingQuestion,
+  const { shouldDeferQuestion, isSubmitBlocked } = useQuestionGate(
+    questions,
     answers,
+    gateQuestionId,
   );
 
   const handleSubmit = useCallback(
@@ -301,9 +304,9 @@ export const FlexJarDock = ({
   const containerStyle: React.CSSProperties = dismissed
     ? baseContainerStyle
     : {
-        ...baseContainerStyle,
-        width: `min(24rem, calc(100vw - ${offset * 2}px))`,
-      };
+      ...baseContainerStyle,
+      width: `min(24rem, calc(100vw - ${offset * 2}px))`,
+    };
 
   const panelStyle: React.CSSProperties = {
     maxHeight: "calc(100vh - 2rem)",
@@ -312,8 +315,14 @@ export const FlexJarDock = ({
 
   const defaultQuestionRenderer = useCallback(
     (props: FlexJarRenderQuestionProps) => {
+      /**
+       * Special rendering for the rating question type.
+       * Can now be any question in the list, but we keep the special UI for it.
+       */
       if (props.question.type === "rating") {
         const rating = props.question as RatingQuestion;
+        const isPromptQuestion = props.question.id === promptQuestion.id;
+
         return (
           <div className={CLASS_NAMES.ratingSection}>
             <div className={CLASS_NAMES.ratingField}>
@@ -325,12 +334,12 @@ export const FlexJarDock = ({
                 isMissing={props.isMissing}
                 disabled={props.disabled}
                 fieldsetClassName={CLASS_NAMES.ratingFieldset}
-                hidePrompt
-                hideDescription
+                hidePrompt={isPromptQuestion} // Only hide prompt if it's the header question
+                hideDescription={isPromptQuestion}
                 hideValueLabels
                 wrap={false}
-                ariaLabelledBy={ratingHeadingId}
-                ariaDescribedBy={ratingDescriptionId}
+                ariaLabelledBy={isPromptQuestion ? promptHeadingId : undefined}
+                ariaDescribedBy={isPromptQuestion ? promptDescriptionId : undefined}
                 rowClassName={CLASS_NAMES.ratingRow}
                 buttonClassName={CLASS_NAMES.ratingButton}
                 fieldsetPaddingBlock="space-8"
@@ -352,7 +361,7 @@ export const FlexJarDock = ({
         />
       );
     },
-    [ratingDescriptionId, ratingHeadingId, validationErrorMessage],
+    [promptDescriptionId, promptHeadingId, promptQuestion.id, validationErrorMessage],
   );
 
   const reopenLabel = minimizedButtonLabel ?? "Gi tilbakemelding";
@@ -390,9 +399,9 @@ export const FlexJarDock = ({
           panelStyle={panelStyle}
           panelBackground={panelBackground}
           panelBorderColor={panelBorderColor}
-          ratingQuestion={ratingQuestion}
-          ratingHeadingId={ratingHeadingId}
-          ratingDescriptionId={ratingDescriptionId}
+          promptQuestion={promptQuestion}
+          promptHeadingId={promptHeadingId}
+          promptDescriptionId={promptDescriptionId}
           successHeadingId={successHeadingId}
           successTitle={successTitle}
           successBody={successBody}
@@ -400,7 +409,7 @@ export const FlexJarDock = ({
           isSuccess={isSuccess}
           onClose={handleCloseDock}
           onSubmit={handleSubmit}
-          orderedQuestions={orderedQuestions}
+          orderedQuestions={questions}
           answers={answers}
           renderQuestion={defaultQuestionRenderer}
           validationMissing={validationMissing}

@@ -12,7 +12,6 @@ import type { BoxNewProps } from "@navikt/ds-react/Box";
 import type {
   FlexJarAnswerValue,
   FlexJarQuestion,
-  RatingQuestion,
 } from "../../../core";
 import type { FlexJarRenderQuestionProps } from "../../../types.js";
 import { SuccessContent } from "./SuccessContent.js";
@@ -25,9 +24,9 @@ interface DockPanelProps {
   panelStyle: React.CSSProperties;
   panelBackground: BoxNewProps["background"];
   panelBorderColor?: BoxNewProps["borderColor"];
-  ratingQuestion: RatingQuestion;
-  ratingHeadingId: string;
-  ratingDescriptionId?: string;
+  promptQuestion: FlexJarQuestion;
+  promptHeadingId: string;
+  promptDescriptionId?: string;
   successHeadingId: string;
   successTitle: string;
   successBody?: React.ReactNode;
@@ -62,9 +61,9 @@ export const DockPanel = ({
   panelStyle,
   panelBackground,
   panelBorderColor,
-  ratingQuestion,
-  ratingHeadingId,
-  ratingDescriptionId,
+  promptQuestion,
+  promptHeadingId,
+  promptDescriptionId,
   successHeadingId,
   successTitle,
   successBody,
@@ -124,17 +123,17 @@ export const DockPanel = ({
                   level="2"
                   size="medium"
                   className={CLASS_NAMES.ratingHeading}
-                  id={ratingHeadingId}
+                  id={promptHeadingId}
                 >
-                  {ratingQuestion.prompt}
+                  {promptQuestion.prompt}
                 </Heading>
-                {ratingQuestion.description && (
+                {promptQuestion.description && (
                   <BodyShort
                     size="small"
                     className={CLASS_NAMES.ratingDescription}
-                    id={ratingDescriptionId}
+                    id={promptDescriptionId}
                   >
-                    {ratingQuestion.description}
+                    {promptQuestion.description}
                   </BodyShort>
                 )}
               </>

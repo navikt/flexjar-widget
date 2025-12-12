@@ -9,6 +9,7 @@ import type {
   FlexJarSubmitResult,
   FlexJarTransport,
   FlexJarValidationError,
+  SurveyType,
 } from "./types";
 import { useAnswerState, cloneAnswers } from "./answers.js";
 import { validateAnswers } from "./validation.js";
@@ -21,10 +22,8 @@ export interface UseFlexJarOptions {
   events?: FlexJarEvents;
   context?: Record<string, unknown>;
   initialAnswers?: Record<string, FlexJarAnswerValue>;
-  coreQuestionIds?: {
-    rating: string;
-    main: string;
-  };
+
+  surveyType?: SurveyType;
 }
 
 export interface UseFlexJarReturn {
@@ -48,7 +47,7 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     events,
     context,
     initialAnswers,
-    coreQuestionIds,
+    surveyType,
   } = options;
 
   const { answers, setAnswer, resetAnswers, startedAtRef } = useAnswerState({
@@ -90,7 +89,7 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
         feedbackId,
         answerSnapshot,
         questions,
-        coreQuestionIds,
+        surveyType,
       ),
     };
 
@@ -117,7 +116,6 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     questions,
     transport,
     validate,
-    coreQuestionIds,
     startedAtRef,
   ]);
 

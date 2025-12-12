@@ -50,11 +50,20 @@ export type FlexJarQuestion =
 
 export type FlexJarAnswerValue = string | number | string[];
 
+/**
+ * Survey type identifier for analytics and dashboard display.
+ * - "rating": Classic 1-5 scale with optional text (current default behavior)
+ * - "topTasks": Task selection + success measurement for conversion tracking
+ * - "custom": Any other question combination
+ */
+export type SurveyType = "rating" | "topTasks" | "custom";
+
 export type FlexJarTransportPayload = {
   feedbackId: string;
+  surveyType?: SurveyType;
   svar?: number;
   feedback?: string;
-} & Record<string, FlexJarAnswerValue>;
+} & Record<string, FlexJarAnswerValue | string>;
 
 export interface FlexJarSubmission {
   feedbackId: string;

@@ -92,10 +92,6 @@ describe("useFlexJar", () => {
         feedbackId: FEEDBACK_ID,
         questions: requiredQuestions,
         transport,
-        coreQuestionIds: {
-          rating: "rating",
-          main: "feedback",
-        },
       }),
     );
 
@@ -133,10 +129,6 @@ describe("useFlexJar", () => {
         feedbackId: FEEDBACK_ID,
         questions: optionalMainQuestionSurvey,
         transport,
-        coreQuestionIds: {
-          rating: "rating",
-          main: "feedback",
-        },
       }),
     );
 
@@ -163,7 +155,7 @@ describe("useFlexJar", () => {
     const payload = submitMock.mock.calls[0][0];
 
     expect(payload.answers).toEqual({ rating: 5 });
-    expect(payload.transportPayload.svar).toBe(5);
+    expect(payload.transportPayload.rating).toBe(5);
     expect(payload.transportPayload).not.toHaveProperty("feedback");
     expect(payload.transportPayload["question__feedback"]).toBe(
       "Hva kan vi forbedre?",
@@ -171,6 +163,36 @@ describe("useFlexJar", () => {
 
     expect(result.current.status).toBe("success");
     expect(result.current.error).toBeNull();
+  });
+
+  it("includes surveyType in the submission payload", async () => {
+    const submitMock = vi.fn(async (payload: FlexJarSubmission) => {
+      void payload;
+    });
+    const transport: FlexJarTransport = {
+      submit: submitMock,
+    };
+
+    const { result } = renderHook(() =>
+      useFlexJar({
+        feedbackId: FEEDBACK_ID,
+        questions: requiredQuestions,
+        transport,
+        surveyType: "topTasks",
+      })
+    );
+
+    await act(() => {
+      result.current.setAnswer("rating", 5);
+      result.current.setAnswer("feedback", "Good");
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    const payload = submitMock.mock.calls[0][0];
+    expect(payload.transportPayload.surveyType).toBe("topTasks");
   });
 
   it("submits answers when validation passes", async () => {
@@ -186,10 +208,6 @@ describe("useFlexJar", () => {
         feedbackId: FEEDBACK_ID,
         questions: requiredQuestions,
         transport,
-        coreQuestionIds: {
-          rating: "rating",
-          main: "feedback",
-        },
       }),
     );
 
@@ -216,11 +234,10 @@ describe("useFlexJar", () => {
       "free-text": "Alt fungerer fint",
     });
     expect(payload.transportPayload.feedbackId).toBe(FEEDBACK_ID);
-    expect(payload.transportPayload.svar).toBe(4);
+    expect(payload.transportPayload.rating).toBe(4);
     expect(payload.transportPayload.feedback).toBe("Alt fungerer fint");
-    expect(payload.transportPayload).not.toHaveProperty("rating");
     expect(payload.transportPayload["free-text"]).toBe("Alt fungerer fint");
-    expect(payload.transportPayload["question__svar"]).toBe(
+    expect(payload.transportPayload["question__rating"]).toBe(
       "Hvor fornøyd er du?",
     );
     expect(payload.transportPayload["question__feedback"]).toBe(
@@ -259,10 +276,6 @@ describe("useFlexJar", () => {
         questions: requiredQuestions,
         transport,
         events,
-        coreQuestionIds: {
-          rating: "rating",
-          main: "feedback",
-        },
       }),
     );
 
@@ -324,10 +337,6 @@ describe("useFlexJar", () => {
         transport,
         events,
         initialAnswers,
-        coreQuestionIds: {
-          rating: "rating",
-          main: "feedback",
-        },
       }),
     );
 
@@ -378,10 +387,6 @@ describe("useFlexJar", () => {
         feedbackId: FEEDBACK_ID,
         questions: requiredQuestions,
         transport,
-        coreQuestionIds: {
-          rating: "rating",
-          main: "feedback",
-        },
       }),
     );
 

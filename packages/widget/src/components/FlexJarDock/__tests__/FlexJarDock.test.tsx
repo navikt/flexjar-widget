@@ -8,23 +8,14 @@ import type {
 } from "../../../core/types.js";
 import type { FlexJarSurveyConfig } from "../../surveyTypes.js";
 
+import { createRatingSurvey } from "../../../presets/index.js";
+
 function createSurvey(): FlexJarSurveyConfig {
-  return {
-    rating: {
-      id: "rating",
-      type: "rating",
-      prompt: "Hvor fornøyd er du?",
-      description: "Beskriv gjerne opplevelsen din.",
-      required: true,
-      scale: 5,
-    },
-    mainQuestion: {
-      id: "feedback",
-      type: "text",
-      prompt: "Hva kan vi forbedre?",
-      required: true,
-      maxLength: 500,
-    },
+  return createRatingSurvey({
+    ratingPrompt: "Hvor fornøyd er du?",
+    ratingDescription: "Beskriv gjerne opplevelsen din.",
+    textPrompt: "Hva kan vi forbedre?",
+    textRequired: true,
     followUpQuestions: [
       {
         id: "free-text",
@@ -34,7 +25,7 @@ function createSurvey(): FlexJarSurveyConfig {
         maxLength: 500,
       },
     ],
-  } satisfies FlexJarSurveyConfig;
+  });
 }
 
 function renderDock(options?: {
@@ -168,7 +159,7 @@ describe("FlexJarDock", () => {
 
     const user = userEvent.setup();
     const { unmount } = renderDock({ events });
-    
+
     // Wait for loading to complete
     await waitFor(() => {
       const initialContainer = document.querySelector(
