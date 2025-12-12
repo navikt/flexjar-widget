@@ -9,6 +9,7 @@ import type {
   FlexJarSurveyConfig,
 } from "../components/surveyTypes.js";
 import { removeConsentValue } from "../components/shared/consentStorage.js";
+import { createRatingSurvey, createTopTasksSurvey } from "../presets/index.js";
 
 // Type for the Storybook mock consent API
 interface FlexJarMockConsentAPI {
@@ -110,17 +111,52 @@ const CHOICE_SURVEY: FlexJarSurveyConfig = {
   ],
 };
 
-const QUICK_FORM_SURVEY: FlexJarSurveyConfig = {
-  rating: {
-    ...RATING_QUESTION,
-    description: undefined,
-  },
-  mainQuestion: {
-    type: "text",
+mainQuestion: {
+  type: "text",
     prompt: "Beskriv kort hva som ikke fungerte.",
-    maxLength: 300,
-    minRows: 2,
+      maxLength: 300,
+        minRows: 2,
   },
+};
+
+const TOP_TASKS_SURVEY = createTopTasksSurvey({
+  tasks: [
+    { value: "apply_sick_leave", label: "Søke om sykepenger" },
+    { value: "check_status", label: "Sjekke status på søknad" },
+    { value: "upload_docs", label: "Laste opp vedlegg" },
+    { value: "other", label: "Noe annet" },
+  ],
+  includeBlockerQuestion: true,
+});
+
+const CUSTOM_SURVEY: FlexJarSurveyConfig = {
+  type: "custom",
+  questions: [
+    {
+      id: "role",
+      type: "singleChoice",
+      prompt: "Hvem skriver du på vegne av?",
+      required: true,
+      options: [
+        { value: "privat", label: "Meg selv" },
+        { value: "employer", label: "Arbeidsgiver" },
+        { value: "provider", label: "Behandler" },
+      ],
+    },
+    {
+      id: "ease_of_use",
+      type: "rating",
+      prompt: "Hvor enkelt var det å finne frem?",
+      required: true,
+      scale: 5,
+    },
+    {
+      id: "comment",
+      type: "text",
+      prompt: "Har du andre tilbakemeldinger?",
+      required: false,
+    },
+  ],
 };
 
 const SUCCESS_TRANSPORT: FlexJarDockProps["transport"] = {
@@ -370,21 +406,64 @@ export const TransportErrorState: Story = {
   },
 };
 
-export const HideAfterSubmit: Story = {
+parameters: {
+  docs: {
+    description: {
+      story:
+      "Demonstrerer hvordan docken skjules permanent etter innsending. Skjulevarighet avhenger av om brukeren har gitt samtykke.",
+      },
+  },
+},
+};
+
+export const StandardRating: Story = {
   render: Default.render,
   args: {
-    feedbackId: "storybook-hide",
-    hideAfterSubmit: true,
-    dismissCooldownDays: 30,
-    successTitle: "Takk for tilbakemeldingen!",
-    successBody:
-      "Docken er nå skjult. Med samtykke vil den forbli skjult i 30 dager. Uten samtykke vil den vises igjen ved ny lasting av siden.",
+    feedbackId: "storybook-rating",
+    survey: createRatingSurvey({
+      ratingPrompt: "Hvordan opplevde du denne siden?",
+      textPrompt: "Hva kan vi gjøre bedre?",
+    }),
+    title: "Din mening hjelper oss",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Standard rating-undersøkelse generert med `createRatingSurvey` preset.",
+      },
+    },
+  },
+};
+
+export const TopTasks: Story = {
+  render: Default.render,
+  args: {
+    feedbackId: "storybook-top-tasks",
+    survey: TOP_TASKS_SURVEY,
+    title: "Fant du det du lette etter?",
   },
   parameters: {
     docs: {
       description: {
         story:
-          "Demonstrerer hvordan docken skjules permanent etter innsending. Skjulevarighet avhenger av om brukeren har gitt samtykke.",
+          "En 'Top Tasks' undersøkelse som måler suksessrate for spesifikke oppgaver. Generert med `createTopTasksSurvey`.",
+      },
+    },
+  },
+};
+
+export const CustomSurvey: Story = {
+  render: Default.render,
+  args: {
+    feedbackId: "storybook-custom",
+    survey: CUSTOM_SURVEY,
+    title: "Tilbakemelding",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "En helt tilpasset undersøkelse definert med 'custom' type, som kombinerer flervalg, rating og fritekst fritt.",
       },
     },
   },
