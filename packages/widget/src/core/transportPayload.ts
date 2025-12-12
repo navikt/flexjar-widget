@@ -35,10 +35,51 @@ export function buildTransportPayload(
     payload[questionId] = answerValue;
   }
 
-  // Add question prompts with question__ prefix
+  // Add structured answers array (rich metadata for analytics)
+  const answersList: any[] = [];
+
   for (const question of questions) {
-    payload[`${QUESTION_TEXT_PREFIX}${question.id}`] = question.prompt;
+    const value = answers[question.id];
+    // Skip if unanswered (unless we want to track unanswered?)
+    // Actually, backend needs even Unanswered sometimes, but usually only answered.
+    // Let's include if value is not null/undefined/empty string
+    if (value === undefined || value === null || value === "") continue;
+
+    let fieldType = "TEXT";
+    let answerValue: any = { type: "text", text: String(value) };
+
+    // Infer type from question or value
+    // This is basic inference, ideally the widget knows the type better.
+    // But for now we map based on shape.
+    if (question.type === "rating") {
+      fieldType = "RATING";
+      answerValue = { type: "rating", rating: Number(value) };
+    } else if (Array.isArray(value)) {
+      fieldType = "MULTI_CHOICE";
+      answerValue = { type: "multiChoice", selectedOptionIds: value };
+    } else if ('options' in question && question.options) {
+      // Likely single choice if it has options and is not array
+      fieldType = "SINGLE_CHOICE";
+      answerValue = { type: "singleChoice", selectedOptionId: String(value) };
+    } else {
+      // Default text
+      fieldType = "TEXT";
+      answerValue = { type: "text", text: String(value) };
+    }
+
+    answersList.push({
+      fieldId: question.id,
+      fieldType: fieldType,
+      question: {
+        label: question.prompt,
+        description: (question as any).description || null, // Cast because description might not be in base type
+        options: 'options' in question && question.options ? question.options.map((o: any) => ({ id: o.value, label: o.label })) : null
+      },
+      value: answerValue
+    });
   }
+
+  payload.answers = answersList;
 
   return payload;
 }
