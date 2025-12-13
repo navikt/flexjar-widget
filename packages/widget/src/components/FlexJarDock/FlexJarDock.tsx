@@ -358,6 +358,7 @@ export const FlexJarDock = ({
           isMissing={props.isMissing}
           disabled={props.disabled}
           validationErrorMessage={validationErrorMessage}
+          hideLabel={props.hideLabel}
         />
       );
     },

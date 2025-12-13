@@ -14,6 +14,7 @@ interface SingleChoiceFieldProps {
   validationErrorMessage: string;
   isMissing: boolean;
   disabled: boolean;
+  hideLabel?: boolean;
 }
 
 export const SingleChoiceField = ({
@@ -23,6 +24,7 @@ export const SingleChoiceField = ({
   validationErrorMessage,
   isMissing,
   disabled,
+  hideLabel,
 }: SingleChoiceFieldProps) => {
   const options = useChoiceOptions(question);
   const selected = typeof value === "string" ? value : "";
@@ -30,6 +32,7 @@ export const SingleChoiceField = ({
   return (
     <RadioGroup
       legend={question.prompt}
+      hideLegend={hideLabel}
       description={question.description}
       value={selected}
       onChange={(nextValue: string) => onChange(nextValue ?? null)}

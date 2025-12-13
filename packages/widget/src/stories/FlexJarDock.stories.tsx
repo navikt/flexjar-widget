@@ -2,12 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "@navikt/ds-react";
 import { FlexJarDock, type FlexJarDockProps } from "../components/FlexJarDock";
-import type {
-  FlexJarFollowUpQuestion,
-  FlexJarMainQuestion,
-  FlexJarRatingQuestion,
-  FlexJarSurveyConfig,
-} from "../components/surveyTypes.js";
+import type { FlexJarSurveyConfig } from "../components/surveyTypes.js";
 import { removeConsentValue } from "../components/shared/consentStorage.js";
 import { createRatingSurvey, createTopTasksSurvey } from "../presets/index.js";
 
@@ -25,99 +20,19 @@ declare global {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const RATING_QUESTION: FlexJarRatingQuestion = {
-  type: "rating",
-  prompt: "Hvordan opplevde du å svare på spørsmålene?",
-  description:
-    "Svarene du sender inn er anonyme, og blir brukt til videreutvikling av tjenesten.",
-  scale: 5,
-  required: true,
-};
 
-const MAIN_TEXT_QUESTION: FlexJarMainQuestion = {
-  type: "text",
-  prompt: "Legg gjerne til en begrunnelse (valgfritt)",
-  description: "Alle tilbakemeldinger er til stor nytte for oss",
-  minRows: 4,
-  maxLength: 500,
-  required: false,
-};
 
-const DEFAULT_SURVEY: FlexJarSurveyConfig = {
-  rating: RATING_QUESTION,
-  mainQuestion: MAIN_TEXT_QUESTION,
-};
+const DEFAULT_SURVEY = createRatingSurvey({
+  ratingPrompt: "Hvordan opplevde du å svare på spørsmålene?",
+  ratingDescription: "Svarene du sender inn er anonyme, og blir brukt til videreutvikling av tjenesten.",
+  textPrompt: "Legg gjerne til en begrunnelse (valgfritt)",
+  textPlaceholder: "",
+  textRequired: false,
+});
 
-const OPTIONAL_FOLLOW_UPS: FlexJarFollowUpQuestion[] = [
-  {
-    id: "best-del",
-    type: "text",
-    prompt: "Hva var det beste med opplevelsen?",
-    maxLength: 400,
-    required: false,
-  },
-  {
-    id: "forbedringstype",
-    type: "singleChoice",
-    prompt: "Hva ønsker du mest at vi jobber videre med?",
-    options: [
-      { value: "speed", label: "Ytelse og hastighet" },
-      { value: "content", label: "Innhold og forklaringer" },
-      { value: "accessibility", label: "Tilgjengelighet" },
-      { value: "other", label: "Noe annet" },
-    ],
-    required: false,
-  },
-];
+// Unused constants removed
 
-const SURVEY_WITH_FOLLOW_UPS: FlexJarSurveyConfig = {
-  rating: RATING_QUESTION,
-  mainQuestion: MAIN_TEXT_QUESTION,
-  followUpQuestions: OPTIONAL_FOLLOW_UPS,
-};
 
-const OPTIONAL_MAIN_SURVEY: FlexJarSurveyConfig = {
-  rating: RATING_QUESTION,
-  mainQuestion: {
-    ...MAIN_TEXT_QUESTION,
-    prompt: "Vil du dele noe mer? (Valgfritt)",
-    required: false,
-  },
-};
-
-const CHOICE_MAIN_QUESTION: FlexJarMainQuestion = {
-  type: "singleChoice",
-  prompt: "Hvordan beskriver du helhetsopplevelsen?",
-  options: [
-    { value: "great", label: "Veldig bra" },
-    { value: "good", label: "Bra" },
-    { value: "neutral", label: "Helt greit" },
-    { value: "poor", label: "Ikke bra" },
-  ],
-  required: true,
-};
-
-const CHOICE_SURVEY: FlexJarSurveyConfig = {
-  rating: RATING_QUESTION,
-  mainQuestion: CHOICE_MAIN_QUESTION,
-  followUpQuestions: [
-    {
-      id: "choice-oppfolging",
-      type: "text",
-      prompt: "Hva skulle vært annerledes for at du skulle gitt en bedre score?",
-      maxLength: 500,
-      required: false,
-    },
-  ],
-};
-
-mainQuestion: {
-  type: "text",
-    prompt: "Beskriv kort hva som ikke fungerte.",
-      maxLength: 300,
-        minRows: 2,
-  },
-};
 
 const TOP_TASKS_SURVEY = createTopTasksSurvey({
   tasks: [
@@ -332,99 +247,11 @@ const ExamplePage = (props: FlexJarDockProps) => {
   );
 };
 
-export const Default: Story = {
+export const Rating: Story = {
   render: (args) => <ExamplePage {...args} />,
-};
-
-export const StaysOpenAfterSubmit: Story = {
-  render: Default.render,
-  args: {
-    feedbackId: "storybook-stays-open",
-    hideAfterSubmit: false,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Med hideAfterSubmit={false} forblir docken synlig (minimert) etter innsending, slik at brukeren kan åpne den igjen. Dette gjør testing enklere.",
-      },
-    },
-  },
-};
-
-export const InitiallyMinimized: Story = {
-  render: Default.render,
-  args: {
-    feedbackId: "storybook-minimized",
-    initialOpen: false,
-    minimizedButtonLabel: "Åpne tilbakemeldingsskjema",
-  },
-};
-
-export const OptionalMainQuestion: Story = {
-  render: Default.render,
-  args: {
-    feedbackId: "storybook-optional",
-    survey: OPTIONAL_MAIN_SURVEY,
-  },
-};
-
-export const WithFollowUpQuestions: Story = {
-  render: Default.render,
-  args: {
-    feedbackId: "storybook-followups",
-    survey: SURVEY_WITH_FOLLOW_UPS,
-  },
-};
-
-export const ChoiceAsMainQuestion: Story = {
-  render: Default.render,
-  args: {
-    feedbackId: "storybook-choice",
-    survey: CHOICE_SURVEY,
-  },
-};
-
-export const BottomLeftPlacement: Story = {
-  render: Default.render,
-  args: {
-    feedbackId: "storybook-left",
-    position: "bottom-left",
-    offset: 32,
-  },
-};
-
-export const TransportErrorState: Story = {
-  render: Default.render,
-  args: {
-    feedbackId: "storybook-error",
-    survey: QUICK_FORM_SURVEY,
-    transport: FAILING_TRANSPORT,
-    submitLabel: "Send inn",
-    transportErrorMessage: "Vi klarte ikke å sende inn akkurat nå. Prøv igjen om litt.",
-    showPersonalDataNotice: false,
-  },
-};
-
-parameters: {
-  docs: {
-    description: {
-      story:
-      "Demonstrerer hvordan docken skjules permanent etter innsending. Skjulevarighet avhenger av om brukeren har gitt samtykke.",
-      },
-  },
-},
-};
-
-export const StandardRating: Story = {
-  render: Default.render,
   args: {
     feedbackId: "storybook-rating",
-    survey: createRatingSurvey({
-      ratingPrompt: "Hvordan opplevde du denne siden?",
-      textPrompt: "Hva kan vi gjøre bedre?",
-    }),
-    title: "Din mening hjelper oss",
+    survey: DEFAULT_SURVEY,
   },
   parameters: {
     docs: {
@@ -435,12 +262,13 @@ export const StandardRating: Story = {
   },
 };
 
+
+
 export const TopTasks: Story = {
-  render: Default.render,
+  render: (args) => <ExamplePage {...args} />,
   args: {
     feedbackId: "storybook-top-tasks",
     survey: TOP_TASKS_SURVEY,
-    title: "Fant du det du lette etter?",
   },
   parameters: {
     docs: {
@@ -453,11 +281,10 @@ export const TopTasks: Story = {
 };
 
 export const CustomSurvey: Story = {
-  render: Default.render,
+  render: (args) => <ExamplePage {...args} />,
   args: {
     feedbackId: "storybook-custom",
     survey: CUSTOM_SURVEY,
-    title: "Tilbakemelding",
   },
   parameters: {
     docs: {

@@ -9,6 +9,7 @@ export interface FlexJarRenderQuestionProps {
   onChange: (nextValue: FlexJarAnswerValue | null | undefined) => void;
   isMissing: boolean;
   disabled: boolean;
+  hideLabel?: boolean;
 }
 
 export interface FlexJarDefaultQuestionProps extends FlexJarRenderQuestionProps {

@@ -9,6 +9,7 @@ interface TextQuestionFieldProps {
   validationErrorMessage: string;
   isMissing: boolean;
   disabled: boolean;
+  hideLabel?: boolean;
 }
 
 export const TextQuestionField = ({
@@ -18,9 +19,11 @@ export const TextQuestionField = ({
   validationErrorMessage,
   isMissing,
   disabled,
+  hideLabel,
 }: TextQuestionFieldProps) => (
   <Textarea
     label={question.prompt}
+    hideLabel={hideLabel}
     description={question.description}
     value={typeof value === "string" ? value : ""}
     onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>

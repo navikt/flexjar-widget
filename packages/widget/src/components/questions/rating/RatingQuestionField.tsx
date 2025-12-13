@@ -169,7 +169,7 @@ export const RatingQuestionField = ({
         <Heading
           id={ariaLabelledBy ? undefined : fallbackHeadingId}
           level="3"
-          size="medium"
+          size="xsmall"
         >
           {question.prompt}
         </Heading>

@@ -175,6 +175,7 @@ export const DockPanel = ({
                       onChange: handleChange,
                       isMissing,
                       disabled: isSubmitting,
+                      hideLabel: question.id === promptQuestion.id,
                     })}
                   </div>
                 );

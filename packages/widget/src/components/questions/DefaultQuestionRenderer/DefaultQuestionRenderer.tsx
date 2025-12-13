@@ -16,6 +16,7 @@ export const DefaultQuestionRenderer = ({
   validationErrorMessage,
   isMissing,
   disabled,
+  hideLabel,
 }: FlexJarDefaultQuestionProps) => {
   switch (question.type) {
     case "rating": {
@@ -28,6 +29,7 @@ export const DefaultQuestionRenderer = ({
           validationErrorMessage={validationErrorMessage}
           isMissing={isMissing}
           disabled={disabled}
+          hidePrompt={hideLabel}
         />
       );
     }
@@ -41,6 +43,7 @@ export const DefaultQuestionRenderer = ({
           validationErrorMessage={validationErrorMessage}
           isMissing={isMissing}
           disabled={disabled}
+          hideLabel={hideLabel}
         />
       );
     }
@@ -54,6 +57,7 @@ export const DefaultQuestionRenderer = ({
           validationErrorMessage={validationErrorMessage}
           isMissing={isMissing}
           disabled={disabled}
+          hideLabel={hideLabel}
         />
       );
     }
