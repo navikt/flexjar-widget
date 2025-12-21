@@ -21,6 +21,8 @@ export interface UseFlexJarOptions {
   transport: FlexJarTransport;
   events?: FlexJarEvents;
   context?: Record<string, unknown>;
+  /** Custom metadata for segmentation/filtering in analytics (e.g. { harDialogmote: true }) */
+  metadata?: Record<string, unknown>;
   initialAnswers?: Record<string, FlexJarAnswerValue>;
 
   surveyType?: SurveyType;
@@ -46,6 +48,7 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     transport,
     events,
     context,
+    metadata,
     initialAnswers,
     surveyType,
   } = options;
@@ -90,6 +93,7 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
         answerSnapshot,
         questions,
         surveyType,
+        metadata,
       ),
     };
 

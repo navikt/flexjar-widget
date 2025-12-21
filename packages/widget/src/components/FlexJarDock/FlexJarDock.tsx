@@ -50,6 +50,13 @@ export interface FlexJarDockProps {
   context?: Record<string, unknown>;
 
   /**
+   * Custom metadata for segmentation/filtering in analytics.
+   * Use this for business-specific context like { harDialogmote: true, sykmeldingstype: "avventende" }.
+   * This data becomes visible and filterable in the analytics dashboard.
+   */
+  metadata?: Record<string, unknown>;
+
+  /**
    * Label for the submit button.
    * @default "Send inn"
    */
@@ -196,6 +203,7 @@ export const FlexJarDock = ({
   transport,
   events,
   context,
+  metadata,
   submitLabel = DEFAULT_COPY.submitLabel,
   submitPendingLabel = DEFAULT_COPY.submitPendingLabel,
   cancelLabel = DEFAULT_COPY.cancelLabel,
@@ -246,6 +254,7 @@ export const FlexJarDock = ({
     transport,
     events,
     context,
+    metadata,
     surveyType,
   });
 

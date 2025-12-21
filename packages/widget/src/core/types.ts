@@ -63,6 +63,8 @@ export type FlexJarTransportPayload = {
   surveyType?: SurveyType;
   svar?: number;
   feedback?: string;
+  /** Custom metadata for segmentation/filtering (e.g. { harDialogmote: true }) */
+  metadata?: Record<string, unknown>;
 } & Record<string, FlexJarAnswerValue | string>;
 
 export interface FlexJarSubmission {

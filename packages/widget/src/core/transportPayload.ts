@@ -16,6 +16,7 @@ export function buildTransportPayload(
   answers: Record<string, FlexJarAnswerValue>,
   questions: FlexJarQuestion[],
   surveyType?: SurveyType,
+  metadata?: Record<string, unknown>,
 ): FlexJarTransportPayload {
   const payload: FlexJarTransportPayload = {
     feedbackId,
@@ -24,6 +25,11 @@ export function buildTransportPayload(
   // Add survey type if provided
   if (surveyType) {
     payload.surveyType = surveyType;
+  }
+
+  // Add custom metadata if provided
+  if (metadata && Object.keys(metadata).length > 0) {
+    payload.metadata = metadata;
   }
 
   // Add all answers
