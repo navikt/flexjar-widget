@@ -69,11 +69,82 @@ import { FlexJarDock } from "@navikt/flexjar-widget";
 4. Follow the usage guide below to describe your survey, wire a transport handler,
    and render the widget entry point that fits your product.
 
+## API Endpoints
+
+Send feedback submissions to the Flexjar backend:
+
+| Environment | URL |
+|-------------|-----|
+| **Dev** | `https://flexjar-analytics-api.intern.dev.nav.no/api/v2/feedback` |
+| **Prod** | `https://flexjar-analytics-api.intern.nav.no/api/v2/feedback` |
+
+### Onboarding your app
+
+To send feedback to the Flexjar API, your app must:
+
+1. **Configure Azure AD** in your `nais.yaml`:
+   ```yaml
+   azure:
+     application:
+       enabled: true
+   ```
+
+2. **Add outbound access** to the API:
+   ```yaml
+   accessPolicy:
+     outbound:
+       rules:
+         - application: flexjar-analytics-api
+           namespace: team-esyfo
+   ```
+
+3. **Request inbound access** – Contact team-esyfo to add your app to the API's inbound policy.
+
+4. **Get an OBO token** for `api://<cluster>.team-esyfo.flexjar-analytics-api/.default` and include it as `Authorization: Bearer <token>`.
+
+### Example transport
+
+```ts
+import { getToken, requestAzureOboToken } from "@navikt/oasis";
+
+const transport: FlexJarTransport = {
+  async submit(submission) {
+    const token = getToken(request);
+    const obo = await requestAzureOboToken(
+      token,
+      "api://prod-gcp.team-esyfo.flexjar-analytics-api/.default"
+    );
+    
+    await fetch("https://flexjar-analytics-api.intern.nav.no/api/v2/feedback", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${obo.token}`,
+      },
+      body: JSON.stringify(submission.transportPayload),
+    });
+  },
+};
+```
+
+## Survey Analytics
+
+View collected feedback at:
+
+| Environment | Dashboard URL |
+|-------------|---------------|
+| **Dev** | https://flexjar-analytics.intern.dev.nav.no |
+| **Prod** | https://flexjar-analytics.intern.nav.no |
+
+The dashboard provides:
+- Feedback list with filtering by date, rating, text, tags
+- Statistics with rating distribution, device breakdown, pathnames
+- Top Tasks success rate tracking
+- Excel/CSV export
+
 ## See it in action
 
 <img src="./demo-flexjar.png" alt="Flexjar dock with rating and text fields" width="320" />
-
-## Describe your survey schema
 
 ## Describe your survey schema
 
