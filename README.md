@@ -1,29 +1,26 @@
 # Flexjar Widget
 
-This workspace hosts `@navikt/flexjar-widget` – the React-based Flexjar survey
-widget. The package bundles the dock UI, hooks, and shared types you need to
-collect feedback with a configurable question set.
+A React widget for collecting user feedback with configurable surveys. Uses [Aksel Design System](https://aksel.nav.no/).
 
 ## Quick Start
 
 ```tsx
 import "@navikt/ds-css/darkside";
 import "@navikt/flexjar-widget/styles.css";
-import { FlexJarDock } from "@navikt/flexjar-widget";
+import { FlexJarDock, createRatingSurvey } from "@navikt/flexjar-widget";
 
-// Minimal example - just 3 props needed
+// Standard rating survey - the most common use case
 <FlexJarDock
   feedbackId="my-app-feedback"
-  survey={{
-    questions: [
-      { id: "rating", type: "rating", prompt: "Hvordan var opplevelsen?", required: true },
-      { id: "main", type: "text", prompt: "Hva kan vi forbedre?" },
-    ],
-  }}
+  survey={createRatingSurvey({
+    ratingPrompt: "Hvordan var opplevelsen?",
+    textPrompt: "Hva kan vi forbedre?",
+  })}
   transport={{
     submit: async (submission) => {
       await fetch("/api/feedback", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submission.transportPayload),
       });
     },
@@ -31,65 +28,120 @@ import { FlexJarDock } from "@navikt/flexjar-widget";
 />
 ```
 
-## Getting started
+---
 
-1. Configure npm to read from GitHub Packages if you have not already:
+## Installation
 
-   ```sh
-   npm config set @navikt:registry https://npm.pkg.github.com
-   ```
+### 1. Configure npm for GitHub Packages
 
-   Provide an auth token with `read:packages` scope via
-   `npm login --registry=https://npm.pkg.github.com` or by exporting
-   `NODE_AUTH_TOKEN` in CI.
+```sh
+npm config set @navikt:registry https://npm.pkg.github.com
+```
 
-2. Install the widget along with its peer dependencies:
+Authenticate via `npm login --registry=https://npm.pkg.github.com` or set `NODE_AUTH_TOKEN` in CI.
 
-   ```sh
-   npm install @navikt/flexjar-widget react react-dom @navikt/ds-react @navikt/ds-css
-   ```
+### 2. Install the package
 
-   Include the Aksel Darkside design system styles and the widget stylesheet once in your
-   app entry point:
+```sh
+npm install @navikt/flexjar-widget @navikt/ds-react @navikt/ds-css @navikt/nav-dekoratoren-moduler
+```
 
-   ```ts
-   import "@navikt/ds-css/darkside";
-   import "@navikt/flexjar-widget/styles.css";
-   ```
+### 3. Import styles
 
-   > Using a global CSS file instead of JavaScript imports? Add
-   > `@import "@navikt/flexjar-widget/styles.css";` below the Aksel import.
+```ts
+// In your app entry point
+import "@navikt/ds-css/darkside";
+import "@navikt/flexjar-widget/styles.css";
+```
 
-3. Ensure you have `@navikt/nav-dekoratoren-moduler` v1.6.0 or later installed:
+---
 
-   ```sh
-   npm install @navikt/nav-dekoratoren-moduler@^1.6.0
-   ```
+## Survey Configuration
 
-4. Follow the usage guide below to describe your survey, wire a transport handler,
-   and render the widget entry point that fits your product.
+### Option 1: Presets (Recommended)
 
-## API Endpoints
+Use presets for common survey patterns:
 
-Send feedback submissions to the Flexjar backend:
+```ts
+import { createRatingSurvey, createTopTasksSurvey } from "@navikt/flexjar-widget";
+
+// Rating survey (1-5 scale + optional text)
+const ratingSurvey = createRatingSurvey({
+  ratingPrompt: "Hvordan var opplevelsen?",
+  ratingDescription: "Svarene er anonyme.",  // Optional
+  textPrompt: "Hva kan vi forbedre?",
+  textRequired: false,  // Optional, defaults to false
+});
+
+// Top Tasks survey (task selection + success measurement)
+const topTasksSurvey = createTopTasksSurvey({
+  taskPrompt: "Hva prøvde du å gjøre i dag?",
+  tasks: [
+    { value: "apply", label: "Søke om sykepenger" },
+    { value: "status", label: "Sjekke status på søknad" },
+  ],
+  successPrompt: "Klarte du det?",  // Optional
+});
+```
+
+### Option 2: Custom Configuration
+
+Build any survey with the question array:
+
+```ts
+const customSurvey = {
+  questions: [
+    {
+      id: "area",
+      type: "singleChoice",
+      prompt: "Hvilken del av tjenesten brukte du?",
+      options: [
+        { value: "search", label: "Søk" },
+        { value: "profile", label: "Profil" },
+      ],
+      required: true,
+    },
+    {
+      id: "feedback",
+      type: "text",
+      prompt: "Fortell oss mer",
+      placeholder: "Skriv her...",
+    },
+  ],
+  gateQuestionId: "area", // Optional: hides other questions until this is answered
+};
+```
+
+### Question Types
+
+| Type | Description | Value Type |
+|------|-------------|------------|
+| `rating` | 1-5 emoji scale | `number` |
+| `text` | Multi-line text input | `string` |
+| `singleChoice` | Radio buttons | `string` |
+| `multiChoice` | Checkboxes | `string[]` |
+
+---
+
+## Sending Feedback to Flexjar API
+
+### API Endpoints
 
 | Environment | URL |
 |-------------|-----|
 | **Dev** | `https://flexjar-analytics-api.intern.dev.nav.no/api/v2/feedback` |
 | **Prod** | `https://flexjar-analytics-api.intern.nav.no/api/v2/feedback` |
 
-### Onboarding your app
+### Onboarding Your App
 
-To send feedback to the Flexjar API, your app must:
-
-1. **Configure Azure AD** in your `nais.yaml`:
+1. **Enable Azure AD** in `nais.yaml`:
    ```yaml
    azure:
      application:
        enabled: true
    ```
 
-2. **Add outbound access** to the API:
+2. **Add outbound access**:
    ```yaml
    accessPolicy:
      outbound:
@@ -98,16 +150,16 @@ To send feedback to the Flexjar API, your app must:
            namespace: team-esyfo
    ```
 
-3. **Request inbound access** – Contact team-esyfo to add your app to the API's inbound policy.
+3. **Request inbound access** – Contact team-esyfo to add your app.
 
-4. **Get an OBO token** for `api://<cluster>.team-esyfo.flexjar-analytics-api/.default` and include it as `Authorization: Bearer <token>`.
+4. **Get OBO token** and include as `Authorization: Bearer <token>`.
 
-### Example transport
+### Example Transport
 
 ```ts
 import { getToken, requestAzureOboToken } from "@navikt/oasis";
 
-const transport: FlexJarTransport = {
+const transport = {
   async submit(submission) {
     const token = getToken(request);
     const obo = await requestAzureOboToken(
@@ -127,252 +179,72 @@ const transport: FlexJarTransport = {
 };
 ```
 
-## Survey Analytics
+---
+
+## Analytics Dashboard
 
 View collected feedback at:
 
-| Environment | Dashboard URL |
-|-------------|---------------|
+| Environment | URL |
+|-------------|-----|
 | **Dev** | https://flexjar-analytics.intern.dev.nav.no |
 | **Prod** | https://flexjar-analytics.intern.nav.no |
 
-The dashboard provides:
-- Feedback list with filtering by date, rating, text, tags
-- Statistics with rating distribution, device breakdown, pathnames
-- Top Tasks success rate tracking
-- Excel/CSV export
+The dashboard provides filtering, statistics, rating distributions, and export to Excel/CSV.
 
-## See it in action
+---
 
-<img src="./demo-flexjar.png" alt="Flexjar dock with rating and text fields" width="320" />
+## Component Props
 
-## Describe your survey schema
+### FlexJarDock
 
-You can define surveys manually using the `questions` array, or use helper functions for common patterns.
+The main component - a sticky panel in the corner of the page.
 
-### Option 1: Using Presets (Recommended)
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `feedbackId` | `string` | Required | Unique ID for this survey |
+| `survey` | `FlexJarSurveyConfig` | Required | Survey configuration |
+| `transport` | `FlexJarTransport` | Required | Handler to submit feedback |
+| `position` | `'bottom-right' \| 'bottom-left'` | `'bottom-right'` | Dock position |
+| `context` | `Record<string, unknown>` | – | Extra metadata for submission |
+| `initialOpen` | `boolean` | `true` | Whether dock starts open |
+| `dismissCooldownDays` | `number` | `30` | Days before dock reappears after dismissal |
 
-```ts
-import { createRatingSurvey, createTopTasksSurvey } from "@navikt/flexjar-widget";
+### Customization Props
 
-// Standard rating survey
-export const ratingSurvey = createRatingSurvey({
-    ratingPrompt: "Hvordan var det å bruke oppfølgingsplanen?",
-    ratingDescription: "Svarene du sender inn er anonyme.",
-    textPrompt: "Hva kan vi forbedre?",
-});
+| Prop | Type | Default |
+|------|------|---------|
+| `title` | `string` | `"Gi tilbakemelding"` |
+| `submitLabel` | `string` | `"Send"` |
+| `cancelLabel` | `string` | `"Lukk"` |
+| `successTitle` | `string` | `"Takk for tilbakemeldingen!"` |
+| `transportErrorMessage` | `string` | `"Kunne ikke sende tilbakemeldingen..."` |
 
-// Top Tasks survey
-export const topTasksSurvey = createTopTasksSurvey({
-    tasks: [
-        { value: "apply", label: "Søke om sykepenger" },
-        { value: "status", label: "Sjekke status på søknad" },
-    ],
-    taskPrompt: "Hva prøvde du å gjøre i dag?",
-});
-```
-
-### Option 2: Manual Configuration
+### Event Callbacks
 
 ```ts
-import { type FlexJarSurveyConfig } from "@navikt/flexjar-widget";
-
-export const survey: FlexJarSurveyConfig = {
-    // Optional: gateQuestionId acts as a visibility gate.
-    // Follow-up questions are hidden until this question is answered.
-    gateQuestionId: "rating",
-    questions: [
-        {
-            id: "rating",
-            type: "rating",
-            prompt: "Hvordan opplevdes dette?",
-            required: true,
-        },
-        {
-            id: "feedback",
-            type: "text",
-            prompt: "Fortell mer (frivillig)",
-            required: false,
-        },
-    ],
-};
+<FlexJarDock
+  events={{
+    onSubmitSuccess: (submission) => analytics.track("feedback_sent"),
+    onSubmitError: (error) => console.error(error),
+    onViewDock: (feedbackId) => analytics.track("feedback_viewed"),
+  }}
+/>
 ```
 
-## FlexJarDock
+---
 
-`FlexJarDock` renders a compact, sticky
-panel that lets users answer the rating question immediately and complete the
-rest of the form inline—without opening a modal.
+## Persistence Behavior
 
-```tsx
-"use client";
+The widget uses localStorage to remember dismissals. This requires:
+- User consent for "surveys" storage
+- `flexjar-*` pattern in decorator's allowed storage list
 
-import { FlexJarDock, type FlexJarTransport } from "@navikt/flexjar-widget";
-import { survey } from "./survey";
+Without consent, the widget still works but state resets on page reload.
 
-const transport: FlexJarTransport = {
-	async submit(submission) {
-		await fetch("/api/flexjar", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(submission.transportPayload),
-		});
-	},
-};
+---
 
-export const FeedbackDock = () => (
-	<FlexJarDock
-		feedbackId="oppfolgingsplan"
-		survey={survey}
-		transport={transport}
-		position="bottom-right"
-	/>
-);
-```
+## Contributing
 
-## FlexJarDock props
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup and release instructions.
 
-| Prop                 | Type                              | Required | Default             | Description                                                       |
-|----------------------|-----------------------------------|----------|---------------------|-------------------------------------------------------------------|
-| `position`           | `'bottom-right' \| 'bottom-left'` | No       | `'bottom-right'`    | Which corner of the viewport the dock sticks to.                  |
-| `offset`             | `number`                          | No       | `24`                | Pixel distance from the viewport edge.                            |
-| `containerClassName` | `string`                          | No       | –                   | Custom class applied to the fixed outer container.                |
-| `panelClassName`     | `string`                          | No       | –                   | Custom class applied to the inner panel element.                  |
-| `panelBackground`    | `BoxProps['background']`          | No       | `'surface-default'` | Token applied to the dock panel background.                       |
-| `panelBorderColor`   | `BoxProps['borderColor']`         | No       | `'border-subtle'`   | Token used for the panel border; set to `undefined` to remove it. |
-
-## Core props
-
-| Prop                     | Type                                                     | Required | Default                                                   | Description                                                                                                                           |
-|--------------------------|----------------------------------------------------------|----------|-----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
-| `feedbackId`             | `string`                                                 | Yes      | –                                                         | Identifier included with the submission payload and analytics callbacks.                                                              |
-| `survey`                 | `FlexJarSurveyConfig`                                    | Yes      | –                                                         | Configuration containing the list of questions and survey type.                                                                       |
-| `transport`              | `FlexJarTransport`                                       | Yes      | –                                                         | Implementation responsible for persisting a submission.                                                                               |
-| `events`                 | `FlexJarEvents`                                          | No       | –                                                         | Lifecycle callbacks for analytics, validation, and dismissal persistence (see below).                                                 |
-| `context`                | `Record<string, unknown>`                                | No       | –                                                         | Extra metadata merged into the submission payload.                                                                                    |
-| `title`                  | `string`                                                 | No       | `"Gi tilbakemelding"`                                     | Accessible label for the dock panel; useful when the rating prompt is not self-explanatory.                                           |
-| `submitLabel`            | `string`                                                 | No       | `"Send"`                                                  | Text for the primary submit button when idle.                                                                                         |
-| `submitPendingLabel`     | `string`                                                 | No       | `"Sender…"`                                               | Text for the primary button while a submission is pending.                                                                            |
-| `cancelLabel`            | `string`                                                 | No       | `"Lukk"`                                                  | Text for the secondary cancel button and close icon aria-label.                                                                       |
-| `validationErrorMessage` | `string`                                                 | No       | `"Du må svare på spørsmålet."`                            | Message used by question components when required answers are missing.                                                                |
-| `transportErrorMessage`  | `string`                                                 | No       | `"Kunne ikke sende tilbakemeldingen. Prøv igjen senere."` | Message displayed when the transport throws.                                                                                          |
-| `successTitle`           | `string`                                                 | No       | `"Takk for tilbakemeldingen!"`                            | Title shown after a successful submission.                                                                                            |
-| `successBody`            | `React.ReactNode`                                        | No       | `undefined`                                               | Body text in the success view; omitted by default.                                                                                    |
-| `successPrimaryLabel`    | `string`                                                 | No       | `"Lukk"`                                                  | Label for the button in the success view.                                                                                             |
-| `renderQuestion`         | `(props: FlexJarRenderQuestionProps) => React.ReactNode` | No       | –                                                         | Custom renderer if you want to override the default question components.                                                              |
-| `resetOnClose`           | `boolean`                                                | No       | `true`                                                    | Reset answers when the dock closes.                                                                                                   |
-| `autoCloseOnSuccess`     | `boolean`                                                | No       | `false`                                                   | Close the dock automatically after a successful submission.                                                                           |
-| `successCloseDelayMs`    | `number`                                                 | No       | `1600`                                                    | Delay (ms) before auto-closing when `autoCloseOnSuccess` is enabled.                                                                  |
-| `dismissCooldownDays`    | `number`                                                 | No       | `30`                                                      | Number of days before the dock can reappear after being dismissed (requires surveys consent and `flexjar-*` in allowed storage list). |
-| `initialOpen`            | `boolean`                                                | No       | `true`                                                    | Whether the dock should be open by default. When persistence is unavailable, this controls the initial state.                         |
-| `showPersonalDataNotice` | `boolean`                                                | No       | `true`                                                    | Toggle the default personal-data warning beneath the form.                                                                            |
-| `personalDataNotice`     | `React.ReactNode`                                        | No       | Default warning element                                   | Custom content for the personal-data warning.                                                                                         |
-
-## Customise the experience
-
-- **Always-on feedback**: `FlexJarDock` keeps the survey visible and can reveal follow-ups once a "gate" question is answered.
-- **Copy & layout**: customise `title`, `submitLabel`, `cancelLabel`, `successTitle`, and `personalDataNotice` to match
-  your product language.
-- **Events**: pass an `events` object (see `FlexJarEvents`) to react to lifecycle hooks like `onViewDock`,
-  `onSubmitSuccess`, validation failures, or dismissal persistence issues via `onDismissalPersistFailed`.
-- **Success handling**: enable `autoCloseOnSuccess` and tune `successCloseDelayMs` if you want the dock to close
-  automatically after feedback is sent.
-- **Custom rendering**: provide `renderQuestion` for advanced layouts while keeping accessibility and validation wiring
-  from `useFlexJar`.
-
-Flexjar’s backend generally expects a `feedbackId` plus answers keyed by their question IDs.
-Core questions in presets use standard IDs (e.g., `rating`, `feedback`, `task`), but you can use any IDs you like.
-
-Every call to your `transport.submit` handler receives a `submission` object with a ready-to-send `transportPayload`.
-The widget enriches the payload with the human-readable question text so downstream logs keep answers and prompts
-together:
-
-```ts
-submission.transportPayload satisfies {
-	feedbackId: string;
-	feedbackId: string;
-	[questionId: string]: string | number | string[];
-	[questionIdWithPrefix: `question__${string}`]: string;
-};
-```
-
-The extra keys follow the pattern `question__<questionId>` and contain the exact prompt that was rendered. Core
-- Questions use their configured IDs for both the value and `question__` metadata.
-
-Send that payload directly to the Flexjar backend, or transform it further if you need to enrich the request.
-
-The packages ship with React (`>=18`) and `@navikt/aksel` as peer dependencies. Consumers stay in full control of
-network transport, analytics, and question configuration.
-
-## FlexJarSurveyConfig
-
-| Field               | Type                        | Required | Description                                                                                                                                                             |
-|---------------------|-----------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `questions`         | `FlexJarQuestion[]`         | Yes      | Array of questions to display in order.                                                         |
-| `gateQuestionId`    | `string`                    | No       | ID of the question that gates visibility of subsequent questions.                               |
-| `type`              | `SurveyType`                | No       | `"rating" \| "topTasks" \| "custom"`. Used for analytics classification. Defaults to `custom`.  |
-
-## Persistence behavior
-
-The widget **always renders** regardless of consent status. Consent only affects
-localStorage persistence:
-
-**With surveys consent granted**:
-
-- Dismissal state persists across page reloads using `localStorage`
-- Storage is managed via `@navikt/nav-dekoratoren-moduler`
-- Storage key format: `flexjar-dismissed-${feedbackId}`
-- The dock will reappear after the configured cooldown period (see `dismissCooldownDays`)
-- Requires the `flexjar-*` pattern in the decorator's allowed storage list
-
-**Without surveys consent**:
-
-- Widget still renders normally
-- No localStorage persistence
-- State resets on page reload
-- The dock respects `initialOpen` prop on every page load
-
-**When storage key is not in allowed list**:
-
-- Widget renders normally
-- Behavior same as without consent (no persistence)
-- In development mode, console logs explain why persistence is unavailable
-
-<details>
-<summary><strong>Flexjar-widget: Internal developer documentation</strong></summary>
-
-### Work on the widget locally
-
-```sh
-npm install
-npm run build
-```
-
-### Publish to GitHub Packages
-
-1. **Prepare the workspace**
-    - Ensure you are on the branch you want to release from (typically `main`).
-    - Step into the package folder: `cd packages/widget` before running any version or publish commands.
-2. **Authenticate (one-time setup per machine)**
-    - Create a personal access token with `write:packages`, `read:packages`, and `repo` scopes.
-    - Store it locally: `npm config set //npm.pkg.github.com/:_authToken=<TOKEN>` *(or export `NODE_AUTH_TOKEN=<TOKEN>`
-      in CI pipelines).*
-3. **Choose the version number**
-    - We follow [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
-        - Bug fix only → `npm version patch`
-        - Backwards-compatible feature → `npm version minor`
-        - Breaking change → `npm version major`
-    - `npm version` updates `package.json`, generates a git tag, and commits the bump for you.
-4. **Document the release**
-    - Update `CHANGELOG.md` with a short summary of the changes going out.
-    - Stage the changelog and version bump: `git add package.json package-lock.json CHANGELOG.md`.
-5. **Verify before publishing**
-    - From the repo root: `npm run lint`, `npm run test`, `npm run build`.
-6. **Publish**
-    - Still inside `packages/widget`: `npm publish --registry=https://npm.pkg.github.com`.
-    - Push the release commit and tag to GitHub: `git push && git push --tags`.
-
-The package exposes the dock UI, question components, hooks, and types from the default entry (
-`@navikt/flexjar-widget`).
-
-</details>

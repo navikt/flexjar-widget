@@ -15,7 +15,7 @@ export function createRatingSurvey(options: {
 }): FlexJarSurveyConfig {
     const questions: FlexJarQuestion[] = [
         {
-            id: "svar",
+            id: "rating",
             type: "rating",
             prompt: options.ratingPrompt,
             description: options.ratingDescription,
@@ -34,7 +34,7 @@ export function createRatingSurvey(options: {
     return {
         type: "rating",
         questions,
-        gateQuestionId: "svar",
+        gateQuestionId: "rating",
 
     };
 }
@@ -44,8 +44,8 @@ export function createRatingSurvey(options: {
  * Users select what they were trying to do and whether they succeeded.
  */
 export function createTopTasksSurvey(options: {
-    tasks: Array<{ value: string; label: string }>;
     taskPrompt?: string;
+    tasks: Array<{ value: string; label: string }>;
     successPrompt?: string;
     blockerPrompt?: string;
     includeBlockerQuestion?: boolean;
