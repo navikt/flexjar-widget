@@ -52,6 +52,17 @@ interface DockPanelProps {
     questionId: string,
     value: FlexJarAnswerValue | null | undefined,
   ) => void;
+  // Step mode props (branching logic)
+  isStepMode?: boolean;
+  currentStep?: number;
+  currentStepQuestion?: FlexJarQuestion;
+  canGoBack?: boolean;
+  canGoNext?: boolean;
+  isLastStep?: boolean;
+  onNext?: () => void;
+  onBack?: () => void;
+  nextLabel?: string;
+  backLabel?: string;
 }
 
 export const DockPanel = ({
@@ -86,6 +97,17 @@ export const DockPanel = ({
   transportErrorMessage,
   shouldDeferQuestion,
   onQuestionChange,
+  // Step mode props
+  isStepMode = false,
+  currentStep = 0,
+  currentStepQuestion,
+  canGoBack = false,
+  canGoNext = true,
+  isLastStep = false,
+  onNext,
+  onBack,
+  nextLabel = "Neste",
+  backLabel = "Tilbake",
 }: DockPanelProps) => {
   return (
     <div style={{ position: "relative" }}>
@@ -93,7 +115,7 @@ export const DockPanel = ({
         padding="space-16"
         background={panelBackground}
         borderRadius="large"
-        shadow="large"
+        shadow="dialog"
         borderWidth={panelBorderColor ? "1" : undefined}
         borderColor={panelBorderColor}
         className={joinClassNames(CLASS_NAMES.panel, panelClassName)}
@@ -154,57 +176,123 @@ export const DockPanel = ({
         ) : (
           <form onSubmit={onSubmit} noValidate>
             <VStack gap="space-16">
-              {orderedQuestions.map((question) => {
-                if (shouldDeferQuestion(question)) {
-                  return null;
-                }
-
-                const value = answers[question.id];
-                const isMissing = validationMissing.includes(question.id);
-                const handleChange = (
-                  nextValue: FlexJarAnswerValue | null | undefined,
-                ) => {
-                  onQuestionChange(question.id, nextValue);
-                };
-
-                return (
-                  <div key={question.id} className="flexjar-question">
+              {isStepMode && currentStepQuestion ? (
+                // Step mode: Show only the current question
+                <>
+                  <div className="flexjar-question">
                     {renderQuestion({
-                      question,
-                      value,
-                      onChange: handleChange,
-                      isMissing,
+                      question: currentStepQuestion,
+                      value: answers[currentStepQuestion.id],
+                      onChange: (nextValue) =>
+                        onQuestionChange(currentStepQuestion.id, nextValue),
+                      isMissing: validationMissing.includes(currentStepQuestion.id),
                       disabled: isSubmitting,
-                      hideLabel: question.id === promptQuestion.id,
+                      hideLabel: currentStepQuestion.id === promptQuestion.id,
                     })}
                   </div>
-                );
-              })}
 
-              {hasTransportError && (
-                <Alert variant="error" role="alert">
-                  {transportErrorMessage}
-                </Alert>
+                  {hasTransportError && (
+                    <Alert variant="error" role="alert">
+                      {transportErrorMessage}
+                    </Alert>
+                  )}
+
+                  {/* Show privacy notice only on last step before submit */}
+                  {showPersonalDataNotice && isLastStep && (
+                    <Alert variant="warning" role="alert">
+                      {personalDataNotice}
+                    </Alert>
+                  )}
+
+                  <HStack gap="space-8" wrap>
+                    {canGoBack && (
+                      <Button
+                        variant="secondary"
+                        type="button"
+                        onClick={onBack}
+                        disabled={isSubmitting}
+                      >
+                        {backLabel}
+                      </Button>
+                    )}
+                    {isLastStep ? (
+                      <Button
+                        type="submit"
+                        loading={isSubmitting}
+                        disabled={isSubmitting || !canGoNext}
+                      >
+                        {isSubmitting ? submitPendingLabel : submitLabel}
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        onClick={onNext}
+                        disabled={isSubmitting || !canGoNext}
+                      >
+                        {nextLabel}
+                      </Button>
+                    )}
+                    <Button variant="tertiary" type="button" onClick={onClose}>
+                      {cancelLabel}
+                    </Button>
+                  </HStack>
+                </>
+              ) : (
+                // Legacy mode: Show all questions at once
+                <>
+                  {orderedQuestions.map((question) => {
+                    if (shouldDeferQuestion(question)) {
+                      return null;
+                    }
+
+                    const value = answers[question.id];
+                    const isMissing = validationMissing.includes(question.id);
+                    const handleChange = (
+                      nextValue: FlexJarAnswerValue | null | undefined,
+                    ) => {
+                      onQuestionChange(question.id, nextValue);
+                    };
+
+                    return (
+                      <div key={question.id} className="flexjar-question">
+                        {renderQuestion({
+                          question,
+                          value,
+                          onChange: handleChange,
+                          isMissing,
+                          disabled: isSubmitting,
+                          hideLabel: question.id === promptQuestion.id,
+                        })}
+                      </div>
+                    );
+                  })}
+
+                  {hasTransportError && (
+                    <Alert variant="error" role="alert">
+                      {transportErrorMessage}
+                    </Alert>
+                  )}
+
+                  {showPersonalDataNotice && !isSubmitBlocked && (
+                    <Alert variant="warning" role="alert">
+                      {personalDataNotice}
+                    </Alert>
+                  )}
+
+                  <HStack gap="space-8" wrap>
+                    <Button
+                      type="submit"
+                      loading={isSubmitting}
+                      disabled={isSubmitting || isSubmitBlocked}
+                    >
+                      {isSubmitting ? submitPendingLabel : submitLabel}
+                    </Button>
+                    <Button variant="tertiary" type="button" onClick={onClose}>
+                      {cancelLabel}
+                    </Button>
+                  </HStack>
+                </>
               )}
-
-              {showPersonalDataNotice && !isSubmitBlocked && (
-                <Alert variant="warning" role="alert">
-                  {personalDataNotice}
-                </Alert>
-              )}
-
-              <HStack gap="space-8" wrap>
-                <Button
-                  type="submit"
-                  loading={isSubmitting}
-                  disabled={isSubmitting || isSubmitBlocked}
-                >
-                  {isSubmitting ? submitPendingLabel : submitLabel}
-                </Button>
-                <Button variant="tertiary" type="button" onClick={onClose}>
-                  {cancelLabel}
-                </Button>
-              </HStack>
             </VStack>
           </form>
         )}

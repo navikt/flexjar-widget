@@ -5,6 +5,7 @@ import { useFlexJar } from "../../core";
 import { DefaultQuestionRenderer, RatingQuestionField } from "../questions";
 import { useQuestionGate } from "./hooks/useQuestionGate.js";
 import { useAutoCloseOnSuccess } from "./hooks/useAutoCloseOnSuccess.js";
+import { useStepNavigation } from "./hooks/useStepNavigation.js";
 import type { FlexJarRenderQuestionProps } from "../../types.js";
 import { buildCanonicalSurvey } from "../shared/canonicalSurvey.js";
 import {
@@ -274,6 +275,23 @@ export const FlexJarDock = ({
     gateQuestionId,
   );
 
+  // Step navigation for branching logic
+  const {
+    isStepMode,
+    currentStep,
+    currentQuestion: currentStepQuestion,
+    canGoBack,
+    canGoNext,
+    isLastStep,
+    shouldSubmit,
+    goToNext,
+    goToPrevious,
+  } = useStepNavigation({
+    questions,
+    answers,
+    metadata,
+  });
+
   const handleSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -434,6 +452,15 @@ export const FlexJarDock = ({
           transportErrorMessage={transportErrorMessage}
           shouldDeferQuestion={shouldDeferQuestion}
           onQuestionChange={setAnswer}
+          // Step mode props for branching
+          isStepMode={isStepMode}
+          currentStep={currentStep}
+          currentStepQuestion={currentStepQuestion}
+          canGoBack={canGoBack}
+          canGoNext={canGoNext}
+          isLastStep={isLastStep || shouldSubmit}
+          onNext={goToNext}
+          onBack={goToPrevious}
         />
       )}
     </div>

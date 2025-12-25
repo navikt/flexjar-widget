@@ -121,6 +121,61 @@ const customSurvey = {
 | `singleChoice` | Radio buttons | `string` |
 | `multiChoice` | Checkboxes | `string[]` |
 
+### Branching Logic (Skip Logic)
+
+Add conditional navigation to questions using the `logic` property:
+
+```ts
+const branchingSurvey = {
+  questions: [
+    {
+      id: "success",
+      type: "singleChoice",
+      prompt: "Fikk du gjort det du kom for?",
+      options: [
+        { value: "YES", label: "Ja" },
+        { value: "NO", label: "Nei" },
+      ],
+      logic: [
+        {
+          condition: { field: "ANSWER", operator: "EQ", value: "YES" },
+          action: { type: "JUMP_TO", targetId: "rating" }, // Skip follow-up
+        },
+      ],
+    },
+    {
+      id: "blocker",
+      type: "text",
+      prompt: "Hva stoppet deg?", // Only shown if answer was "NO"
+    },
+    {
+      id: "rating",
+      type: "rating",
+      prompt: "Hvor fornøyd er du?",
+    },
+  ],
+};
+```
+
+**Logic Rules:**
+
+| Field | Description |
+|-------|-------------|
+| `ANSWER` | Compare against the current question's answer |
+| `METADATA` | Compare against survey metadata (requires `key`) |
+
+| Operator | Description |
+|----------|-------------|
+| `EQ` / `NEQ` | Equals / Not equals |
+| `GT` / `LT` | Greater than / Less than (numeric) |
+| `CONTAINS` | Text contains substring |
+
+| Action | Description |
+|--------|-------------|
+| `JUMP_TO` | Jump to question with `targetId` |
+| `SKIP` | Skip the next question |
+| `SUBMIT` | Submit survey immediately |
+
 ---
 
 ## Sending Feedback to Flexjar API

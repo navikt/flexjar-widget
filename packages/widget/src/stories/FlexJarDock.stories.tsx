@@ -295,3 +295,87 @@ export const CustomSurvey: Story = {
     },
   },
 };
+
+/**
+ * Survey with branching logic - demonstrates skip logic based on answers and metadata.
+ * When the user answers "Yes" to the first question, it skips to the positive follow-up.
+ * When the user answers "No", it shows a follow-up question about what went wrong.
+ */
+const BRANCHING_SURVEY: FlexJarSurveyConfig = {
+  type: "custom",
+  questions: [
+    {
+      id: "solved_task",
+      type: "singleChoice",
+      prompt: "Fikk du gjort det du kom for?",
+      description: "Vi bruker svaret til å forbedre tjenesten",
+      required: true,
+      options: [
+        { value: "YES", label: "Ja" },
+        { value: "PARTIAL", label: "Delvis" },
+        { value: "NO", label: "Nei" },
+      ],
+      logic: [
+        {
+          // If answered YES, skip to the positive rating question
+          condition: { field: "ANSWER", operator: "EQ", value: "YES" },
+          action: { type: "JUMP_TO", targetId: "positive_rating" },
+        },
+        // If NO or PARTIAL, fall through to next question (blocker follow-up)
+      ],
+    },
+    {
+      id: "blocker",
+      type: "singleChoice",
+      prompt: "Hva var det som stoppet deg?",
+      required: true,
+      options: [
+        { value: "tech_error", label: "Teknisk feil" },
+        { value: "confusing", label: "Vanskelig å forstå" },
+        { value: "missing_info", label: "Manglet informasjon" },
+        { value: "other", label: "Noe annet" },
+      ],
+    },
+    {
+      id: "blocker_details",
+      type: "text",
+      prompt: "Kan du fortelle mer om hva som skjedde?",
+      required: false,
+      placeholder: "Beskriv problemet så godt du kan...",
+    },
+    {
+      id: "positive_rating",
+      type: "rating",
+      prompt: "Hvor fornøyd er du med tjenesten?",
+      scale: 5,
+      required: true,
+    },
+    {
+      id: "final_comment",
+      type: "text",
+      prompt: "Har du andre tilbakemeldinger?",
+      required: false,
+    },
+  ],
+};
+
+export const BranchingLogic: Story = {
+  render: (args) => <ExamplePage {...args} />,
+  args: {
+    feedbackId: "storybook-branching",
+    survey: BRANCHING_SURVEY,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: `**Branching Logic / Skip Logic Demo**
+
+Denne historien demonstrerer kondisjonell navigasjon:
+- Svar "Ja" → hopper over oppfølgingsspørsmålet og rett til rating
+- Svar "Nei" eller "Delvis" → viser oppfølgingsspørsmål om hva som var problemet
+
+Branching aktiveres automatisk når spørsmål har \`logic\` definert.`,
+      },
+    },
+  },
+};

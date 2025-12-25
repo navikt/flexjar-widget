@@ -4,6 +4,89 @@ export type FlexJarQuestionType =
   | "singleChoice"
   | "multiChoice";
 
+// ============================================
+// Branching Logic Types (Skip Logic)
+// ============================================
+
+/**
+ * Field type for logic conditions.
+ * - "ANSWER": Compare against the current question's answer
+ * - "METADATA": Compare against a value in the survey metadata
+ */
+export type LogicField = "ANSWER" | "METADATA";
+
+/**
+ * Comparison operators for logic conditions.
+ */
+export type LogicOperator = "EQ" | "NEQ" | "GT" | "LT" | "CONTAINS";
+
+/**
+ * A condition that determines whether a logic rule should trigger.
+ * Uses discriminated unions for type safety.
+ */
+export type LogicCondition =
+  | {
+    /** Compare against the current question's answer */
+    field: "ANSWER";
+    /** Comparison operator */
+    operator: LogicOperator;
+    /** Value to compare against */
+    value: string | number | boolean;
+  }
+  | {
+    /** Compare against a value in the survey metadata */
+    field: "METADATA";
+    /** Key to look up in metadata (required for METADATA) */
+    key: string;
+    /** Comparison operator */
+    operator: LogicOperator;
+    /** Value to compare against */
+    value: string | number | boolean;
+  };
+
+/**
+ * Action type for logic rules.
+ * - "JUMP_TO": Jump to a specific question by ID
+ * - "SKIP": Skip the next question (go to currentIndex + 2)
+ * - "SUBMIT": Submit the survey immediately
+ */
+export type LogicActionType = "JUMP_TO" | "SKIP" | "SUBMIT";
+
+/**
+ * Action to perform when a logic condition is met.
+ * Uses discriminated unions to ensure targetId is provided for JUMP_TO.
+ */
+export type LogicAction =
+  | {
+    /** Jump to a specific question */
+    type: "JUMP_TO";
+    /** Target question ID (required for JUMP_TO) */
+    targetId: string;
+  }
+  | {
+    /** Skip the next question */
+    type: "SKIP";
+  }
+  | {
+    /** Submit the survey immediately */
+    type: "SUBMIT";
+  };
+
+/**
+ * A branching rule that controls survey navigation.
+ * Rules are evaluated in order; first matching rule wins.
+ */
+export interface LogicRule {
+  /** Condition to evaluate */
+  condition: LogicCondition;
+  /** Action to perform if condition is met */
+  action: LogicAction;
+}
+
+// ============================================
+// Question Base Type
+// ============================================
+
 export interface FlexJarQuestionBase<TType extends FlexJarQuestionType> {
   id: string;
   type: TType;
@@ -11,6 +94,12 @@ export interface FlexJarQuestionBase<TType extends FlexJarQuestionType> {
   description?: string;
   required?: boolean;
   analyticsId?: string;
+  /**
+   * Optional branching rules evaluated after this question is answered.
+   * Rules are evaluated in order; first matching rule determines navigation.
+   * If no rules match (or logic is undefined), proceeds to next question.
+   */
+  logic?: LogicRule[];
 }
 
 export interface RatingScaleLabel {
