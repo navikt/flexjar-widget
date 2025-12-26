@@ -1,7 +1,7 @@
 {
   "name": "flexjar-workspace",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.2.15-alpha.test.1",
   "workspaces": [
     "packages/*"
   ],
