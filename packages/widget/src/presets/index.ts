@@ -8,9 +8,6 @@ import type { FlexJarSurveyConfig } from "../components/surveyTypes.js";
 export function createRatingSurvey(options: {
     ratingPrompt: string;
     ratingDescription?: string;
-    textPrompt: string;
-    textPlaceholder?: string;
-    textRequired?: boolean;
     followUpQuestions?: FlexJarQuestion[];
 }): FlexJarSurveyConfig {
     const questions: FlexJarQuestion[] = [
@@ -21,21 +18,16 @@ export function createRatingSurvey(options: {
             description: options.ratingDescription,
             required: true,
         },
-        {
-            id: "feedback",
-            type: "text",
-            prompt: options.textPrompt,
-            placeholder: options.textPlaceholder,
-            required: options.textRequired ?? false,
-        },
-        ...(options.followUpQuestions ?? []),
     ];
+
+    if (options.followUpQuestions) {
+        questions.push(...options.followUpQuestions);
+    }
 
     return {
         type: "rating",
         questions,
         gateQuestionId: "rating",
-
     };
 }
 
