@@ -17,6 +17,8 @@ export function buildTransportPayload(
   questions: FlexJarQuestion[],
   surveyType?: SurveyType,
   metadata?: Record<string, unknown>,
+  startedAt?: string,
+  submittedAt?: string,
 ): FlexJarTransportPayload {
   const payload: FlexJarTransportPayload = {
     feedbackId,
@@ -30,6 +32,18 @@ export function buildTransportPayload(
   // Add custom metadata if provided
   if (metadata && Object.keys(metadata).length > 0) {
     payload.metadata = metadata;
+  }
+
+  // Calculate and add time to complete if both timestamps are available
+  if (startedAt && submittedAt) {
+    const startTime = new Date(startedAt).getTime();
+    const endTime = new Date(submittedAt).getTime();
+    const timeToCompleteMs = endTime - startTime;
+
+    // Only add if it's a reasonable value (between 1 second and 30 minutes)
+    if (timeToCompleteMs > 1000 && timeToCompleteMs < 1800000) {
+      payload.timeToCompleteMs = timeToCompleteMs;
+    }
   }
 
   // Add all answers
@@ -63,7 +77,7 @@ export function buildTransportPayload(
     } else if (Array.isArray(value)) {
       fieldType = "MULTI_CHOICE";
       answerValue = { type: "multiChoice", selectedOptionIds: value };
-    } else if ('options' in question && question.options) {
+    } else if ("options" in question && question.options) {
       // Likely single choice if it has options and is not array
       fieldType = "SINGLE_CHOICE";
       answerValue = { type: "singleChoice", selectedOptionId: String(value) };
@@ -79,9 +93,12 @@ export function buildTransportPayload(
       question: {
         label: question.prompt,
         description: (question as any).description || null, // Cast because description might not be in base type
-        options: 'options' in question && question.options ? question.options.map((o: any) => ({ id: o.value, label: o.label })) : null
+        options:
+          "options" in question && question.options
+            ? question.options.map((o: any) => ({ id: o.value, label: o.label }))
+            : null,
       },
-      value: answerValue
+      value: answerValue,
     });
   }
 
@@ -89,5 +106,3 @@ export function buildTransportPayload(
 
   return payload;
 }
-
-

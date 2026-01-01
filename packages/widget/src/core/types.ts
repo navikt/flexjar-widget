@@ -1,8 +1,4 @@
-export type FlexJarQuestionType =
-  | "rating"
-  | "text"
-  | "singleChoice"
-  | "multiChoice";
+export type FlexJarQuestionType = "rating" | "text" | "singleChoice" | "multiChoice";
 
 // ============================================
 // Branching Logic Types (Skip Logic)
@@ -26,23 +22,23 @@ export type LogicOperator = "EQ" | "NEQ" | "GT" | "LT" | "CONTAINS";
  */
 export type LogicCondition =
   | {
-    /** Compare against the current question's answer */
-    field: "ANSWER";
-    /** Comparison operator */
-    operator: LogicOperator;
-    /** Value to compare against */
-    value: string | number | boolean;
-  }
+      /** Compare against the current question's answer */
+      field: "ANSWER";
+      /** Comparison operator */
+      operator: LogicOperator;
+      /** Value to compare against */
+      value: string | number | boolean;
+    }
   | {
-    /** Compare against a value in the survey metadata */
-    field: "METADATA";
-    /** Key to look up in metadata (required for METADATA) */
-    key: string;
-    /** Comparison operator */
-    operator: LogicOperator;
-    /** Value to compare against */
-    value: string | number | boolean;
-  };
+      /** Compare against a value in the survey metadata */
+      field: "METADATA";
+      /** Key to look up in metadata (required for METADATA) */
+      key: string;
+      /** Comparison operator */
+      operator: LogicOperator;
+      /** Value to compare against */
+      value: string | number | boolean;
+    };
 
 /**
  * Action type for logic rules.
@@ -58,19 +54,19 @@ export type LogicActionType = "JUMP_TO" | "SKIP" | "SUBMIT";
  */
 export type LogicAction =
   | {
-    /** Jump to a specific question */
-    type: "JUMP_TO";
-    /** Target question ID (required for JUMP_TO) */
-    targetId: string;
-  }
+      /** Jump to a specific question */
+      type: "JUMP_TO";
+      /** Target question ID (required for JUMP_TO) */
+      targetId: string;
+    }
   | {
-    /** Skip the next question */
-    type: "SKIP";
-  }
+      /** Skip the next question */
+      type: "SKIP";
+    }
   | {
-    /** Submit the survey immediately */
-    type: "SUBMIT";
-  };
+      /** Submit the survey immediately */
+      type: "SUBMIT";
+    };
 
 /**
  * A branching rule that controls survey navigation.
@@ -125,8 +121,9 @@ export interface ChoiceOption {
   description?: string;
 }
 
-export interface ChoiceQuestion
-  extends FlexJarQuestionBase<"singleChoice" | "multiChoice"> {
+export interface ChoiceQuestion extends FlexJarQuestionBase<
+  "singleChoice" | "multiChoice"
+> {
   options: ChoiceOption[];
   randomize?: boolean;
 }
@@ -143,9 +140,16 @@ export type FlexJarAnswerValue = string | number | string[];
  * Survey type identifier for analytics and dashboard display.
  * - "rating": Classic 1-5 scale with optional text (current default behavior)
  * - "topTasks": Task selection + success measurement for conversion tracking
+ * - "discovery": Free-text task discovery to identify what users are trying to do
+ * - "taskPriority": Users select their top 5 most important tasks from a list
  * - "custom": Any other question combination
  */
-export type SurveyType = "rating" | "topTasks" | "custom";
+export type SurveyType =
+  | "rating"
+  | "topTasks"
+  | "discovery"
+  | "taskPriority"
+  | "custom";
 
 export type FlexJarTransportPayload = {
   feedbackId: string;

@@ -32,10 +32,7 @@ export interface UseFlexJarReturn {
   answers: Record<string, FlexJarAnswerValue>;
   status: FlexJarStatus;
   error: FlexJarError | null;
-  setAnswer: (
-    questionId: string,
-    value: FlexJarAnswerValue | null | undefined,
-  ) => void;
+  setAnswer: (questionId: string, value: FlexJarAnswerValue | null | undefined) => void;
   submit: () => Promise<FlexJarSubmitResult>;
   validate: () => string[];
   reset: () => void;
@@ -82,11 +79,12 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     setError(null);
 
     const answerSnapshot = cloneAnswers(answers);
+    const submittedAtTimestamp = new Date().toISOString();
     const submission: FlexJarSubmission = {
       feedbackId,
       answers: answerSnapshot,
       startedAt: startedAtRef.current,
-      submittedAt: new Date().toISOString(),
+      submittedAt: submittedAtTimestamp,
       context: context ? { ...context } : undefined,
       transportPayload: buildTransportPayload(
         feedbackId,
@@ -94,6 +92,8 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
         questions,
         surveyType,
         metadata,
+        startedAtRef.current,
+        submittedAtTimestamp,
       ),
     };
 
