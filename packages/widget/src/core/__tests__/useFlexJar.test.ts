@@ -157,9 +157,8 @@ describe("useFlexJar", () => {
     expect(payload.answers).toEqual({ rating: 5 });
     expect(payload.transportPayload.rating).toBe(5);
     expect(payload.transportPayload).not.toHaveProperty("feedback");
-    expect(payload.transportPayload["question__feedback"]).toBe(
-      "Hva kan vi forbedre?",
-    );
+    // surveyType is now always inferred if not provided
+    expect(payload.transportPayload.surveyType).toBe("rating");
 
     expect(result.current.status).toBe("success");
     expect(result.current.error).toBeNull();
@@ -237,14 +236,12 @@ describe("useFlexJar", () => {
     expect(payload.transportPayload.rating).toBe(4);
     expect(payload.transportPayload.feedback).toBe("Alt fungerer fint");
     expect(payload.transportPayload["free-text"]).toBe("Alt fungerer fint");
-    expect(payload.transportPayload["question__rating"]).toBe(
+    // surveyType is now always inferred if not provided
+    expect(payload.transportPayload.surveyType).toBe("rating");
+    // Structured answers array contains question metadata
+    expect(payload.transportPayload.answers).toHaveLength(3);
+    expect(payload.transportPayload.answers![0].question.label).toBe(
       "Hvor fornøyd er du?",
-    );
-    expect(payload.transportPayload["question__feedback"]).toBe(
-      "Hva kan vi forbedre?",
-    );
-    expect(payload.transportPayload["question__free-text"]).toBe(
-      "Andre kommentarer?",
     );
     expect(payload.startedAt).toBe(INITIAL_TIME.toISOString());
     expect(payload.submittedAt).toBe(SUBMIT_TIME.toISOString());

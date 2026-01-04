@@ -22,23 +22,23 @@ export type LogicOperator = "EQ" | "NEQ" | "GT" | "LT" | "CONTAINS";
  */
 export type LogicCondition =
   | {
-      /** Compare against the current question's answer */
-      field: "ANSWER";
-      /** Comparison operator */
-      operator: LogicOperator;
-      /** Value to compare against */
-      value: string | number | boolean;
-    }
+    /** Compare against the current question's answer */
+    field: "ANSWER";
+    /** Comparison operator */
+    operator: LogicOperator;
+    /** Value to compare against */
+    value: string | number | boolean;
+  }
   | {
-      /** Compare against a value in the survey metadata */
-      field: "METADATA";
-      /** Key to look up in metadata (required for METADATA) */
-      key: string;
-      /** Comparison operator */
-      operator: LogicOperator;
-      /** Value to compare against */
-      value: string | number | boolean;
-    };
+    /** Compare against a value in the survey metadata */
+    field: "METADATA";
+    /** Key to look up in metadata (required for METADATA) */
+    key: string;
+    /** Comparison operator */
+    operator: LogicOperator;
+    /** Value to compare against */
+    value: string | number | boolean;
+  };
 
 /**
  * Action type for logic rules.
@@ -54,19 +54,19 @@ export type LogicActionType = "JUMP_TO" | "SKIP" | "SUBMIT";
  */
 export type LogicAction =
   | {
-      /** Jump to a specific question */
-      type: "JUMP_TO";
-      /** Target question ID (required for JUMP_TO) */
-      targetId: string;
-    }
+    /** Jump to a specific question */
+    type: "JUMP_TO";
+    /** Target question ID (required for JUMP_TO) */
+    targetId: string;
+  }
   | {
-      /** Skip the next question */
-      type: "SKIP";
-    }
+    /** Skip the next question */
+    type: "SKIP";
+  }
   | {
-      /** Submit the survey immediately */
-      type: "SUBMIT";
-    };
+    /** Submit the survey immediately */
+    type: "SUBMIT";
+  };
 
 /**
  * A branching rule that controls survey navigation.
@@ -151,6 +151,24 @@ export type SurveyType =
   | "taskPriority"
   | "custom";
 
+/** Structured answer for transport/analytics */
+export interface TransportAnswer {
+  fieldId: string;
+  fieldType: "RATING" | "TEXT" | "SINGLE_CHOICE" | "MULTI_CHOICE";
+  question: {
+    label: string;
+    description: string | null;
+    options: Array<{ id: string; label: string }> | null;
+  };
+  value: {
+    type: "rating" | "text" | "singleChoice" | "multiChoice";
+    rating?: number;
+    text?: string;
+    selectedOptionId?: string;
+    selectedOptionIds?: string[];
+  };
+}
+
 export type FlexJarTransportPayload = {
   feedbackId: string;
   surveyType?: SurveyType;
@@ -158,7 +176,12 @@ export type FlexJarTransportPayload = {
   feedback?: string;
   /** Custom metadata for segmentation/filtering (e.g. { harDialogmote: true }) */
   metadata?: Record<string, unknown>;
-} & Record<string, FlexJarAnswerValue | string>;
+  /** Structured answers array for analytics */
+  answers?: TransportAnswer[];
+  /** Time to complete the survey in milliseconds */
+  timeToCompleteMs?: number;
+} & Record<string, FlexJarAnswerValue | string | TransportAnswer[] | number | Record<string, unknown>>;
+
 
 export interface FlexJarSubmission {
   feedbackId: string;
