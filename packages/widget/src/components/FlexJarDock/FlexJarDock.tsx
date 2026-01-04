@@ -19,6 +19,28 @@ import { CLASS_NAMES, joinClassNames } from "./classNames.js";
 import { usePersistedDismissal } from "./hooks/usePersistedDismissal.js";
 import "./FlexJarDock.fallback.css";
 
+import type {
+  FlexJarLabels,
+  FlexJarSuccessConfig,
+  FlexJarStyle,
+  FlexJarBehavior,
+} from "./propTypes.js";
+
+/**
+ * Props for the FlexJarDock component.
+ * 
+ * @example
+ * ```tsx
+ * <FlexJarDock
+ *   feedbackId="my-app"
+ *   survey={NAV_STANDARD_RATING}
+ *   transport={transport}
+ *   labels={{ submit: "Send", cancel: "Avbryt" }}
+ *   success={{ title: "Takk!", autoClose: true }}
+ *   behavior={{ storageStrategy: "localStorage" }}
+ * />
+ * ```
+ */
 export interface FlexJarDockProps {
   /**
    * Unique identifier for this feedback instance. Used for localStorage persistence keys and event tracking.
@@ -28,7 +50,7 @@ export interface FlexJarDockProps {
 
   /**
    * Survey configuration defining the questions to display.
-   * Must include a rating question and main question, with optional follow-up questions.
+   * Use presets like NAV_STANDARD_RATING or create custom with createRatingSurvey().
    */
   survey: FlexJarSurveyConfig;
 
@@ -39,163 +61,39 @@ export interface FlexJarDockProps {
   transport: FlexJarTransport;
 
   /**
+   * Labels for UI elements (submit button, error messages, etc.).
+   */
+  labels?: FlexJarLabels;
+
+  /**
+   * Success state configuration (title, body, auto-close).
+   */
+  success?: FlexJarSuccessConfig;
+
+  /**
+   * Visual styling options (position, colors, classNames).
+   */
+  style?: FlexJarStyle;
+
+  /**
+   * Behavior options (persistence, cooldown, privacy notice).
+   */
+  behavior?: FlexJarBehavior;
+
+  /**
    * Optional event callbacks for tracking user interactions and lifecycle events.
-   * Includes onViewDock, onSubmit, onSubmitSuccess, onSubmitError, etc.
    */
   events?: FlexJarEvents;
 
   /**
-   * Additional context data to include with submissions (e.g., user metadata, page info).
-   * Will be merged into the transportPayload.
+   * Additional context data to include with submissions.
    */
   context?: Record<string, unknown>;
 
   /**
    * Custom metadata for segmentation/filtering in analytics.
-   * Use this for business-specific context like { harDialogmote: true, sykmeldingstype: "avventende" }.
-   * This data becomes visible and filterable in the analytics dashboard.
    */
   metadata?: Record<string, unknown>;
-
-  /**
-   * Label for the submit button.
-   * @default "Send inn"
-   */
-  submitLabel?: string;
-
-  /**
-   * Label shown on the submit button while submission is in progress.
-   * @default "Sender inn..."
-   */
-  submitPendingLabel?: string;
-
-  /**
-   * Label for the cancel button (currently not used in dock UI).
-   * @default "Lukk"
-   */
-  cancelLabel?: string;
-
-  /**
-   * Error message shown when required fields are missing.
-   * @default "Vennligst fyll ut alle påkrevde felt"
-   */
-  validationErrorMessage?: string;
-
-  /**
-   * Error message shown when submission fails due to transport/network errors.
-   * @default "Noe gikk galt ved innsending. Prøv igjen senere."
-   */
-  transportErrorMessage?: string;
-
-  /**
-   * Title shown on the success screen after successful submission.
-   * @default "Takk for tilbakemeldingen!"
-   */
-  successTitle?: string;
-
-  /**
-   * Optional body content displayed on the success screen.
-   * Can be a string or React element.
-   */
-  successBody?: ReactNode;
-
-  /**
-   * Label for the primary action button on the success screen ("Lukk").
-   * @default "Lukk"
-   */
-  successPrimaryLabel?: string;
-
-  /**
-   * Whether to reset the form state when the dock is closed/dismissed.
-   * @default true
-   */
-  resetOnClose?: boolean;
-
-  /**
-   * Whether to automatically close the dock after successful submission.
-   * When true, closes after `successCloseDelayMs` milliseconds.
-   * @default false
-   */
-  autoCloseOnSuccess?: boolean;
-
-  /**
-   * Delay in milliseconds before auto-closing the dock after success (when `autoCloseOnSuccess` is true).
-   * @default 1600
-   */
-  successCloseDelayMs?: number;
-
-  /**
-   * Whether to show the personal data notice at the bottom of the form.
-   * @default true
-   */
-  showPersonalDataNotice?: boolean;
-
-  /**
-   * Custom content for the personal data notice.
-   * If not provided, uses the default NAV privacy notice.
-   */
-  personalDataNotice?: ReactNode;
-
-  /**
-   * Position of the dock on the screen.
-   * @default "bottom-right"
-   */
-  position?: "bottom-right" | "bottom-left";
-
-  /**
-   * Offset in pixels from the bottom and side edges of the viewport.
-   * @default 24
-   */
-  offset?: number;
-
-  /**
-   * Additional CSS class name for the dock container element.
-   */
-  containerClassName?: string;
-
-  /**
-   * Additional CSS class name for the dock panel element.
-   */
-  panelClassName?: string;
-
-  /**
-   * Background color for the dock panel using NAV Design System Darkside tokens.
-   * @default "default"
-   */
-  panelBackground?: BoxNewProps["background"];
-
-  /**
-   * Border color for the dock panel using NAV Design System Darkside tokens.
-   * @default "neutral-subtle"
-   */
-  panelBorderColor?: BoxNewProps["borderColor"];
-
-  /**
-   * Whether the dock should be open or minimized on initial render.
-   * @default true
-   */
-  initialOpen?: boolean;
-
-  /**
-   * Custom label for the minimized dock button.
-   * @default "Gi tilbakemelding"
-   */
-  minimizedButtonLabel?: string;
-
-  /**
-   * Number of days before a dismissed dock can be shown again.
-   * Set to 0 to disable cooldown (dock can be reopened immediately).
-   * @default 30
-   */
-  dismissCooldownDays?: number;
-
-  /**
-   * Controls dock behavior after successful submission.
-   * - true: Dock is completely hidden (no minimized button) and stays hidden across page reloads for the cooldown period
-   * - false: Dock is minimized (shows small button) and can be reopened
-   * @default true
-   */
-  hideAfterSubmit?: boolean;
 }
 
 export const FlexJarDock = ({
@@ -205,30 +103,40 @@ export const FlexJarDock = ({
   events,
   context,
   metadata,
-  submitLabel = DEFAULT_COPY.submitLabel,
-  submitPendingLabel = DEFAULT_COPY.submitPendingLabel,
-  cancelLabel = DEFAULT_COPY.cancelLabel,
-  validationErrorMessage = DEFAULT_COPY.validationErrorMessage,
-  transportErrorMessage = DEFAULT_COPY.transportErrorMessage,
-  successTitle = DEFAULT_COPY.successTitle,
-  successBody = DEFAULT_COPY.successBody,
-  successPrimaryLabel = DEFAULT_COPY.successPrimaryLabel,
-  resetOnClose = true,
-  autoCloseOnSuccess = false,
-  successCloseDelayMs = 1600,
-  showPersonalDataNotice = true,
-  personalDataNotice,
-  position = "bottom-right",
-  offset = 24,
-  containerClassName,
-  panelClassName,
-  panelBackground = "default",
-  panelBorderColor = "neutral-subtle",
-  initialOpen = true,
-  minimizedButtonLabel,
-  dismissCooldownDays = 30,
-  hideAfterSubmit = true,
+  labels,
+  success,
+  style,
+  behavior,
 }: FlexJarDockProps) => {
+  // Resolve props from grouped config with defaults
+  const submitLabel = labels?.submit ?? DEFAULT_COPY.submitLabel;
+  const submitPendingLabel = labels?.submitPending ?? DEFAULT_COPY.submitPendingLabel;
+  const cancelLabel = labels?.cancel ?? DEFAULT_COPY.cancelLabel;
+  const validationErrorMessage = labels?.validationError ?? DEFAULT_COPY.validationErrorMessage;
+  const transportErrorMessage = labels?.transportError ?? DEFAULT_COPY.transportErrorMessage;
+  const minimizedButtonLabel = labels?.minimizedButton ?? "Gi tilbakemelding";
+
+  const successTitle = success?.title ?? DEFAULT_COPY.successTitle;
+  const successBody = success?.body ?? DEFAULT_COPY.successBody;
+  const successPrimaryLabel = success?.primaryLabel ?? DEFAULT_COPY.successPrimaryLabel;
+  const autoCloseOnSuccess = success?.autoClose ?? false;
+  const successCloseDelayMs = success?.autoCloseDelayMs ?? 1600;
+
+  const position = style?.position ?? "bottom-right";
+  const offset = style?.offset ?? 24;
+  const containerClassName = style?.containerClassName;
+  const panelClassName = style?.panelClassName;
+  const panelBackground = style?.panelBackground ?? "default";
+  const panelBorderColor = style?.panelBorderColor ?? "neutral-subtle";
+
+  const initialOpen = behavior?.initialOpen ?? true;
+  const resetOnClose = behavior?.resetOnClose ?? true;
+  const dismissCooldownDays = behavior?.dismissCooldownDays ?? 30;
+  const hideAfterSubmit = behavior?.hideAfterSubmit ?? true;
+  const showPersonalDataNotice = behavior?.showPersonalDataNotice ?? true;
+  const personalDataNotice = behavior?.personalDataNotice;
+  const storageStrategy = behavior?.storageStrategy ?? "consent";
+
   // IMPORTANT: Call all hooks before any conditional returns to comply with Rules of Hooks
 
   /* 
@@ -267,6 +175,7 @@ export const FlexJarDock = ({
       events,
       resetOnClose,
       onReset: reset,
+      storageStrategy,
     });
 
   const { shouldDeferQuestion, isSubmitBlocked } = useQuestionGate(
@@ -392,7 +301,6 @@ export const FlexJarDock = ({
     [promptDescriptionId, promptHeadingId, promptQuestion.id, validationErrorMessage],
   );
 
-  const reopenLabel = minimizedButtonLabel ?? "Gi tilbakemelding";
   const noticeContent = personalDataNotice ?? DEFAULT_PERSONAL_DATA_NOTICE;
 
   // Don't render anything while loading persisted state
@@ -414,7 +322,7 @@ export const FlexJarDock = ({
     >
       {dismissed ? (
         <MinimizedDock
-          label={reopenLabel}
+          label={minimizedButtonLabel}
           panelId={panelId}
           onReopen={reopenDock}
           className={CLASS_NAMES.minimizedButton}

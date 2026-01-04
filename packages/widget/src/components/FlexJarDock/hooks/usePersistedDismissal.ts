@@ -5,6 +5,7 @@ import {
   removeConsentValue,
   writeConsentValue,
 } from "../../shared/consentStorage.js";
+import type { StorageStrategy } from "../propTypes.js";
 
 const MS_IN_DAY = 86_400_000;
 
@@ -37,6 +38,67 @@ const isResumeExpired = (resumeAt: string | null | undefined): boolean => {
   return resumeTime <= Date.now();
 };
 
+// Simple localStorage wrapper
+const localStorageAdapter = {
+  async read(key: string): Promise<string | null> {
+    if (typeof window === "undefined") return null;
+    try {
+      return window.localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  async write(key: string, value: string): Promise<{ persisted: boolean; allowed: boolean; error?: unknown }> {
+    if (typeof window === "undefined") return { persisted: false, allowed: false };
+    try {
+      window.localStorage.setItem(key, value);
+      return { persisted: true, allowed: true };
+    } catch (error) {
+      return { persisted: false, allowed: false, error };
+    }
+  },
+  async remove(key: string): Promise<void> {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.removeItem(key);
+    } catch {
+      // ignore
+    }
+  },
+};
+
+// No-op storage for "none" strategy
+const noopStorageAdapter = {
+  async read(_key: string): Promise<string | null> {
+    return null;
+  },
+  async write(_key: string, _value: string): Promise<{ persisted: boolean; allowed: boolean; error?: unknown }> {
+    return { persisted: false, allowed: true };
+  },
+  async remove(_key: string): Promise<void> {
+    // no-op
+  },
+};
+
+// Consent storage adapter (existing behavior)
+const consentStorageAdapter = {
+  read: readConsentValue,
+  write: writeConsentValue,
+  remove: removeConsentValue,
+};
+
+const getStorageAdapter = (strategy: StorageStrategy) => {
+  switch (strategy) {
+    case "localStorage":
+      return localStorageAdapter;
+    case "none":
+      return noopStorageAdapter;
+    case "consent":
+    default:
+      return consentStorageAdapter;
+  }
+};
+
 export interface UsePersistedDismissalOptions {
   feedbackId: string;
   initialOpen: boolean;
@@ -44,6 +106,7 @@ export interface UsePersistedDismissalOptions {
   events?: FlexJarEvents;
   resetOnClose: boolean;
   onReset: () => void;
+  storageStrategy: StorageStrategy;
 }
 
 export interface UsePersistedDismissalReturn {
@@ -64,12 +127,19 @@ export const usePersistedDismissal = (
     events,
     resetOnClose,
     onReset,
+    storageStrategy,
   } = options;
 
   const storageKey = useMemo(
     () => `flexjar-dismissed-${feedbackId}`,
     [feedbackId],
   );
+
+  const storageAdapter = useMemo(
+    () => getStorageAdapter(storageStrategy),
+    [storageStrategy],
+  );
+
   const [dismissed, setDismissed] = useState<boolean>(() => !initialOpen);
   const [shouldHideCompletely, setShouldHideCompletely] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -84,7 +154,7 @@ export const usePersistedDismissal = (
         return;
       }
 
-      const persistedValue = await readConsentValue(storageKey);
+      const persistedValue = await storageAdapter.read(storageKey);
 
       if (cancelled) {
         return;
@@ -93,14 +163,6 @@ export const usePersistedDismissal = (
       if (!persistedValue) {
         if (!userInteractedRef.current) {
           setDismissed(!initialOpen);
-        }
-        setIsLoading(false);
-        return;
-      }
-
-      if (persistedValue === "1") {
-        if (!userInteractedRef.current) {
-          setDismissed(true);
         }
         setIsLoading(false);
         return;
@@ -116,7 +178,7 @@ export const usePersistedDismissal = (
       }
 
       if (isResumeExpired(parsed.resumeAt ?? null)) {
-        await removeConsentValue(storageKey);
+        await storageAdapter.remove(storageKey);
         if (!cancelled && !userInteractedRef.current) {
           setDismissed(!initialOpen);
           setShouldHideCompletely(false);
@@ -137,7 +199,7 @@ export const usePersistedDismissal = (
     return () => {
       cancelled = true;
     };
-  }, [initialOpen, storageKey]);
+  }, [initialOpen, storageKey, storageAdapter]);
 
   useEffect(() => {
     if (!dismissed) {
@@ -152,7 +214,7 @@ export const usePersistedDismissal = (
         const resumeAt =
           dismissCooldownDays > 0
             ? new Date(now.getTime() + dismissCooldownDays * MS_IN_DAY)
-                .toISOString()
+              .toISOString()
             : undefined;
 
         const payload: PersistedDismissalState = {
@@ -164,7 +226,7 @@ export const usePersistedDismissal = (
         };
 
         try {
-          const result = await writeConsentValue(
+          const result = await storageAdapter.write(
             storageKey,
             JSON.stringify(payload),
           );
@@ -178,12 +240,12 @@ export const usePersistedDismissal = (
       }
 
       try {
-        await removeConsentValue(storageKey);
+        await storageAdapter.remove(storageKey);
       } catch (persistError) {
         events?.onDismissalPersistFailed?.(persistError);
       }
     },
-    [dismissCooldownDays, events, storageKey],
+    [dismissCooldownDays, events, storageKey, storageAdapter],
   );
 
   const closeDock = useCallback((hideCompletely?: boolean) => {

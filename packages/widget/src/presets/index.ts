@@ -1,5 +1,43 @@
-import type { FlexJarQuestion } from "../core/types.js";
+import type { FlexJarQuestion, TextQuestion } from "../core/types.js";
 import type { FlexJarSurveyConfig } from "../components/surveyTypes.js";
+
+/**
+ * Pre-configured NAV standard rating survey.
+ * 
+ * This is the most common use case: a 5-star rating with an optional text follow-up.
+ * 
+ * @example
+ * ```tsx
+ * import { FlexJarDock, NAV_STANDARD_RATING, createNavTransport } from "@navikt/flexjar-widget";
+ * 
+ * <FlexJarDock
+ *   feedbackId="my-app-feedback"
+ *   survey={NAV_STANDARD_RATING}
+ *   transport={createNavTransport()}
+ * />
+ * ```
+ */
+export const NAV_STANDARD_RATING: FlexJarSurveyConfig = {
+  type: "rating",
+  questions: [
+    {
+      id: "rating",
+      type: "rating",
+      prompt: "Hvordan var opplevelsen din?",
+      description: "1 er dårlig, 5 er bra",
+      required: true,
+      scale: 5,
+    } as FlexJarQuestion,
+    {
+      id: "feedback",
+      type: "text",
+      prompt: "Har du andre tilbakemeldinger?",
+      required: false,
+      maxLength: 1000,
+    } as TextQuestion,
+  ],
+  gateQuestionId: "rating",
+};
 
 /**
  * Creates a standard rating survey with rating scale and text feedback.
