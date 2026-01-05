@@ -4,7 +4,12 @@ import { Button } from "@navikt/ds-react";
 import { FlexJarDock, type FlexJarDockProps } from "../components/FlexJarDock";
 import type { FlexJarSurveyConfig } from "../components/surveyTypes.js";
 import { removeConsentValue } from "../components/shared/consentStorage.js";
-import { createRatingSurvey, createTopTasksSurvey } from "../presets/index.js";
+import {
+  DEFAULT_SURVEY_RATING,
+  DEFAULT_SURVEY_DISCOVERY,
+  createTopTasksSurvey,
+  createTaskPrioritySurvey,
+} from "../presets/index.js";
 
 // Type for the Storybook mock consent API
 interface FlexJarMockConsentAPI {
@@ -20,28 +25,30 @@ declare global {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// ============================================
+// Survey Configurations (matching flexjar-analytics mock data)
+// ============================================
 
-
-const DEFAULT_SURVEY = createRatingSurvey({
-  ratingPrompt: "Hvordan opplevde du å svare på spørsmålene?",
-  ratingDescription: "Svarene du sender inn er anonyme, og blir brukt til videreutvikling av tjenesten.",
-  textPrompt: "Legg gjerne til en begrunnelse (valgfritt)",
-  textPlaceholder: "",
-  textRequired: false,
-});
-
-// Unused constants removed
-
-
+// Tasks matching flexjar-analytics mock data for Top Tasks surveys
+const MOCK_TASKS = [
+  { value: "apply_sick_leave", label: "Søke om sykepenger" },
+  { value: "check_status", label: "Sjekke status på søknad" },
+  { value: "upload_docs", label: "Laste opp vedlegg" },
+  { value: "contact_nav", label: "Kontakte NAV" },
+  { value: "find_info", label: "Finne informasjon" },
+  { value: "other", label: "Noe annet" },
+];
 
 const TOP_TASKS_SURVEY = createTopTasksSurvey({
-  tasks: [
-    { value: "apply_sick_leave", label: "Søke om sykepenger" },
-    { value: "check_status", label: "Sjekke status på søknad" },
-    { value: "upload_docs", label: "Laste opp vedlegg" },
-    { value: "other", label: "Noe annet" },
-  ],
+  tasks: MOCK_TASKS,
   includeBlockerQuestion: true,
+  includeOtherTask: true,
+});
+
+// Task Priority survey (for McGovern methodology)
+const TASK_PRIORITY_SURVEY = createTaskPrioritySurvey({
+  tasks: MOCK_TASKS,
+  maxSelections: 3,
 });
 
 const CUSTOM_SURVEY: FlexJarSurveyConfig = {
@@ -102,19 +109,15 @@ const meta: Meta<typeof FlexJarDock> = {
   },
   args: {
     feedbackId: "storybook-dock",
-    survey: DEFAULT_SURVEY,
+    survey: DEFAULT_SURVEY_RATING,
     transport: SUCCESS_TRANSPORT,
-    dismissCooldownDays: 0,
+    behavior: { dismissCooldownDays: 0 },
   },
   argTypes: {
     transport: { control: false },
     survey: { control: false },
     events: { control: false },
     context: { control: false },
-    position: {
-      options: ["bottom-right", "bottom-left"],
-      control: { type: "inline-radio" },
-    },
   },
 };
 
@@ -251,12 +254,27 @@ export const Rating: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
     feedbackId: "storybook-rating",
-    survey: DEFAULT_SURVEY,
+    survey: DEFAULT_SURVEY_RATING,
   },
   parameters: {
     docs: {
       description: {
-        story: "Standard rating-undersøkelse generert med `createRatingSurvey` preset.",
+        story: "Standard rating-undersøkelse med `DEFAULT_SURVEY_RATING` preset. Matcher flexjar-analytics data.",
+      },
+    },
+  },
+};
+
+export const Discovery: Story = {
+  render: (args) => <ExamplePage {...args} />,
+  args: {
+    feedbackId: "storybook-discovery",
+    survey: DEFAULT_SURVEY_DISCOVERY,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: "Discovery-undersøkelse med `DEFAULT_SURVEY_DISCOVERY` preset. Brukes til å finne hvilke oppgaver brukere kommer for.",
       },
     },
   },
@@ -274,7 +292,23 @@ export const TopTasks: Story = {
     docs: {
       description: {
         story:
-          "En 'Top Tasks' undersøkelse som måler suksessrate for spesifikke oppgaver. Generert med `createTopTasksSurvey`.",
+          "Top Tasks-undersøkelse for å måle suksessrate på oppgaver. Bruker `createTopTasksSurvey` med oppgaveliste.",
+      },
+    },
+  },
+};
+
+export const TaskPriority: Story = {
+  render: (args) => <ExamplePage {...args} />,
+  args: {
+    feedbackId: "storybook-task-priority",
+    survey: TASK_PRIORITY_SURVEY,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "McGovern Task Priority-undersøkelse. Brukere velger sine viktigste oppgaver. Bruker `createTaskPrioritySurvey`.",
       },
     },
   },

@@ -10,9 +10,13 @@ export type {
 } from "./components/FlexJarDock/propTypes.js";
 export type { FlexJarSurveyConfig, SurveyType } from "./components/surveyTypes.js";
 export {
+    // Default presets
+    DEFAULT_SURVEY_RATING,
+    DEFAULT_SURVEY_DISCOVERY,
+    // Builder functions
     createRatingSurvey,
-    createTopTasksSurvey,
     createDiscoverySurvey,
+    createTopTasksSurvey,
     createTaskPrioritySurvey,
-    NAV_STANDARD_RATING,
 } from "./presets/index.js";
+

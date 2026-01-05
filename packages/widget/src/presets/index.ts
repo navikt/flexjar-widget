@@ -1,23 +1,25 @@
 import type { FlexJarQuestion, TextQuestion } from "../core/types.js";
 import type { FlexJarSurveyConfig } from "../components/surveyTypes.js";
 
+// ============================================
+// Default Survey Presets
+// ============================================
+
 /**
- * Pre-configured NAV standard rating survey.
- * 
- * This is the most common use case: a 5-star rating with an optional text follow-up.
+ * Default rating survey: 5-star rating with optional text follow-up.
  * 
  * @example
  * ```tsx
- * import { FlexJarDock, NAV_STANDARD_RATING, createNavTransport } from "@navikt/flexjar-widget";
+ * import { FlexJarDock, DEFAULT_SURVEY_RATING } from "@navikt/flexjar-widget";
  * 
  * <FlexJarDock
  *   feedbackId="my-app-feedback"
- *   survey={NAV_STANDARD_RATING}
- *   transport={createNavTransport()}
+ *   survey={DEFAULT_SURVEY_RATING}
+ *   transport={transport}
  * />
  * ```
  */
-export const NAV_STANDARD_RATING: FlexJarSurveyConfig = {
+export const DEFAULT_SURVEY_RATING: FlexJarSurveyConfig = {
   type: "rating",
   questions: [
     {
@@ -40,8 +42,58 @@ export const NAV_STANDARD_RATING: FlexJarSurveyConfig = {
 };
 
 /**
- * Creates a standard rating survey with rating scale and text feedback.
- * This produces the same behavior as the pre-refactor widget.
+ * Default discovery survey: Free-text task identification with success question.
+ * Use this to discover what tasks users come to your site for.
+ * 
+ * @example
+ * ```tsx
+ * import { FlexJarDock, DEFAULT_SURVEY_DISCOVERY } from "@navikt/flexjar-widget";
+ * 
+ * <FlexJarDock
+ *   feedbackId="discovery-feedback"
+ *   survey={DEFAULT_SURVEY_DISCOVERY}
+ *   transport={transport}
+ * />
+ * ```
+ */
+export const DEFAULT_SURVEY_DISCOVERY: FlexJarSurveyConfig = {
+  type: "discovery",
+  questions: [
+    {
+      id: "discoveredTask",
+      type: "text",
+      prompt: "Hva kom du hit for å gjøre i dag?",
+      placeholder: "Beskriv med dine egne ord...",
+      required: true,
+      minRows: 2,
+    } as FlexJarQuestion,
+    {
+      id: "taskSuccess",
+      type: "singleChoice",
+      prompt: "Fikk du gjort det?",
+      options: [
+        { value: "yes", label: "Ja" },
+        { value: "partial", label: "Delvis" },
+        { value: "no", label: "Nei" },
+      ],
+      required: true,
+    } as FlexJarQuestion,
+    {
+      id: "blocker",
+      type: "text",
+      prompt: "Hva hindret deg? (valgfritt)",
+      required: false,
+    } as FlexJarQuestion,
+  ],
+  gateQuestionId: "discoveredTask",
+};
+
+// ============================================
+// Survey Builder Functions
+// ============================================
+
+/**
+ * Creates a rating survey with customizable prompts.
  */
 export function createRatingSurvey(options: {
   ratingPrompt: string;
@@ -70,77 +122,8 @@ export function createRatingSurvey(options: {
 }
 
 /**
- * Creates a Top Tasks survey for measuring task completion success.
- * Users select what they were trying to do and whether they succeeded.
- */
-export function createTopTasksSurvey(options: {
-  taskPrompt?: string;
-  tasks: Array<{ value: string; label: string }>;
-  successPrompt?: string;
-  blockerPrompt?: string;
-  includeBlockerQuestion?: boolean;
-  /** Include "Noe annet" option with free-text follow-up for task discovery */
-  includeOtherTask?: boolean;
-  otherTaskPrompt?: string;
-}): FlexJarSurveyConfig {
-  // Build task options, optionally including "Annet"
-  const taskOptions = options.includeOtherTask
-    ? [...options.tasks, { value: "other", label: "Noe annet" }]
-    : options.tasks;
-
-  const questions: FlexJarQuestion[] = [
-    {
-      id: "task",
-      type: "singleChoice",
-      prompt: options.taskPrompt ?? "Hva prøvde du å gjøre i dag?",
-      options: taskOptions,
-      required: true,
-    },
-    {
-      id: "taskSuccess",
-      type: "singleChoice",
-      prompt: options.successPrompt ?? "Klarte du det?",
-      options: [
-        { value: "yes", label: "Ja" },
-        { value: "partial", label: "Delvis" },
-        { value: "no", label: "Nei" },
-      ],
-      required: true,
-    },
-  ];
-
-  // Add "Other task" free-text question when includeOtherTask is enabled
-  if (options.includeOtherTask) {
-    questions.push({
-      id: "otherTask",
-      type: "text",
-      prompt: options.otherTaskPrompt ?? "Beskriv hva du prøvde å gjøre",
-      required: false,
-      // Note: showIf logic would need to be implemented in the widget renderer
-      // For now, this field can be left empty if "other" was not selected
-    });
-  }
-
-  if (options.includeBlockerQuestion !== false) {
-    questions.push({
-      id: "blocker",
-      type: "text",
-      prompt: options.blockerPrompt ?? "Hva hindret deg? (valgfritt)",
-      required: false,
-    });
-  }
-
-  return {
-    type: "topTasks",
-    questions,
-    gateQuestionId: "task",
-  };
-}
-
-/**
  * Creates a Discovery survey for free-text task identification.
- * Users describe what they came to do in their own words.
- * This is used to discover which tasks should be offered in Top Tasks surveys.
+ * Use this to discover what tasks users come to your site for.
  */
 export function createDiscoverySurvey(options?: {
   taskPrompt?: string;
@@ -188,13 +171,101 @@ export function createDiscoverySurvey(options?: {
 }
 
 /**
+ * Creates a Top Tasks survey for measuring task completion success.
+ * 
+ * Note: Tasks must be provided as they are domain-specific.
+ * There is no DEFAULT_SURVEY_TOP_TASKS since tasks vary per application.
+ * 
+ * @example
+ * ```tsx
+ * const survey = createTopTasksSurvey({
+ *   tasks: [
+ *     { value: "apply", label: "Søke om sykepenger" },
+ *     { value: "status", label: "Sjekke status på søknad" },
+ *   ]
+ * });
+ * ```
+ */
+export function createTopTasksSurvey(options: {
+  taskPrompt?: string;
+  tasks: Array<{ value: string; label: string }>;
+  successPrompt?: string;
+  blockerPrompt?: string;
+  includeBlockerQuestion?: boolean;
+  includeOtherTask?: boolean;
+  otherTaskPrompt?: string;
+}): FlexJarSurveyConfig {
+  const taskOptions = options.includeOtherTask
+    ? [...options.tasks, { value: "other", label: "Noe annet" }]
+    : options.tasks;
+
+  const questions: FlexJarQuestion[] = [
+    {
+      id: "task",
+      type: "singleChoice",
+      prompt: options.taskPrompt ?? "Hva prøvde du å gjøre i dag?",
+      options: taskOptions,
+      required: true,
+    },
+    {
+      id: "taskSuccess",
+      type: "singleChoice",
+      prompt: options.successPrompt ?? "Klarte du det?",
+      options: [
+        { value: "yes", label: "Ja" },
+        { value: "partial", label: "Delvis" },
+        { value: "no", label: "Nei" },
+      ],
+      required: true,
+    },
+  ];
+
+  if (options.includeOtherTask) {
+    questions.push({
+      id: "otherTask",
+      type: "text",
+      prompt: options.otherTaskPrompt ?? "Beskriv hva du prøvde å gjøre",
+      required: false,
+    });
+  }
+
+  if (options.includeBlockerQuestion !== false) {
+    questions.push({
+      id: "blocker",
+      type: "text",
+      prompt: options.blockerPrompt ?? "Hva hindret deg? (valgfritt)",
+      required: false,
+    });
+  }
+
+  return {
+    type: "topTasks",
+    questions,
+    gateQuestionId: "task",
+  };
+}
+
+/**
  * Creates a Task Priority survey for ranking which tasks matter most.
  * Classic McGovern methodology: users select their top N tasks from a list.
- * Requires 400+ responses for statistical significance.
- *
- * @param options.tasks - Full list of tasks to choose from (20-50 recommended)
- * @param options.maxSelections - How many tasks users can select (default: 5)
- * @param options.randomize - Randomize option order per user (default: true, critical for validity)
+ * 
+ * Note: Tasks must be provided as they are domain-specific.
+ * There is no DEFAULT_SURVEY_TASK_PRIORITY since tasks vary per application.
+ * 
+ * @param options.tasks - Full list of tasks (20-50 recommended)
+ * @param options.maxSelections - How many to select (default: 5)
+ * @param options.randomize - Randomize order (default: true, critical for validity)
+ * 
+ * @example
+ * ```tsx
+ * const survey = createTaskPrioritySurvey({
+ *   tasks: [
+ *     { value: "apply", label: "Søke om sykepenger" },
+ *     { value: "status", label: "Sjekke status" },
+ *     // ... 20-50 tasks
+ *   ]
+ * });
+ * ```
  */
 export function createTaskPrioritySurvey(options: {
   prompt?: string;
@@ -211,7 +282,7 @@ export function createTaskPrioritySurvey(options: {
       prompt: options.prompt ?? `Velg de ${maxSelections} viktigste oppgavene for deg`,
       options: options.tasks,
       required: true,
-      randomize: options.randomize ?? true, // Critical for validity!
+      randomize: options.randomize ?? true,
     },
   ];
 
