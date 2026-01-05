@@ -38,12 +38,12 @@ export const EmojiButton = React.forwardRef<HTMLButtonElement, EmojiButtonProps>
         type="button"
         className={className}
         onClick={() => setActiveState(feedback)}
-        aria-pressed={isActive}
         aria-checked={isActive}
         role="radio"
         aria-label={ariaLabel ?? text}
         disabled={disabled}
         style={style}
+        tabIndex={isActive || activeState === null ? 0 : -1}
       >
         {children}
         {renderText && <BodyShort>{text}</BodyShort>}

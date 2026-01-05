@@ -314,11 +314,12 @@ export const FlexJarDock = ({
   }
 
   return (
-    <div
+    <aside
       className={joinClassNames(CLASS_NAMES.container, containerClassName)}
       style={containerStyle}
       data-feedback-id={feedbackId}
       data-state={dismissed ? "dismissed" : "open"}
+      aria-label="Tilbakemeldingspanel"
     >
       {dismissed ? (
         <MinimizedDock
@@ -371,7 +372,7 @@ export const FlexJarDock = ({
           onBack={goToPrevious}
         />
       )}
-    </div>
+    </aside>
   );
 };
 

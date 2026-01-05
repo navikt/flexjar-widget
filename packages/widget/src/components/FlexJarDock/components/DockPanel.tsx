@@ -120,8 +120,7 @@ export const DockPanel = ({
         borderColor={panelBorderColor}
         className={joinClassNames(CLASS_NAMES.panel, panelClassName)}
         style={panelStyle}
-        aria-label={panelLabel}
-        role="region"
+        aria-labelledby={isSuccess ? successHeadingId : promptHeadingId}
         id={panelId}
       >
         <div className={CLASS_NAMES.header}>

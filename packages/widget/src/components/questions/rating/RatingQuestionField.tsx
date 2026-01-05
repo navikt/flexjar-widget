@@ -163,6 +163,29 @@ export const RatingQuestionField = ({
     [disabled, onChange],
   );
 
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      const currentIndex = activeState ? activeState - 1 : 0;
+      let nextIndex: number;
+
+      switch (event.key) {
+        case "ArrowRight":
+        case "ArrowDown":
+          nextIndex = (currentIndex + 1) % options.length;
+          handleSelect(options[nextIndex]);
+          event.preventDefault();
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+          nextIndex = (currentIndex - 1 + options.length) % options.length;
+          handleSelect(options[nextIndex]);
+          event.preventDefault();
+          break;
+      }
+    },
+    [activeState, options, handleSelect],
+  );
+
   return (
     <VStack gap="space-8" className={className}>
       {!hidePrompt && (
@@ -194,7 +217,9 @@ export const RatingQuestionField = ({
           align="center"
           wrap={wrap}
           className={joinClassNames(CLASS_NAMES.row, rowClassName)}
-          role="presentation"
+          role="radiogroup"
+          aria-labelledby={headingId}
+          onKeyDown={handleKeyDown}
         >
           {options.map((option, index) => {
             const variant = resolveVariant(index);

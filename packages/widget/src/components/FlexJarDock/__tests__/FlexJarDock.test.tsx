@@ -14,9 +14,14 @@ function createSurvey(): FlexJarSurveyConfig {
   return createRatingSurvey({
     ratingPrompt: "Hvor fornøyd er du?",
     ratingDescription: "Beskriv gjerne opplevelsen din.",
-    textPrompt: "Hva kan vi forbedre?",
-    textRequired: true,
     followUpQuestions: [
+      {
+        id: "feedback",
+        type: "text",
+        prompt: "Hva kan vi forbedre?",
+        required: true,
+        maxLength: 500,
+      },
       {
         id: "free-text",
         type: "text",
@@ -47,7 +52,7 @@ function renderDock(options?: {
       transport={transport}
       events={options?.events}
       context={options?.context}
-      initialOpen={options?.initialOpen}
+      behavior={{ initialOpen: options?.initialOpen ?? true }}
     />,
   );
 }
