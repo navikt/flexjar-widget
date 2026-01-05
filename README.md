@@ -1,21 +1,17 @@
 # Flexjar Widget
 
-A React widget for collecting user feedback with configurable surveys. Uses [Aksel Design System](https://aksel.nav.no/).
+En React widget for å samle brukertilbakemeldinger. Bruker [Aksel Design System](https://aksel.nav.no/).
 
 ## Quick Start
 
 ```tsx
 import "@navikt/ds-css/darkside";
 import "@navikt/flexjar-widget/styles.css";
-import { FlexJarDock, createRatingSurvey } from "@navikt/flexjar-widget";
+import { FlexJarDock, NAV_STANDARD_RATING } from "@navikt/flexjar-widget";
 
-// Standard rating survey - the most common use case
 <FlexJarDock
   feedbackId="my-app-feedback"
-  survey={createRatingSurvey({
-    ratingPrompt: "Hvordan var opplevelsen?",
-    textPrompt: "Hva kan vi forbedre?",
-  })}
+  survey={NAV_STANDARD_RATING}
   transport={{
     submit: async (submission) => {
       await fetch("/api/feedback", {
@@ -32,100 +28,166 @@ import { FlexJarDock, createRatingSurvey } from "@navikt/flexjar-widget";
 
 ## Installation
 
-### 1. Configure npm for GitHub Packages
-
 ```sh
+# Configure npm for GitHub Packages
 npm config set @navikt:registry https://npm.pkg.github.com
+
+# Install
+npm install @navikt/flexjar-widget @navikt/ds-react @navikt/ds-css
 ```
 
-Authenticate via `npm login --registry=https://npm.pkg.github.com` or set `NODE_AUTH_TOKEN` in CI.
-
-### 2. Install the package
-
+**For eksterne flater** (nav.no), installer også:
 ```sh
-npm install @navikt/flexjar-widget @navikt/ds-react @navikt/ds-css @navikt/nav-dekoratoren-moduler
-```
-
-### 3. Import styles
-
-```ts
-// In your app entry point
-import "@navikt/ds-css/darkside";
-import "@navikt/flexjar-widget/styles.css";
+npm install @navikt/nav-dekoratoren-moduler
 ```
 
 ---
 
-## Survey Configuration
+## Props
 
-### Option 1: Presets (Recommended)
+```tsx
+<FlexJarDock
+  // Required
+  feedbackId="unique-id"
+  survey={NAV_STANDARD_RATING}
+  transport={{ submit: async (data) => { ... } }}
+  
+  // Optional - grouped configs
+  labels={{ submit: "Send", cancel: "Avbryt" }}
+  success={{ title: "Takk!", autoClose: true }}
+  style={{ position: "bottom-left" }}
+  behavior={{ storageStrategy: "localStorage" }}
+  
+  // Optional - callbacks
+  events={{ onSubmitSuccess: () => { ... } }}
+  context={{ page: "/soknad" }}
+  metadata={{ team: "esyfo" }}
+/>
+```
 
-Use presets for common survey patterns:
+### Grouped Props
 
-```ts
-import { createRatingSurvey, createTopTasksSurvey } from "@navikt/flexjar-widget";
+| Prop | Options |
+|------|---------|
+| `labels` | `submit`, `submitPending`, `cancel`, `validationError`, `transportError`, `minimizedButton` |
+| `success` | `title`, `body`, `primaryLabel`, `autoClose`, `autoCloseDelayMs` |
+| `style` | `position`, `offset`, `containerClassName`, `panelClassName`, `panelBackground`, `panelBorderColor` |
+| `behavior` | `initialOpen`, `resetOnClose`, `dismissCooldownDays`, `hideAfterSubmit`, `showPersonalDataNotice`, `storageStrategy` |
 
-// Rating survey (1-5 scale + optional text)
-const ratingSurvey = createRatingSurvey({
+### Storage Strategy
+
+Widgeten støtter ulike lagringsstrategier for dismiss-tilstand:
+
+| Strategy | Use Case |
+|----------|----------|
+| `"consent"` (default) | Eksterne flater (nav.no) - krever brukersamtykke |
+| `"localStorage"` | Interne flater (Modia, Gosys) - localStorage direkte |
+| `"none"` | Ingen persistering |
+
+```tsx
+// Intern flate (Modia)
+<FlexJarDock
+  feedbackId="modia-feedback"
+  survey={NAV_STANDARD_RATING}
+  transport={transport}
+  behavior={{ storageStrategy: "localStorage" }}
+/>
+```
+
+---
+
+## Survey Presets
+
+### NAV_STANDARD_RATING
+
+Ferdig konfigurert 5-stjerners rating med valgfri tekst:
+
+```tsx
+import { NAV_STANDARD_RATING } from "@navikt/flexjar-widget";
+
+<FlexJarDock
+  feedbackId="my-app"
+  survey={NAV_STANDARD_RATING}
+  transport={transport}
+/>
+```
+
+### createRatingSurvey
+
+```tsx
+import { createRatingSurvey } from "@navikt/flexjar-widget";
+
+const survey = createRatingSurvey({
   ratingPrompt: "Hvordan var opplevelsen?",
-  ratingDescription: "Svarene er anonyme.",  // Optional
-  textPrompt: "Hva kan vi forbedre?",
-  textRequired: false,  // Optional, defaults to false
-});
-
-// Top Tasks survey (task selection + success measurement)
-const topTasksSurvey = createTopTasksSurvey({
-  taskPrompt: "Hva prøvde du å gjøre i dag?",
-  tasks: [
-    { value: "apply", label: "Søke om sykepenger" },
-    { value: "status", label: "Sjekke status på søknad" },
-  ],
-  successPrompt: "Klarte du det?",  // Optional
+  ratingDescription: "1 er dårlig, 5 er bra",
+  followUpQuestions: [
+    { id: "feedback", type: "text", prompt: "Har du andre tilbakemeldinger?" }
+  ]
 });
 ```
 
-### Option 2: Custom Configuration
+### createTopTasksSurvey
 
-Build any survey with the question array:
+```tsx
+import { createTopTasksSurvey } from "@navikt/flexjar-widget";
 
-```ts
+const survey = createTopTasksSurvey({
+  taskPrompt: "Hva prøvde du å gjøre?",
+  tasks: [
+    { value: "apply", label: "Søke om sykepenger" },
+    { value: "status", label: "Sjekke status" },
+  ],
+});
+```
+
+### createDiscoverySurvey
+
+```tsx
+import { createDiscoverySurvey } from "@navikt/flexjar-widget";
+
+const survey = createDiscoverySurvey({
+  prompt: "Hva prøvde du å finne?",
+});
+```
+
+---
+
+## Custom Survey
+
+```tsx
 const customSurvey = {
   questions: [
     {
-      id: "area",
-      type: "singleChoice",
-      prompt: "Hvilken del av tjenesten brukte du?",
-      options: [
-        { value: "search", label: "Søk" },
-        { value: "profile", label: "Profil" },
-      ],
+      id: "rating",
+      type: "rating",
+      prompt: "Hvor fornøyd er du?",
       required: true,
     },
     {
       id: "feedback",
       type: "text",
       prompt: "Fortell oss mer",
-      placeholder: "Skriv her...",
+      required: false,
     },
   ],
-  gateQuestionId: "area", // Optional: hides other questions until this is answered
+  gateQuestionId: "rating", // Skjul andre spørsmål til dette er besvart
 };
 ```
 
 ### Question Types
 
-| Type | Description | Value Type |
-|------|-------------|------------|
-| `rating` | 1-5 emoji scale | `number` |
-| `text` | Multi-line text input | `string` |
-| `singleChoice` | Radio buttons | `string` |
-| `multiChoice` | Checkboxes | `string[]` |
+| Type | Value Type |
+|------|------------|
+| `rating` | `number` (1-5) |
+| `text` | `string` |
+| `singleChoice` | `string` |
+| `multiChoice` | `string[]` |
 
-### Branching Logic (Skip Logic)
+---
 
-Add conditional navigation to questions using the `logic` property:
+## Branching Logic
 
-```ts
+```tsx
 const branchingSurvey = {
   questions: [
     {
@@ -139,64 +201,37 @@ const branchingSurvey = {
       logic: [
         {
           condition: { field: "ANSWER", operator: "EQ", value: "YES" },
-          action: { type: "JUMP_TO", targetId: "rating" }, // Skip follow-up
+          action: { type: "JUMP_TO", targetId: "rating" },
         },
       ],
     },
-    {
-      id: "blocker",
-      type: "text",
-      prompt: "Hva stoppet deg?", // Only shown if answer was "NO"
-    },
-    {
-      id: "rating",
-      type: "rating",
-      prompt: "Hvor fornøyd er du?",
-    },
+    { id: "blocker", type: "text", prompt: "Hva stoppet deg?" },
+    { id: "rating", type: "rating", prompt: "Hvor fornøyd er du?" },
   ],
 };
 ```
 
-**Logic Rules:**
-
-| Field | Description |
-|-------|-------------|
-| `ANSWER` | Compare against the current question's answer |
-| `METADATA` | Compare against survey metadata (requires `key`) |
-
-| Operator | Description |
-|----------|-------------|
-| `EQ` / `NEQ` | Equals / Not equals |
-| `GT` / `LT` | Greater than / Less than (numeric) |
-| `CONTAINS` | Text contains substring |
-
-| Action | Description |
-|--------|-------------|
-| `JUMP_TO` | Jump to question with `targetId` |
-| `SKIP` | Skip the next question |
-| `SUBMIT` | Submit survey immediately |
-
 ---
 
-## Sending Feedback to Flexjar API
+## Flexjar API
 
-### API Endpoints
+### Endpoints
 
-| Environment | URL |
-|-------------|-----|
-| **Dev** | `https://flexjar-analytics-api.intern.dev.nav.no/api/v2/feedback` |
-| **Prod** | `https://flexjar-analytics-api.intern.nav.no/api/v2/feedback` |
+| Env | URL |
+|-----|-----|
+| Dev | `https://flexjar-analytics-api.intern.dev.nav.no/api/v2/feedback` |
+| Prod | `https://flexjar-analytics-api.intern.nav.no/api/v2/feedback` |
 
-### Onboarding Your App
+### Onboarding
 
-1. **Enable Azure AD** in `nais.yaml`:
+1. Enable Azure AD i `nais.yaml`:
    ```yaml
    azure:
      application:
        enabled: true
    ```
 
-2. **Add outbound access**:
+2. Add outbound access:
    ```yaml
    accessPolicy:
      outbound:
@@ -205,20 +240,17 @@ const branchingSurvey = {
            namespace: team-esyfo
    ```
 
-3. **Request inbound access** – Contact team-esyfo to add your app.
+3. Kontakt team-esyfo for inbound access.
 
-4. **Get OBO token** and include as `Authorization: Bearer <token>`.
+### Transport Example
 
-### Example Transport
-
-```ts
+```tsx
 import { getToken, requestAzureOboToken } from "@navikt/oasis";
 
 const transport = {
   async submit(submission) {
-    const token = getToken(request);
     const obo = await requestAzureOboToken(
-      token,
+      getToken(request),
       "api://prod-gcp.team-esyfo.flexjar-analytics-api/.default"
     );
     
@@ -238,68 +270,13 @@ const transport = {
 
 ## Analytics Dashboard
 
-View collected feedback at:
-
-| Environment | URL |
-|-------------|-----|
-| **Dev** | https://flexjar-analytics.intern.dev.nav.no |
-| **Prod** | https://flexjar-analytics.intern.nav.no |
-
-The dashboard provides filtering, statistics, rating distributions, and export to Excel/CSV.
-
----
-
-## Component Props
-
-### FlexJarDock
-
-The main component - a sticky panel in the corner of the page.
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `feedbackId` | `string` | Required | Unique ID for this survey |
-| `survey` | `FlexJarSurveyConfig` | Required | Survey configuration |
-| `transport` | `FlexJarTransport` | Required | Handler to submit feedback |
-| `position` | `'bottom-right' \| 'bottom-left'` | `'bottom-right'` | Dock position |
-| `context` | `Record<string, unknown>` | – | Extra metadata for submission |
-| `initialOpen` | `boolean` | `true` | Whether dock starts open |
-| `dismissCooldownDays` | `number` | `30` | Days before dock reappears after dismissal |
-
-### Customization Props
-
-| Prop | Type | Default |
-|------|------|---------|
-| `title` | `string` | `"Gi tilbakemelding"` |
-| `submitLabel` | `string` | `"Send"` |
-| `cancelLabel` | `string` | `"Lukk"` |
-| `successTitle` | `string` | `"Takk for tilbakemeldingen!"` |
-| `transportErrorMessage` | `string` | `"Kunne ikke sende tilbakemeldingen..."` |
-
-### Event Callbacks
-
-```ts
-<FlexJarDock
-  events={{
-    onSubmitSuccess: (submission) => analytics.track("feedback_sent"),
-    onSubmitError: (error) => console.error(error),
-    onViewDock: (feedbackId) => analytics.track("feedback_viewed"),
-  }}
-/>
-```
-
----
-
-## Persistence Behavior
-
-The widget uses localStorage to remember dismissals. This requires:
-- User consent for "surveys" storage
-- `flexjar-*` pattern in decorator's allowed storage list
-
-Without consent, the widget still works but state resets on page reload.
+| Env | URL |
+|-----|-----|
+| Dev | https://flexjar-analytics.intern.dev.nav.no |
+| Prod | https://flexjar-analytics.intern.nav.no |
 
 ---
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup and release instructions.
-
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
