@@ -174,8 +174,6 @@ export type FlexJarTransportPayload = {
   surveyType?: SurveyType;
   svar?: number;
   feedback?: string;
-  /** Custom metadata for segmentation/filtering (e.g. { harDialogmote: true }) */
-  metadata?: Record<string, unknown>;
   /** Structured answers array for analytics */
   answers?: TransportAnswer[];
   /** Time to complete the survey in milliseconds */

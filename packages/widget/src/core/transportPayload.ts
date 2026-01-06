@@ -46,7 +46,7 @@ export function buildTransportPayload(
   answers: Record<string, FlexJarAnswerValue>,
   questions: FlexJarQuestion[],
   surveyType?: SurveyType,
-  metadata?: Record<string, unknown>,
+  tags?: Record<string, unknown>,
   startedAt?: string,
   submittedAt?: string,
 ): FlexJarTransportPayload {
@@ -58,9 +58,9 @@ export function buildTransportPayload(
   const resolvedSurveyType = surveyType ?? inferSurveyType(questions);
   payload.surveyType = resolvedSurveyType;
 
-  // Add custom metadata if provided
-  if (metadata && Object.keys(metadata).length > 0) {
-    payload.metadata = metadata;
+  // Add context tags if provided (for segmentation)
+  if (tags && Object.keys(tags).length > 0) {
+    payload.metadata = tags;
   }
 
   // Calculate and add time to complete if both timestamps are available
