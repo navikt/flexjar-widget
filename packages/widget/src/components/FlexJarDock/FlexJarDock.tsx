@@ -204,9 +204,18 @@ export const FlexJarDock = ({
   const handleSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+      const nativeEvent = event.nativeEvent as SubmitEvent;
+      console.log("[FlexJar DEBUG] handleSubmit triggered", {
+        shouldSubmit,
+        isLastStep,
+        currentStep,
+        currentStepQuestion: currentStepQuestion?.id,
+        submitter: nativeEvent.submitter?.textContent,
+        submitterType: (nativeEvent.submitter as HTMLButtonElement)?.type,
+      });
       await submit();
     },
-    [submit],
+    [submit, shouldSubmit, isLastStep, currentStep, currentStepQuestion],
   );
 
   const isSubmitting = status === "submitting";

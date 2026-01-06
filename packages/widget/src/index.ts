@@ -12,6 +12,7 @@ export type { FlexJarSurveyConfig, SurveyType } from "./components/surveyTypes.j
 export {
     // Default presets
     DEFAULT_SURVEY_RATING,
+    DEFAULT_SURVEY_SERVICE_FEEDBACK,
     DEFAULT_SURVEY_DISCOVERY,
     // Builder functions
     createRatingSurvey,

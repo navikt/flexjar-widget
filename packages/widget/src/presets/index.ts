@@ -26,7 +26,8 @@ export const DEFAULT_SURVEY_RATING: FlexJarSurveyConfig = {
       id: "rating",
       type: "rating",
       prompt: "Hvordan var opplevelsen din?",
-      description: "1 er dårlig, 5 er bra",
+      description:
+        "Svarene du sender inn er anonyme, og blir brukt til videreutvikling av tjenesten",
       required: true,
       scale: 5,
     } as FlexJarQuestion,
@@ -34,6 +35,45 @@ export const DEFAULT_SURVEY_RATING: FlexJarSurveyConfig = {
       id: "feedback",
       type: "text",
       prompt: "Har du andre tilbakemeldinger?",
+      description: "Alle tilbakemeldinger er til stor nytte for oss",
+      required: false,
+      maxLength: 1000,
+    } as TextQuestion,
+  ],
+  gateQuestionId: "rating",
+};
+
+/**
+ * Service-oriented rating survey with improved messaging.
+ * Emphasizes that feedback is anonymous and used for service development.
+ * 
+ * @examplezs
+ * import { FlexJarDock, DEFAULT_SURVEY_SERVICE_FEEDBACK } from "@navikt/flexjar-widget";
+ * 
+ * <FlexJarDock
+ *   feedbackId="service-feedback"
+ *   survey={DEFAULT_SURVEY_SERVICE_FEEDBACK}
+ *   transport={transport}
+ * />
+ * ```
+ */
+export const DEFAULT_SURVEY_SERVICE_FEEDBACK: FlexJarSurveyConfig = {
+  type: "rating",
+  questions: [
+    {
+      id: "rating",
+      type: "rating",
+      prompt: "Hvordan opplevde du å svare på spørsmålene?",
+      description:
+        "Svarene du sender inn er anonyme, og blir brukt til videreutvikling av tjenesten",
+      required: true,
+      scale: 5,
+    } as FlexJarQuestion,
+    {
+      id: "feedback",
+      type: "text",
+      prompt: "Legg gjerne til en begrunnelse (valgfritt)",
+      description: "Alle tilbakemeldinger er til stor nytte for oss",
       required: false,
       maxLength: 1000,
     } as TextQuestion,
@@ -66,6 +106,7 @@ export const DEFAULT_SURVEY_DISCOVERY: FlexJarSurveyConfig = {
       placeholder: "Beskriv med dine egne ord...",
       required: true,
       minRows: 2,
+      maxLength: 500,
     } as FlexJarQuestion,
     {
       id: "taskSuccess",
@@ -83,6 +124,7 @@ export const DEFAULT_SURVEY_DISCOVERY: FlexJarSurveyConfig = {
       type: "text",
       prompt: "Hva hindret deg? (valgfritt)",
       required: false,
+      maxLength: 500,
     } as FlexJarQuestion,
   ],
   gateQuestionId: "discoveredTask",
@@ -140,6 +182,7 @@ export function createDiscoverySurvey(options?: {
       placeholder: options?.taskPlaceholder ?? "Beskriv med dine egne ord...",
       required: true,
       minRows: 2,
+      maxLength: 500,
     },
     {
       id: "taskSuccess",
@@ -160,6 +203,7 @@ export function createDiscoverySurvey(options?: {
       type: "text",
       prompt: options?.blockerPrompt ?? "Hva hindret deg? (valgfritt)",
       required: false,
+      maxLength: 500,
     });
   }
 
@@ -206,35 +250,60 @@ export function createTopTasksSurvey(options: {
       prompt: options.taskPrompt ?? "Hva prøvde du å gjøre i dag?",
       options: taskOptions,
       required: true,
-    },
-    {
-      id: "taskSuccess",
-      type: "singleChoice",
-      prompt: options.successPrompt ?? "Klarte du det?",
-      options: [
-        { value: "yes", label: "Ja" },
-        { value: "partial", label: "Delvis" },
-        { value: "no", label: "Nei" },
-      ],
-      required: true,
+      // If NOT "other", skip to taskSuccess
+      logic: options.includeOtherTask
+        ? [
+          {
+            condition: { field: "ANSWER", operator: "NEQ", value: "other" },
+            action: { type: "JUMP_TO", targetId: "taskSuccess" },
+          },
+        ]
+        : undefined,
     },
   ];
 
+  // otherTask comes BEFORE taskSuccess (shown only when task === "other")
   if (options.includeOtherTask) {
     questions.push({
       id: "otherTask",
       type: "text",
       prompt: options.otherTaskPrompt ?? "Beskriv hva du prøvde å gjøre",
       required: false,
+      maxLength: 500,
     });
   }
 
+  // taskSuccess with branching to skip blocker if "yes"
+  questions.push({
+    id: "taskSuccess",
+    type: "singleChoice",
+    prompt: options.successPrompt ?? "Klarte du det?",
+    options: [
+      { value: "yes", label: "Ja" },
+      { value: "partial", label: "Delvis" },
+      { value: "no", label: "Nei" },
+    ],
+    required: true,
+    // If "yes", submit immediately (skip blocker)
+    logic:
+      options.includeBlockerQuestion !== false
+        ? [
+          {
+            condition: { field: "ANSWER", operator: "EQ", value: "yes" },
+            action: { type: "SUBMIT" },
+          },
+        ]
+        : undefined,
+  });
+
+  // blocker (shown only when taskSuccess !== "yes")
   if (options.includeBlockerQuestion !== false) {
     questions.push({
       id: "blocker",
       type: "text",
       prompt: options.blockerPrompt ?? "Hva hindret deg? (valgfritt)",
       required: false,
+      maxLength: 500,
     });
   }
 

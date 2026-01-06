@@ -146,17 +146,25 @@ export const DockPanel = ({
                   className={CLASS_NAMES.ratingHeading}
                   id={promptHeadingId}
                 >
-                  {promptQuestion.prompt}
+                  {/* In step mode, show current step's prompt; otherwise show first question */}
+                  {isStepMode && currentStepQuestion
+                    ? currentStepQuestion.prompt
+                    : promptQuestion.prompt}
                 </Heading>
-                {promptQuestion.description && (
-                  <BodyShort
-                    size="small"
-                    className={CLASS_NAMES.ratingDescription}
-                    id={promptDescriptionId}
-                  >
-                    {promptQuestion.description}
-                  </BodyShort>
-                )}
+                {/* Show description from current step in step mode, or from first question otherwise */}
+                {(isStepMode && currentStepQuestion
+                  ? currentStepQuestion.description
+                  : promptQuestion.description) && (
+                    <BodyShort
+                      size="small"
+                      className={CLASS_NAMES.ratingDescription}
+                      id={promptDescriptionId}
+                    >
+                      {isStepMode && currentStepQuestion
+                        ? currentStepQuestion.description
+                        : promptQuestion.description}
+                    </BodyShort>
+                  )}
               </>
             )}
           </div>
@@ -186,7 +194,7 @@ export const DockPanel = ({
                         onQuestionChange(currentStepQuestion.id, nextValue),
                       isMissing: validationMissing.includes(currentStepQuestion.id),
                       disabled: isSubmitting,
-                      hideLabel: currentStepQuestion.id === promptQuestion.id,
+                      hideLabel: true, // Header now shows current step's prompt
                     })}
                   </div>
 
@@ -216,6 +224,7 @@ export const DockPanel = ({
                     )}
                     {isLastStep ? (
                       <Button
+                        key="submit-btn"
                         type="submit"
                         loading={isSubmitting}
                         disabled={isSubmitting || !canGoNext}
@@ -224,6 +233,7 @@ export const DockPanel = ({
                       </Button>
                     ) : (
                       <Button
+                        key="next-btn"
                         type="button"
                         onClick={onNext}
                         disabled={isSubmitting || !canGoNext}

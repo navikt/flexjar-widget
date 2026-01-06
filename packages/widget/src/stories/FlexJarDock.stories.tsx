@@ -6,7 +6,9 @@ import type { FlexJarSurveyConfig } from "../components/surveyTypes.js";
 import { removeConsentValue } from "../components/shared/consentStorage.js";
 import {
   DEFAULT_SURVEY_RATING,
+  DEFAULT_SURVEY_SERVICE_FEEDBACK,
   DEFAULT_SURVEY_DISCOVERY,
+  createRatingSurvey,
   createTopTasksSurvey,
   createTaskPrioritySurvey,
 } from "../presets/index.js";
@@ -36,7 +38,6 @@ const MOCK_TASKS = [
   { value: "upload_docs", label: "Laste opp vedlegg" },
   { value: "contact_nav", label: "Kontakte NAV" },
   { value: "find_info", label: "Finne informasjon" },
-  { value: "other", label: "Noe annet" },
 ];
 
 const TOP_TASKS_SURVEY = createTopTasksSurvey({
@@ -134,7 +135,7 @@ const ExamplePage = (props: FlexJarDockProps) => {
 
   const handleReset = useCallback(() => {
     void (async () => {
-      await removeConsentValue(`flexjar-dock-dismissed:${props.feedbackId}`);
+      await removeConsentValue(`flexjar-dismissed-${props.feedbackId}`);
       setResetToken((token) => token + 1);
     })();
   }, [props.feedbackId]);
@@ -253,13 +254,14 @@ const ExamplePage = (props: FlexJarDockProps) => {
 export const Rating: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "storybook-rating",
-    survey: DEFAULT_SURVEY_RATING,
+    feedbackId: "storybook-service",
+    survey: DEFAULT_SURVEY_SERVICE_FEEDBACK,
   },
   parameters: {
     docs: {
       description: {
-        story: "Standard rating-undersøkelse med `DEFAULT_SURVEY_RATING` preset. Matcher flexjar-analytics data.",
+        story:
+          "Tjenesteorientert rating-undersøkelse med `DEFAULT_SURVEY_SERVICE_FEEDBACK` preset. Fokuserer på brukeropplevelse av selve spørsmålene og formidler at svar er anonyme.",
       },
     },
   },
@@ -279,8 +281,6 @@ export const Discovery: Story = {
     },
   },
 };
-
-
 
 export const TopTasks: Story = {
   render: (args) => <ExamplePage {...args} />,

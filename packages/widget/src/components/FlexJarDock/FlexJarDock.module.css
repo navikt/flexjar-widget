@@ -7,6 +7,13 @@
   position: relative;
 }
 
+/* Reset browser default fieldset padding for consistent alignment */
+.panel fieldset {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
