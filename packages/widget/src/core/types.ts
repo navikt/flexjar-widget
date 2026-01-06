@@ -183,12 +183,80 @@ export type FlexJarTransportPayload = {
 } & Record<string, FlexJarAnswerValue | string | TransportAnswer[] | number | Record<string, unknown>>;
 
 
+/**
+ * Device type for analytics segmentation.
+ */
+export type DeviceType = "mobile" | "tablet" | "desktop";
+
+/**
+ * Structured context for feedback segmentation and debugging.
+ * 
+ * @example
+ * ```tsx
+ * <FlexJarDock
+ *   context={{
+ *     app: "sykepenger",
+ *     tags: { harSykmelding: true, rolle: "arbeidsgiver" },
+ *     debug: { sessionId: "abc-123" }
+ *   }}
+ * />
+ * ```
+ */
+export interface FlexjarContext {
+  // ============================================
+  // System-collected (auto-populated by widget)
+  // ============================================
+
+  /** Current page URL */
+  url?: string;
+  /** Current pathname (without domain) */
+  pathname?: string;
+  /** Browser viewport dimensions */
+  viewport?: { width: number; height: number };
+  /** Device type based on viewport width */
+  deviceType?: DeviceType;
+  /** Browser user agent */
+  userAgent?: string;
+
+  // ============================================
+  // User-provided identification
+  // ============================================
+
+  /** Application identifier */
+  app?: string;
+
+  // ============================================
+  // Tags (for analytics graphs) - LOW CARDINALITY
+  // Only string/number/boolean values allowed
+  // These will automatically become graphs in the dashboard
+  // ============================================
+
+  /**
+   * Low-cardinality tags for analytics segmentation.
+   * 
+   * ✅ Good: { harSykmelding: true, rolle: "arbeidsgiver" }
+   * ❌ Bad: { behandlingId: "123...", timestamp: 169... }
+   */
+  tags?: Record<string, string | number | boolean>;
+
+  // ============================================
+  // Debug (for detailed debugging) - HIGH CARDINALITY OK
+  // Shown only in individual feedback detail view
+  // ============================================
+
+  /**
+   * High-cardinality debug info for individual feedback inspection.
+   * Not used for graphs/segmentation.
+   */
+  debug?: Record<string, unknown>;
+}
+
 export interface FlexJarSubmission {
   feedbackId: string;
   answers: Record<string, FlexJarAnswerValue>;
   startedAt: string;
   submittedAt: string;
-  context?: Record<string, unknown>;
+  context?: FlexjarContext;
   transportPayload: FlexJarTransportPayload;
 }
 

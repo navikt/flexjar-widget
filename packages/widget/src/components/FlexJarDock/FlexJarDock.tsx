@@ -1,6 +1,6 @@
 import React, { type ReactNode, useCallback, useMemo } from "react";
 import type { BoxNewProps } from "@navikt/ds-react/Box";
-import type { FlexJarEvents, FlexJarTransport, RatingQuestion } from "../../core";
+import type { DeviceType, FlexJarEvents, FlexJarTransport, FlexjarContext, RatingQuestion } from "../../core";
 import { useFlexJar } from "../../core";
 import { DefaultQuestionRenderer, RatingQuestionField } from "../questions";
 import { useQuestionGate } from "./hooks/useQuestionGate.js";
@@ -25,6 +25,15 @@ import type {
   FlexJarStyle,
   FlexJarBehavior,
 } from "./propTypes.js";
+
+/**
+ * Derives device type from viewport width.
+ */
+function getDeviceType(width: number): DeviceType {
+  if (width < 768) return "mobile";
+  if (width < 1024) return "tablet";
+  return "desktop";
+}
 
 /**
  * Props for the FlexJarDock component.
@@ -86,14 +95,10 @@ export interface FlexJarDockProps {
   events?: FlexJarEvents;
 
   /**
-   * Additional context data to include with submissions.
+   * Structured context for segmentation (tags) and debugging (debug).
+   * System fields (url, pathname, viewport, deviceType) are auto-collected.
    */
-  context?: Record<string, unknown>;
-
-  /**
-   * Custom metadata for segmentation/filtering in analytics.
-   */
-  metadata?: Record<string, unknown>;
+  context?: FlexjarContext;
 }
 
 export const FlexJarDock = ({
@@ -102,7 +107,6 @@ export const FlexJarDock = ({
   transport,
   events,
   context,
-  metadata,
   labels,
   success,
   style,
@@ -163,13 +167,32 @@ export const FlexJarDock = ({
   const successHeadingId = `${feedbackId}-dock-success-heading`;
   const panelId = `${feedbackId}-dock-panel`;
 
+  // Auto-collect system context and merge with user-provided context
+  const enrichedContext = useMemo((): FlexjarContext => {
+    const isClient = typeof window !== "undefined";
+    const viewportWidth = isClient ? window.innerWidth : 1024;
+    const viewportHeight = isClient ? window.innerHeight : 768;
+
+    return {
+      // System-collected
+      url: isClient ? window.location.href : undefined,
+      pathname: isClient ? window.location.pathname : undefined,
+      viewport: { width: viewportWidth, height: viewportHeight },
+      deviceType: getDeviceType(viewportWidth),
+      userAgent: isClient ? navigator.userAgent : undefined,
+      // User-provided
+      app: context?.app,
+      tags: context?.tags,
+      debug: context?.debug,
+    };
+  }, [context?.app, context?.tags, context?.debug]);
+
   const { answers, status, error, setAnswer, submit, reset } = useFlexJar({
     feedbackId,
     questions,
     transport,
     events,
-    context,
-    metadata,
+    context: enrichedContext,
     surveyType,
   });
 
@@ -204,7 +227,6 @@ export const FlexJarDock = ({
   } = useStepNavigation({
     questions,
     answers,
-    metadata,
   });
 
   const handleSubmit = useCallback(

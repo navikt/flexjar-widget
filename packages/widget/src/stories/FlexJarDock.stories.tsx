@@ -256,12 +256,20 @@ export const Rating: Story = {
   args: {
     feedbackId: "storybook-service",
     survey: DEFAULT_SURVEY_SERVICE_FEEDBACK,
+    // Context example matching analytics mock data format for sykefraværsoppfølging
+    context: {
+      app: "syfo-oppfolgingsplan-frontend",
+      tags: {
+        harAktivSykmelding: "Ja",
+        ukeSykefravær: "3",
+      },
+    },
   },
   parameters: {
     docs: {
       description: {
         story:
-          "Tjenesteorientert rating-undersøkelse med `DEFAULT_SURVEY_SERVICE_FEEDBACK` preset. Fokuserer på brukeropplevelse av selve spørsmålene og formidler at svar er anonyme.",
+          "Tjenesteorientert rating-undersøkelse med `DEFAULT_SURVEY_SERVICE_FEEDBACK` preset og `context.tags` for segmentering. Tags matcher analytics mock data-format for sykefraværsoppfølging.",
       },
     },
   },

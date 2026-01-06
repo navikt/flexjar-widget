@@ -9,6 +9,7 @@ import type {
   FlexJarSubmitResult,
   FlexJarTransport,
   FlexJarValidationError,
+  FlexjarContext,
   SurveyType,
 } from "./types";
 import { useAnswerState, cloneAnswers } from "./answers.js";
@@ -20,11 +21,9 @@ export interface UseFlexJarOptions {
   questions: FlexJarQuestion[];
   transport: FlexJarTransport;
   events?: FlexJarEvents;
-  context?: Record<string, unknown>;
-  /** Custom metadata for segmentation/filtering in analytics (e.g. { harDialogmote: true }) */
-  metadata?: Record<string, unknown>;
+  /** Structured context for segmentation (tags) and debugging (debug) */
+  context?: FlexjarContext;
   initialAnswers?: Record<string, FlexJarAnswerValue>;
-
   surveyType?: SurveyType;
 }
 
@@ -45,7 +44,6 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     transport,
     events,
     context,
-    metadata,
     initialAnswers,
     surveyType,
   } = options;
@@ -91,7 +89,7 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
         answerSnapshot,
         questions,
         surveyType,
-        metadata,
+        context?.tags,
         startedAtRef.current,
         submittedAtTimestamp,
       ),
