@@ -147,6 +147,12 @@ export const FlexJarDock = ({
   const canonicalSurvey = useMemo(() => buildCanonicalSurvey(survey), [survey]);
   const { type: surveyType, questions, gateQuestionId } = canonicalSurvey;
 
+  // Check if survey has any text questions (for personal data notice)
+  const hasTextQuestions = useMemo(
+    () => questions.some((q) => q.type === "text"),
+    [questions]
+  );
+
   // The first question is used as the "prompt" question in the header
   const promptQuestion = questions[0];
 
@@ -204,18 +210,9 @@ export const FlexJarDock = ({
   const handleSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      const nativeEvent = event.nativeEvent as SubmitEvent;
-      console.log("[FlexJar DEBUG] handleSubmit triggered", {
-        shouldSubmit,
-        isLastStep,
-        currentStep,
-        currentStepQuestion: currentStepQuestion?.id,
-        submitter: nativeEvent.submitter?.textContent,
-        submitterType: (nativeEvent.submitter as HTMLButtonElement)?.type,
-      });
       await submit();
     },
-    [submit, shouldSubmit, isLastStep, currentStep, currentStepQuestion],
+    [submit],
   );
 
   const isSubmitting = status === "submitting";
@@ -363,7 +360,7 @@ export const FlexJarDock = ({
           submitLabel={submitLabel}
           submitPendingLabel={submitPendingLabel}
           cancelLabel={cancelLabel}
-          showPersonalDataNotice={showPersonalDataNotice}
+          showPersonalDataNotice={showPersonalDataNotice && hasTextQuestions}
           personalDataNotice={noticeContent}
           isSubmitBlocked={isSubmitBlocked}
           hasTransportError={Boolean(hasTransportError)}

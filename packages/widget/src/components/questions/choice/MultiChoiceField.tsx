@@ -14,6 +14,7 @@ interface MultiChoiceFieldProps {
   validationErrorMessage: string;
   isMissing: boolean;
   disabled: boolean;
+  hideLabel?: boolean;
 }
 
 export const MultiChoiceField = ({
@@ -23,6 +24,7 @@ export const MultiChoiceField = ({
   validationErrorMessage,
   isMissing,
   disabled,
+  hideLabel,
 }: MultiChoiceFieldProps) => {
   const options = useChoiceOptions(question);
   const selected = Array.isArray(value) ? value : [];
@@ -30,6 +32,7 @@ export const MultiChoiceField = ({
   return (
     <CheckboxGroup
       legend={question.prompt}
+      hideLegend={hideLabel}
       description={question.description}
       value={selected}
       onChange={(nextValues: string[]) => onChange(nextValues)}
@@ -48,3 +51,4 @@ export const MultiChoiceField = ({
     </CheckboxGroup>
   );
 };
+

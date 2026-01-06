@@ -71,6 +71,7 @@ export const DefaultQuestionRenderer = ({
           validationErrorMessage={validationErrorMessage}
           isMissing={isMissing}
           disabled={disabled}
+          hideLabel={hideLabel}
         />
       );
     }
