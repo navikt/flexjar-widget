@@ -5,6 +5,7 @@ import type {
   SurveyType,
   ChoiceOption,
   TransportAnswer,
+  FlexjarContext,
 } from "./types";
 
 /**
@@ -46,7 +47,7 @@ export function buildTransportPayload(
   answers: Record<string, FlexJarAnswerValue>,
   questions: FlexJarQuestion[],
   surveyType?: SurveyType,
-  tags?: Record<string, unknown>,
+  context?: FlexjarContext,
   startedAt?: string,
   submittedAt?: string,
 ): FlexJarTransportPayload {
@@ -58,9 +59,9 @@ export function buildTransportPayload(
   const resolvedSurveyType = surveyType ?? inferSurveyType(questions);
   payload.surveyType = resolvedSurveyType;
 
-  // Add context tags if provided (for segmentation)
-  if (tags && Object.keys(tags).length > 0) {
-    payload.metadata = tags;
+  // Add context if provided
+  if (context) {
+    payload.context = context;
   }
 
   // Calculate and add time to complete if both timestamps are available

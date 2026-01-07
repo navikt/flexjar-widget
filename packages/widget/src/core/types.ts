@@ -178,7 +178,9 @@ export type FlexJarTransportPayload = {
   answers?: TransportAnswer[];
   /** Time to complete the survey in milliseconds */
   timeToCompleteMs?: number;
-} & Record<string, FlexJarAnswerValue | string | TransportAnswer[] | number | Record<string, unknown>>;
+  /** Full context object including system fields (device, viewport) and user tags */
+  context?: FlexjarContext;
+} & Record<string, FlexJarAnswerValue | string | TransportAnswer[] | number | Record<string, unknown> | FlexjarContext | undefined>;
 
 
 /**

@@ -89,7 +89,7 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
         answerSnapshot,
         questions,
         surveyType,
-        context?.tags,
+        context,
         startedAtRef.current,
         submittedAtTimestamp,
       ),
