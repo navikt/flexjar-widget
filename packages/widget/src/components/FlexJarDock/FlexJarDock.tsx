@@ -1,22 +1,19 @@
-import React, { type ReactNode, useCallback, useMemo } from "react";
-import type { BoxNewProps } from "@navikt/ds-react/Box";
-import type { DeviceType, FlexJarEvents, FlexJarTransport, FlexjarContext, RatingQuestion } from "../../core";
+import React, { useCallback, useMemo } from "react";
+import type { FlexJarEvents, FlexJarTransport, FlexjarContext, RatingQuestion } from "../../core";
 import { useFlexJar } from "../../core";
 import { DefaultQuestionRenderer, RatingQuestionField } from "../questions";
 import { useQuestionGate } from "./hooks/useQuestionGate.js";
 import { useAutoCloseOnSuccess } from "./hooks/useAutoCloseOnSuccess.js";
 import { useStepNavigation } from "./hooks/useStepNavigation.js";
+import { useEnrichedContext } from "./hooks/useEnrichedContext.js";
 import type { FlexJarRenderQuestionProps } from "../../types.js";
 import { buildCanonicalSurvey } from "../shared/canonicalSurvey.js";
-import {
-  DEFAULT_COPY,
-  DEFAULT_PERSONAL_DATA_NOTICE,
-} from "../shared/commonDefaults.js";
 import type { FlexJarSurveyConfig } from "../surveyTypes.js";
 import { DockPanel } from "./components/DockPanel.js";
 import { MinimizedDock } from "./components/MinimizedDock.js";
 import { CLASS_NAMES, joinClassNames } from "./classNames.js";
 import { usePersistedDismissal } from "./hooks/usePersistedDismissal.js";
+import { resolveConfig } from "./resolveConfig.js";
 import "./FlexJarDock.fallback.css";
 
 import type {
@@ -26,14 +23,7 @@ import type {
   FlexJarBehavior,
 } from "./propTypes.js";
 
-/**
- * Derives device type from viewport width.
- */
-function getDeviceType(width: number): DeviceType {
-  if (width < 768) return "mobile";
-  if (width < 1024) return "tablet";
-  return "desktop";
-}
+
 
 /**
  * Props for the FlexJarDock component.
@@ -112,34 +102,11 @@ export const FlexJarDock = ({
   style,
   behavior,
 }: FlexJarDockProps) => {
-  // Resolve props from grouped config with defaults
-  const submitLabel = labels?.submit ?? DEFAULT_COPY.submitLabel;
-  const submitPendingLabel = labels?.submitPending ?? DEFAULT_COPY.submitPendingLabel;
-  const cancelLabel = labels?.cancel ?? DEFAULT_COPY.cancelLabel;
-  const validationErrorMessage = labels?.validationError ?? DEFAULT_COPY.validationErrorMessage;
-  const transportErrorMessage = labels?.transportError ?? DEFAULT_COPY.transportErrorMessage;
-  const minimizedButtonLabel = labels?.minimizedButton ?? "Gi tilbakemelding";
-
-  const successTitle = success?.title ?? DEFAULT_COPY.successTitle;
-  const successBody = success?.body ?? DEFAULT_COPY.successBody;
-  const successPrimaryLabel = success?.primaryLabel ?? DEFAULT_COPY.successPrimaryLabel;
-  const autoCloseOnSuccess = success?.autoClose ?? false;
-  const successCloseDelayMs = success?.autoCloseDelayMs ?? 1600;
-
-  const position = style?.position ?? "bottom-right";
-  const offset = style?.offset ?? 24;
-  const containerClassName = style?.containerClassName;
-  const panelClassName = style?.panelClassName;
-  const panelBackground = style?.panelBackground ?? "default";
-  const panelBorderColor = style?.panelBorderColor ?? "neutral-subtle";
-
-  const initialOpen = behavior?.initialOpen ?? true;
-  const resetOnClose = behavior?.resetOnClose ?? true;
-  const dismissCooldownDays = behavior?.dismissCooldownDays ?? 30;
-  const hideAfterSubmit = behavior?.hideAfterSubmit ?? true;
-  const showPersonalDataNotice = behavior?.showPersonalDataNotice ?? true;
-  const personalDataNotice = behavior?.personalDataNotice;
-  const storageStrategy = behavior?.storageStrategy ?? "consent";
+  // Resolve all config with defaults
+  const config = useMemo(
+    () => resolveConfig(labels, success, style, behavior),
+    [labels, success, style, behavior]
+  );
 
   // IMPORTANT: Call all hooks before any conditional returns to comply with Rules of Hooks
 
@@ -168,24 +135,7 @@ export const FlexJarDock = ({
   const panelId = `${feedbackId}-dock-panel`;
 
   // Auto-collect system context and merge with user-provided context
-  const enrichedContext = useMemo((): FlexjarContext => {
-    const isClient = typeof window !== "undefined";
-    const viewportWidth = isClient ? window.innerWidth : 1024;
-    const viewportHeight = isClient ? window.innerHeight : 768;
-
-    return {
-      // System-collected
-      url: isClient ? window.location.href : undefined,
-      pathname: isClient ? window.location.pathname : undefined,
-      viewport: { width: viewportWidth, height: viewportHeight },
-      deviceType: getDeviceType(viewportWidth),
-      userAgent: isClient ? navigator.userAgent : undefined,
-      // User-provided
-      app: context?.app,
-      tags: context?.tags,
-      debug: context?.debug,
-    };
-  }, [context?.app, context?.tags, context?.debug]);
+  const enrichedContext = useEnrichedContext(context);
 
   const { answers, status, error, setAnswer, submit, reset } = useFlexJar({
     feedbackId,
@@ -199,12 +149,12 @@ export const FlexJarDock = ({
   const { dismissed, shouldHideCompletely, isLoading, closeDock, reopenDock } =
     usePersistedDismissal({
       feedbackId,
-      initialOpen,
-      dismissCooldownDays,
+      initialOpen: config.initialOpen,
+      dismissCooldownDays: config.dismissCooldownDays,
       events,
-      resetOnClose,
+      resetOnClose: config.resetOnClose,
       onReset: reset,
-      storageStrategy,
+      storageStrategy: config.storageStrategy,
     });
 
   const { shouldDeferQuestion, isSubmitBlocked } = useQuestionGate(
@@ -241,17 +191,17 @@ export const FlexJarDock = ({
   const isSuccess = status === "success";
 
   const handleCloseDock = useCallback(() => {
-    if (isSuccess && hideAfterSubmit) {
+    if (isSuccess && config.hideAfterSubmit) {
       closeDock(true);
     } else {
       closeDock();
     }
-  }, [closeDock, isSuccess, hideAfterSubmit]);
+  }, [closeDock, isSuccess, config.hideAfterSubmit]);
 
   useAutoCloseOnSuccess({
-    enabled: autoCloseOnSuccess,
+    enabled: config.autoCloseOnSuccess,
     status,
-    delayMs: successCloseDelayMs,
+    delayMs: config.successCloseDelayMs,
     onClose: handleCloseDock,
   });
   const validationMissing = error?.type === "validation" ? error.missing : [];
@@ -259,9 +209,9 @@ export const FlexJarDock = ({
 
   const baseContainerStyle: React.CSSProperties = {
     position: "fixed",
-    bottom: offset,
-    right: position === "bottom-right" ? offset : undefined,
-    left: position === "bottom-left" ? offset : undefined,
+    bottom: config.offset,
+    right: config.position === "bottom-right" ? config.offset : undefined,
+    left: config.position === "bottom-left" ? config.offset : undefined,
     zIndex: 1000,
   };
 
@@ -269,7 +219,7 @@ export const FlexJarDock = ({
     ? baseContainerStyle
     : {
       ...baseContainerStyle,
-      width: `min(24rem, calc(100vw - ${offset * 2}px))`,
+      width: `min(24rem, calc(100vw - ${config.offset * 2}px))`,
     };
 
   const panelStyle: React.CSSProperties = {
@@ -294,11 +244,11 @@ export const FlexJarDock = ({
                 question={rating}
                 value={props.value}
                 onChange={props.onChange}
-                validationErrorMessage={validationErrorMessage}
+                validationErrorMessage={config.validationErrorMessage}
                 isMissing={props.isMissing}
                 disabled={props.disabled}
                 fieldsetClassName={CLASS_NAMES.ratingFieldset}
-                hidePrompt={isPromptQuestion} // Only hide prompt if it's the header question
+                hidePrompt={isPromptQuestion}
                 hideDescription={isPromptQuestion}
                 hideValueLabels
                 wrap={false}
@@ -321,15 +271,15 @@ export const FlexJarDock = ({
           onChange={props.onChange}
           isMissing={props.isMissing}
           disabled={props.disabled}
-          validationErrorMessage={validationErrorMessage}
+          validationErrorMessage={config.validationErrorMessage}
           hideLabel={props.hideLabel}
         />
       );
     },
-    [promptDescriptionId, promptHeadingId, promptQuestion.id, validationErrorMessage],
+    [promptDescriptionId, promptHeadingId, promptQuestion.id, config.validationErrorMessage],
   );
 
-  const noticeContent = personalDataNotice ?? DEFAULT_PERSONAL_DATA_NOTICE;
+  const noticeContent = config.personalDataNotice;
 
   // Don't render anything while loading persisted state
   if (isLoading) {
@@ -343,7 +293,7 @@ export const FlexJarDock = ({
 
   return (
     <aside
-      className={joinClassNames(CLASS_NAMES.container, containerClassName)}
+      className={joinClassNames(CLASS_NAMES.container, config.containerClassName)}
       style={containerStyle}
       data-feedback-id={feedbackId}
       data-state={dismissed ? "dismissed" : "open"}
@@ -351,7 +301,7 @@ export const FlexJarDock = ({
     >
       {dismissed ? (
         <MinimizedDock
-          label={minimizedButtonLabel}
+          label={config.minimizedButtonLabel}
           panelId={panelId}
           onReopen={reopenDock}
           className={CLASS_NAMES.minimizedButton}
@@ -360,17 +310,17 @@ export const FlexJarDock = ({
         <DockPanel
           panelId={panelId}
           panelLabel="Gi tilbakemelding"
-          panelClassName={panelClassName}
+          panelClassName={config.panelClassName}
           panelStyle={panelStyle}
-          panelBackground={panelBackground}
-          panelBorderColor={panelBorderColor}
+          panelBackground={config.panelBackground}
+          panelBorderColor={config.panelBorderColor}
           promptQuestion={promptQuestion}
           promptHeadingId={promptHeadingId}
           promptDescriptionId={promptDescriptionId}
           successHeadingId={successHeadingId}
-          successTitle={successTitle}
-          successBody={successBody}
-          successPrimaryLabel={successPrimaryLabel}
+          successTitle={config.successTitle}
+          successBody={config.successBody}
+          successPrimaryLabel={config.successPrimaryLabel}
           isSuccess={isSuccess}
           onClose={handleCloseDock}
           onSubmit={handleSubmit}
@@ -379,14 +329,14 @@ export const FlexJarDock = ({
           renderQuestion={defaultQuestionRenderer}
           validationMissing={validationMissing}
           isSubmitting={isSubmitting}
-          submitLabel={submitLabel}
-          submitPendingLabel={submitPendingLabel}
-          cancelLabel={cancelLabel}
-          showPersonalDataNotice={showPersonalDataNotice && hasTextQuestions}
+          submitLabel={config.submitLabel}
+          submitPendingLabel={config.submitPendingLabel}
+          cancelLabel={config.cancelLabel}
+          showPersonalDataNotice={config.showPersonalDataNotice && hasTextQuestions}
           personalDataNotice={noticeContent}
           isSubmitBlocked={isSubmitBlocked}
           hasTransportError={Boolean(hasTransportError)}
-          transportErrorMessage={transportErrorMessage}
+          transportErrorMessage={config.transportErrorMessage}
           shouldDeferQuestion={shouldDeferQuestion}
           onQuestionChange={setAnswer}
           // Step mode props for branching
