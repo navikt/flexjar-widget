@@ -8,7 +8,6 @@ import {
   DEFAULT_SURVEY_RATING,
   DEFAULT_SURVEY_SERVICE_FEEDBACK,
   DEFAULT_SURVEY_DISCOVERY,
-  createRatingSurvey,
   createTopTasksSurvey,
   createTaskPrioritySurvey,
 } from "../presets/index.js";
@@ -86,13 +85,6 @@ const SUCCESS_TRANSPORT: FlexJarDockProps["transport"] = {
   async submit(submission) {
     await delay(800);
     console.info("Simulert innsending", submission);
-  },
-};
-
-const FAILING_TRANSPORT: FlexJarDockProps["transport"] = {
-  async submit() {
-    await delay(600);
-    throw new Error("Kunne ikke nå tjenesten");
   },
 };
 

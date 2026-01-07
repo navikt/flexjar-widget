@@ -69,13 +69,13 @@ const localStorageAdapter = {
 
 // No-op storage for "none" strategy
 const noopStorageAdapter = {
-  async read(_key: string): Promise<string | null> {
+  async read(): Promise<string | null> {
     return null;
   },
-  async write(_key: string, _value: string): Promise<{ persisted: boolean; allowed: boolean; error?: unknown }> {
+  async write(): Promise<{ persisted: boolean; allowed: boolean; error?: unknown }> {
     return { persisted: false, allowed: true };
   },
-  async remove(_key: string): Promise<void> {
+  async remove(): Promise<void> {
     // no-op
   },
 };

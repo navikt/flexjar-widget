@@ -31,7 +31,7 @@ describe("buildCanonicalSurvey", () => {
   it("validates that all questions have IDs", () => {
     const invalidQuestions = [
       { type: "text", prompt: "No ID" },
-    ] as any;
+    ] as unknown as FlexJarSurveyConfig["questions"];
 
     expect(() =>
       buildCanonicalSurvey({ questions: invalidQuestions })

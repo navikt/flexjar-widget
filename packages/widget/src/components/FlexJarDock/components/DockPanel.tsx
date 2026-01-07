@@ -120,6 +120,8 @@ export const DockPanel = ({
         borderColor={panelBorderColor}
         className={joinClassNames(CLASS_NAMES.panel, panelClassName)}
         style={panelStyle}
+        data-flexjar-panel-label={panelLabel}
+        data-flexjar-step={isStepMode ? currentStep : undefined}
         aria-labelledby={isSuccess ? successHeadingId : promptHeadingId}
         id={panelId}
       >

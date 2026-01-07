@@ -116,6 +116,7 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     events,
     feedbackId,
     questions,
+    surveyType,
     transport,
     validate,
     startedAtRef,
