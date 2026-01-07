@@ -782,7 +782,7 @@ const LoadingPage = () => (
 
 // Skeleton loading for cards
 const CardSkeleton = () => (
-  <VStack gap="4">
+  <VStack gap="space-16">
     <Skeleton variant="rectangle" width="100%" height="40px" />
     <Skeleton variant="text" width="80%" />
     <Skeleton variant="text" width="60%" />
@@ -890,12 +890,12 @@ const DefaultPageLayout = ({ children }) => (
 ```typescript
 // Form sections with consistent spacing
 const FormSections = ({ children }) => (
-  <VStack gap="12">{children}</VStack>
+  <VStack gap="space-48">{children}</VStack>
 );
 
 // Questions group
 const Questions = ({ children }) => (
-  <VStack gap="8">{children}</VStack>
+  <VStack gap="space-32">{children}</VStack>
 );
 
 // Form panel with background
@@ -914,7 +914,7 @@ const Questions = ({ children }) => (
 
 ```typescript
 // Responsive button group
-<HStack gap="4" justify="end">
+<HStack gap="space-16" justify="end">
   <Button variant="secondary">Avbryt</Button>
   <Button variant="primary">Lagre</Button>
 </HStack>

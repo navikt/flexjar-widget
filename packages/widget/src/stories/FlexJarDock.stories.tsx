@@ -31,24 +31,52 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // ============================================
 
 // Tasks matching flexjar-analytics mock data for Top Tasks surveys
-const MOCK_TASKS = [
-  { value: "apply_sick_leave", label: "Søke om sykepenger" },
-  { value: "check_status", label: "Sjekke status på søknad" },
-  { value: "upload_docs", label: "Laste opp vedlegg" },
-  { value: "contact_nav", label: "Kontakte NAV" },
-  { value: "find_info", label: "Finne informasjon" },
+const TOP_TASKS = [
+  { value: "lese-om-dialogmote", label: "Lese om dialogmøte" },
+  { value: "melde-motebehov", label: "Melde behov for møte" },
+  { value: "svare-pa-innkalling", label: "Svare på innkalling" },
+  { value: "sjekke-status", label: "Sjekke status på sak" },
+  { value: "laste-opp-dokument", label: "Laste opp dokumentasjon" },
+  { value: "se-tidligere-mote", label: "Se tidligere møtereferater" },
+  { value: "endre-tidspunkt", label: "Endre møtetidspunkt" },
+  { value: "kontakte-nav", label: "Kontakte NAV om møtet" },
+  { value: "avlyse-mote", label: "Avlyse eller utsette møte" },
+];
+
+// Task Priority list matching flexjar-analytics mock data (McGovern methodology)
+const TASK_PRIORITY_TASKS = [
+  // TOP TASKS (will get ~60% of all votes combined - the "Long Neck")
+  { value: "sjekke-utbetaling", label: "Sjekke utbetalinger" },
+  { value: "sok-dagpenger", label: "Søke dagpenger" },
+  { value: "melde-sykefravaer", label: "Melde sykefravær" },
+  { value: "sjekke-status", label: "Sjekke søknadsstatus" },
+
+  // MEDIUM TASKS (next ~25%)
+  { value: "meldekort", label: "Sende meldekort" },
+  { value: "finne-skjema", label: "Finne riktig skjema" },
+  { value: "kontakte-nav", label: "Kontakte NAV" },
+  { value: "lese-rettigheter", label: "Lese om mine rettigheter" },
+
+  // TINY TASKS (the long tail - ~15% combined)
+  { value: "endre-kontonummer", label: "Endre kontonummer" },
+  { value: "bestille-legeerklaring", label: "Bestille legeerklæring" },
+  { value: "se-vedtak", label: "Se vedtak" },
+  { value: "klage-vedtak", label: "Klage på vedtak" },
+  { value: "sok-foreldrepenger", label: "Søke foreldrepenger" },
+  { value: "aktivitetsplan", label: "Oppdatere aktivitetsplan" },
+  { value: "cv-registrering", label: "Registrere CV" },
 ];
 
 const TOP_TASKS_SURVEY = createTopTasksSurvey({
-  tasks: MOCK_TASKS,
+  tasks: TOP_TASKS,
   includeBlockerQuestion: true,
   includeOtherTask: true,
 });
 
 // Task Priority survey (for McGovern methodology)
 const TASK_PRIORITY_SURVEY = createTaskPrioritySurvey({
-  tasks: MOCK_TASKS,
-  maxSelections: 3,
+  tasks: TASK_PRIORITY_TASKS,
+  maxSelections: 5,
 });
 
 const CUSTOM_SURVEY: FlexJarSurveyConfig = {

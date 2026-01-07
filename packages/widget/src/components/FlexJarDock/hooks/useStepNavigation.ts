@@ -77,7 +77,7 @@ export function useStepNavigation(
     const isLastStep = currentStep >= questions.length - 1;
 
     const goToNext = useCallback(() => {
-        if (!currentQuestion) return;
+        if (!currentQuestion) return null;
 
         const result = evaluateBranching(
             currentQuestion,

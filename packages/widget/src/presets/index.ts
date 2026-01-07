@@ -127,7 +127,8 @@ export const DEFAULT_SURVEY_DISCOVERY: FlexJarSurveyConfig = {
       maxLength: 500,
     } as FlexJarQuestion,
   ],
-  gateQuestionId: "discoveredTask",
+  // Note: No gateQuestionId - all questions visible at once
+  // This provides a cleaner UX than gate-reveal (where questions appear when typing)
 };
 
 // ============================================
@@ -210,7 +211,7 @@ export function createDiscoverySurvey(options?: {
   return {
     type: "discovery",
     questions,
-    gateQuestionId: "discoveredTask",
+    // No gateQuestionId - all questions visible at once for cleaner UX
   };
 }
 
