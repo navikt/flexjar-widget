@@ -11,6 +11,7 @@ import {
   createTopTasksSurvey,
   createTaskPrioritySurvey,
 } from "../presets/index.js";
+import { SurveyCodePreview } from "./SurveyCodePreview";
 
 // Type for the Storybook mock consent API
 interface FlexJarMockConsentAPI {
@@ -265,6 +266,15 @@ const ExamplePage = (props: FlexJarDockProps) => {
             </li>
           </ul>
         </div>
+
+        {/* Code preview showing the survey configuration */}
+        {props.survey && (
+          <SurveyCodePreview
+            survey={props.survey}
+            title="Survey-konfigurasjon"
+            defaultCollapsed={false}
+          />
+        )}
       </div>
       <FlexJarDock key={resetToken} {...props} />
     </div>
