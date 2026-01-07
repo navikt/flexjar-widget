@@ -42,8 +42,8 @@ packages/widget/
 ├── src/
 │   ├── core/           # useFlexJar hook, types
 │   ├── components/     # FlexJarDock, question renderers
-│   ├── presets/        # createRatingSurvey, createTopTasksSurvey
-│   └── persistence/    # localStorage handling
+│   ├── presets/        # DEFAULT_SURVEY_* and survey builders
+│   └── shared/         # consent/storage helpers and shared defaults (under components/shared)
 └── dist/               # Built output
 ```
 

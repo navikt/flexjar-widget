@@ -4,11 +4,13 @@ description: Best practices for using Aksel spacing tokens in components
 
 # Aksel Spacing Tokens
 
-When using Aksel design system components (VStack, HStack, HGrid, Box, etc.), always use the **new `space-X` token format** for spacing properties.
+When using Aksel design system components (VStack, HStack, HGrid, Box, etc.), prefer using the `space-*` tokens already used in this repo.
+
+This repo does not use Tailwind. Use CSS modules if custom styling is needed.
 
 ## Deprecated vs New Format
 
-The old numeric string format (`"1"`, `"2"`, `"4"`, `"6"`, etc.) is **deprecated**.
+Some Aksel APIs historically accepted numeric string values, but this repo standardizes on `space-*` tokens for consistency.
 
 Use the new `space-X` format instead:
 

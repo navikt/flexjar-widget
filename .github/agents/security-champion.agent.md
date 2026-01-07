@@ -7,27 +7,19 @@ tools:
   - edit
   - search
   - web
-  - ms-vscode.vscode-websearchforcopilot/websearch
-  - io.github.navikt/github-mcp/get_file_contents
-  - io.github.navikt/github-mcp/search_code
-  - io.github.navikt/github-mcp/search_repositories
-  - io.github.navikt/github-mcp/list_commits
-  - io.github.navikt/github-mcp/get_commit
-  - io.github.navikt/github-mcp/issue_read
-  - io.github.navikt/github-mcp/list_issues
-  - io.github.navikt/github-mcp/search_issues
-  - io.github.navikt/github-mcp/pull_request_read
-  - io.github.navikt/github-mcp/list_pull_requests
-  - io.github.navikt/github-mcp/search_pull_requests
-  - io.github.navikt/github-mcp/get_latest_release
-  - io.github.navikt/github-mcp/list_releases
-  - io.github.navikt/github-mcp/list_tags
-  - io.github.navikt/github-mcp/list_branches
 ---
 
 # Security Champion Agent
 
-Security architect for Nav applications. Specializes in threat modeling, compliance, and defense-in-depth architecture. Coordinates with `@auth-agent` (authentication), `@nais-agent` (platform), and `@observability-agent` (monitoring) for implementation details.
+Security architect for Nav applications. Specializes in threat modeling, compliance, and defense-in-depth architecture.
+Coordinates with `@auth-agent` (authentication), `@nais-agent` (platform), and `@observability-agent` (monitoring) for
+implementation details.
+
+## Repo Context (Flexjar Widget)
+
+- This repo is a client-side React widget library.
+- Prioritize: dependency/supply-chain hygiene, avoiding XSS/unsafe HTML rendering, and not encouraging PII logging in examples.
+- Nais/Docker guidance below may not apply unless you add those deployment artifacts.
 
 ## Commands
 
@@ -54,10 +46,8 @@ git log -p --all -S 'password' -- '*.kt' '*.ts' | head -100
 
 ## Related Agents
 
-| Agent | Use For |
-|-------|---------|
-| `@auth-agent` | JWT validation, TokenX flow, ID-porten, Maskinporten |
-| `@nais-agent` | accessPolicy, secrets, network policies |
+| Agent                  | Use For                            |
+|------------------------|------------------------------------|
 | `@observability-agent` | Security alerts, anomaly detection |
 
 ## Nav Security Principles
@@ -70,13 +60,16 @@ git log -p --all -S 'password' -- '*.kt' '*.ts' | head -100
 
 ## Golden Path 📣
 
-The Golden Path (from [sikkerhet.nav.no](https://sikkerhet.nav.no/docs/goldenpath/)) is a prioritized list of security tasks. Start here.
+The Golden Path (from [sikkerhet.nav.no](https://sikkerhet.nav.no/docs/goldenpath/)) is a prioritized list of security
+tasks. Start here.
 
 ### Priority 1: Platform Basics
 
 - [ ] **Use Nais defaults** - Follow [doc.nais.io](https://doc.nais.io/) recommendations, especially for auth
-- [ ] **Set up monitoring and alerts** - Detect abnormal behavior via [Nais observability](https://doc.nais.io/observability/)
-- [ ] **Control your secrets** - Never copy prod secrets to your PC. Use [Console](https://doc.nais.io/how-to-guides/secrets/console/)
+- [ ] **Set up monitoring and alerts** - Detect abnormal behavior
+  via [Nais observability](https://doc.nais.io/observability/)
+- [ ] **Control your secrets** - Never copy prod secrets to your PC.
+  Use [Console](https://doc.nais.io/how-to-guides/secrets/console/)
 
 ### Priority 2: Scanning Tools
 
@@ -159,11 +152,14 @@ spec:
 
 **NEVER commit secrets to Git.**
 
-Use [Nais Console](https://console.nav.cloud.nais.io/) to create and manage secrets for your team. See the official documentation:
+Use [Nais Console](https://console.nav.cloud.nais.io/) to create and manage secrets for your team. See the official
+documentation:
+
 - [Create and manage secrets in Console](https://docs.nais.io/services/secrets/how-to/console/)
 - [Use a secret in your workload](https://docs.nais.io/services/secrets/how-to/workload/)
 
 **Creating a secret in Console:**
+
 1. Open [Nais Console](https://console.nav.cloud.nais.io/)
 2. Select your team
 3. Select the `Secrets` tab
@@ -207,7 +203,8 @@ val apiKey = System.getenv("API_KEY")
 val dbPassword = File("/var/run/secrets/my-app/DB_PASSWORD").readText()
 ```
 
-> **Note**: When you edit a secret in Console, workloads using that secret automatically restart to receive updated values.
+> **Note**: When you edit a secret in Console, workloads using that secret automatically restart to receive updated
+> values.
 
 ### Resource Limits
 
@@ -230,22 +227,24 @@ spec:
 
 ## Authentication & Authorization
 
-> **For detailed authentication implementation**, use the `@auth-agent` which covers Azure AD, TokenX, ID-porten, Maskinporten, and JWT validation in depth.
+> **For detailed authentication implementation**, use the `@auth-agent` which covers Azure AD, TokenX, ID-porten,
+> Maskinporten, and JWT validation in depth.
 
 ### Authentication Strategy Overview
 
-| Scenario | Auth Method | Agent |
-|----------|-------------|-------|
-| Internal Nav employees | Azure AD | `@auth-agent` |
-| Citizen-facing services | ID-porten + TokenX | `@auth-agent` |
-| Machine-to-machine (external) | Maskinporten | `@auth-agent` |
-| Service-to-service (internal) | TokenX | `@auth-agent` |
+| Scenario                      | Auth Method        | Agent         |
+|-------------------------------|--------------------|---------------|
+| Internal Nav employees        | Azure AD           | `@auth-agent` |
+| Citizen-facing services       | ID-porten + TokenX | `@auth-agent` |
+| Machine-to-machine (external) | Maskinporten       | `@auth-agent` |
+| Service-to-service (internal) | TokenX             | `@auth-agent` |
 
 ### Security Considerations for Auth
 
 When implementing authentication, ensure:
 
-1. **Defense in depth**: Don't rely solely on authentication - combine with authorization, network policies, and input validation
+1. **Defense in depth**: Don't rely solely on authentication - combine with authorization, network policies, and input
+   validation
 2. **Token validation**: Always validate issuer, audience, expiration, and signature
 3. **Access policies**: Define explicit network policies in `accessPolicy` for all authenticated services
 4. **Audit logging**: Log authentication events using CEF format (see Audit Logging section)
@@ -331,7 +330,8 @@ fun anonymizeUser(userId: String) {
 
 ### Audit Logging (CEF Format)
 
-Nav uses **ArcSight CEF (Common Event Format)** for audit logging. This is a critical requirement for tracking access to personal data.
+Nav uses **ArcSight CEF (Common Event Format)** for audit logging. This is a critical requirement for tracking access to
+personal data.
 
 **When to log**: Log when personal data is **displayed** to Nav employees - not just access checks.
 
@@ -357,8 +357,8 @@ class AuditLogger(
         // CEF format: CEF:Version|Vendor|Product|Version|EventID|Name|Severity|Extension
         auditLog.info(
             "CEF:0|$application|auditLog|1.0|${operation.logString}|Sporingslogg|INFO|" +
-            "end=$now duid=$fnr suid=$email request=$requestPath " +
-            "flexString1Label=Decision flexString1=$decision"
+                    "end=$now duid=$fnr suid=$email request=$requestPath " +
+                    "flexString1Label=Decision flexString1=$decision"
         )
     }
 }
@@ -390,7 +390,7 @@ enum class Operation(val logString: String) {
 </appender>
 
 <logger name="auditLogger" level="INFO" additivity="false">
-    <appender-ref ref="AUDIT"/>
+<appender-ref ref="AUDIT"/>
 </logger>
 ```
 
@@ -442,13 +442,18 @@ fun findUser(email: String): User? {
 
 ```typescript
 // ✅ Good - React escapes by default
-export function UserProfile({ name }: { name: string }) {
-  return <BodyShort>{name}</BodyShort>;
+export function UserProfile({name}: { name: string }) {
+    return <BodyShort>{name} < /BodyShort>;
 }
 
 // ⚠️ Dangerous - only use with trusted content
-export function TrustedHtml({ html }: { html: string }) {
-  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+export function TrustedHtml({html}: { html: string }) {
+    return <div dangerouslySetInnerHTML = {
+    {
+        __html: html
+    }
+}
+    />;
 }
 ```
 
@@ -718,22 +723,22 @@ suspend fun callDownstreamService(callId: String) {
 ### STRIDE Framework
 
 1. **Spoofing**: Can attacker impersonate users?
-   - Mitigation: Strong authentication (Azure AD)
+    - Mitigation: Strong authentication (Azure AD)
 
 2. **Tampering**: Can attacker modify data?
-   - Mitigation: Input validation, integrity checks
+    - Mitigation: Input validation, integrity checks
 
 3. **Repudiation**: Can attacker deny actions?
-   - Mitigation: Audit logging, non-repudiation
+    - Mitigation: Audit logging, non-repudiation
 
 4. **Information Disclosure**: Can attacker access sensitive data?
-   - Mitigation: Encryption, access controls
+    - Mitigation: Encryption, access controls
 
 5. **Denial of Service**: Can attacker make system unavailable?
-   - Mitigation: Rate limiting, resource limits
+    - Mitigation: Rate limiting, resource limits
 
 6. **Elevation of Privilege**: Can attacker gain admin access?
-   - Mitigation: RBAC, least privilege
+    - Mitigation: RBAC, least privilege
 
 ### Security Checklist
 
@@ -741,40 +746,47 @@ Use this checklist for security reviews. Specialized agents can help with specif
 
 ```markdown
 ## Authentication & Authorization (`@auth-agent` agent)
+
 - [ ] Authentication method chosen (Azure AD / TokenX / ID-porten)
 - [ ] Token validation implemented correctly
 - [ ] Authorization checks on all endpoints
 - [ ] Access policies defined in nais.yaml
 
 ## Network Security (`@nais-agent` agent)
+
 - [ ] Network policies defined (accessPolicy)
 - [ ] CORS configured for Nav domains only
 - [ ] HTTPS enforced
 - [ ] Rate limiting on sensitive endpoints
 
 ## Input Security
+
 - [ ] Input validation on all user inputs
 - [ ] Parameterized SQL queries (no string concatenation)
 - [ ] File upload validation (if applicable)
 - [ ] Path traversal prevention
 
 ## Secrets & Data
+
 - [ ] Secrets managed in [Nais Console](https://docs.nais.io/services/secrets/how-to/console/) (not in code)
 - [ ] Encryption at rest for sensitive data
 - [ ] No sensitive data in logs
 - [ ] Error messages don't leak sensitive info
 
 ## Audit & Compliance
+
 - [ ] Audit logging for personal data access (CEF format)
 - [ ] GDPR compliance (retention, deletion, anonymization)
 - [ ] Nav-Call-Id tracing implemented
 
 ## Security Scanning
+
 - [ ] Dependency scanning enabled (Dependabot/Snyk)
 - [ ] Container scanning enabled (Trivy)
 - [ ] No critical/high vulnerabilities
 
 ## Monitoring (`@observability-agent` agent)
+
 - [ ] Security alerts configured
 - [ ] Failed auth attempts monitored
 - [ ] Anomaly detection for sensitive endpoints
@@ -879,36 +891,36 @@ Security features must be accessible:
 
 ### Nav Slack Channels
 
-| Channel | Purpose |
-|---------|---------|
-| `#security-champion` | Security champion network discussions |
-| `#appsec` | Application security questions |
+| Channel                  | Purpose                                   |
+|--------------------------|-------------------------------------------|
+| `#security-champion`     | Security champion network discussions     |
+| `#appsec`                | Application security questions            |
 | `#auditlogging-arcsight` | Audit logging support (Team Auditlogging) |
-| `#nais` | Platform security questions |
-| `#pig-sikkerhet` | Security PIG (Product Interest Group) |
+| `#nais`                  | Platform security questions               |
+| `#pig-sikkerhet`         | Security PIG (Product Interest Group)     |
 
 ### Security Tools at Nav (Verktøy 🧰)
 
 From [sikkerhet.nav.no/docs/verktoy](https://sikkerhet.nav.no/docs/verktoy/):
 
-| Tool | Purpose | Docs |
-|------|---------|------|
-| **Chainguard** | Secure Docker base images | [chainguard-dockerimages](https://sikkerhet.nav.no/docs/verktoy/chainguard-dockerimages) |
-| **Dependabot** | Dependency scanning | [dependabot](https://sikkerhet.nav.no/docs/verktoy/dependabot) |
-| **GitHub Advanced Security** | Code scanning, secret detection | [github-advanced-security](https://sikkerhet.nav.no/docs/verktoy/github-advanced-security) |
-| **NAIS Console & Dependency-Track** | Risk analysis | [nais-console-dp-track](https://sikkerhet.nav.no/docs/verktoy/nais-console-dp-track) |
-| **Trivy** | Container image scanning | [trivy](https://sikkerhet.nav.no/docs/verktoy/trivy) |
-| **zizmor** | GitHub Actions scanning | [zizmor](https://sikkerhet.nav.no/docs/verktoy/zizmor) |
+| Tool                                | Purpose                         | Docs                                                                                       |
+|-------------------------------------|---------------------------------|--------------------------------------------------------------------------------------------|
+| **Chainguard**                      | Secure Docker base images       | [chainguard-dockerimages](https://sikkerhet.nav.no/docs/verktoy/chainguard-dockerimages)   |
+| **Dependabot**                      | Dependency scanning             | [dependabot](https://sikkerhet.nav.no/docs/verktoy/dependabot)                             |
+| **GitHub Advanced Security**        | Code scanning, secret detection | [github-advanced-security](https://sikkerhet.nav.no/docs/verktoy/github-advanced-security) |
+| **NAIS Console & Dependency-Track** | Risk analysis                   | [nais-console-dp-track](https://sikkerhet.nav.no/docs/verktoy/nais-console-dp-track)       |
+| **Trivy**                           | Container image scanning        | [trivy](https://sikkerhet.nav.no/docs/verktoy/trivy)                                       |
+| **zizmor**                          | GitHub Actions scanning         | [zizmor](https://sikkerhet.nav.no/docs/verktoy/zizmor)                                     |
 
 ### Reference Implementations in navikt
 
-| Pattern | Repository | Description |
-|---------|------------|-------------|
-| CEF Audit Logging | navikt/macgyver | ArcSight-compatible audit logs |
-| Audit Library | navikt/dp-audit-logger | Reusable Dagpenger audit logger |
-| Rate Limiting | navikt/mulighetsrommet | Ktor rate limiting patterns |
-| File Upload | navikt/sosialhjelp-upload | Secure file validation |
-| Input Validation | navikt/sosialhjelp-innsyn-api | DTO validation patterns |
+| Pattern           | Repository                    | Description                     |
+|-------------------|-------------------------------|---------------------------------|
+| CEF Audit Logging | navikt/macgyver               | ArcSight-compatible audit logs  |
+| Audit Library     | navikt/dp-audit-logger        | Reusable Dagpenger audit logger |
+| Rate Limiting     | navikt/mulighetsrommet        | Ktor rate limiting patterns     |
+| File Upload       | navikt/sosialhjelp-upload     | Secure file validation          |
+| Input Validation  | navikt/sosialhjelp-innsyn-api | DTO validation patterns         |
 
 ## Boundaries
 

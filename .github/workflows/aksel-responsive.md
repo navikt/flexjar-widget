@@ -122,18 +122,7 @@ Verify the component at these widths:
 
 ## Common Patterns for This Project
 
-### DashboardGrid (reusable component)
-Use `DashboardGrid` with responsive minColumnWidth:
-```tsx
-<DashboardGrid minColumnWidth={{ xs: "140px", md: "240px" }}>
-  <DashboardCard>...</DashboardCard>
-</DashboardGrid>
-```
+### Notes
 
-### Header Navigation
-- Icons only on mobile (`below="sm"`)
-- Icons + text on tablet and up (`above="sm"`)
-
-### FilterBar
-- Stack vertically on mobile (`xs: 1 column`)
-- Horizontal layout on tablet+ (`md: multiple columns`)
+- This repo is a reusable widget library. Avoid application-specific layout patterns.
+- No Tailwind: if you need custom layout tweaks, use CSS modules.

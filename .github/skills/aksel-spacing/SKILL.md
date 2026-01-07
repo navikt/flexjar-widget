@@ -20,7 +20,7 @@ import { Box, VStack } from '@navikt/ds-react';
 
 export default function Page() {
   return (
-    <main className="max-w-7xl mx-auto">
+    <main>
       <Box
         paddingBlock={{ xs: 'space-8', md: 'space-12' }}
         paddingInline={{ xs: 'space-4', md: 'space-10' }}
@@ -180,20 +180,10 @@ export function FilterSection() {
 }
 ```
 
-## Spacing Tokens Reference
+## Spacing Tokens
 
-```typescript
-"space-0"; // 0px
-"space-1"; // 4px
-"space-2"; // 8px
-"space-3"; // 12px
-"space-4"; // 16px  ← Form field gaps
-"space-5"; // 20px
-"space-6"; // 24px  ← Card padding (mobile)
-"space-8"; // 32px  ← Card padding (desktop), section gaps
-"space-10"; // 40px  ← Page padding (desktop)
-"space-12"; // 48px  ← Page padding block (desktop)
-```
+Use the `space-<number>` tokens supported by the current `@navikt/ds-react` version in this repo.
+Prefer copying the exact tokens already used in the widget (for consistency) and refer to Aksel token docs when in doubt.
 
 ## Responsive Breakpoints
 
@@ -227,4 +217,7 @@ gap="space-4"
 // ❌ NEVER use Tailwind
 className="p-4 m-2"  // WRONG!
 className="px-6 py-4"  // WRONG!
+
+// ✅ If custom styling is needed, use CSS modules
+// className={styles.root}
 ```

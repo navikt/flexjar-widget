@@ -180,3 +180,8 @@ Aksel tokens automatically support dark mode when using the theme wrapper:
 ```
 
 All `--ax-*` tokens will automatically adapt. Never use hardcoded colors that break dark mode.
+
+## This Repo (Flexjar Widget)
+
+- No Tailwind: use CSS modules for custom styling.
+- Prefer Aksel primitives/props for spacing/layout over custom CSS when possible.

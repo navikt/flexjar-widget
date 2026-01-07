@@ -7,38 +7,34 @@ tools:
   - edit
   - search
   - web
-  - ms-vscode.vscode-websearchforcopilot/websearch
-  - io.github.navikt/github-mcp/get_file_contents
-  - io.github.navikt/github-mcp/search_code
-  - io.github.navikt/github-mcp/search_repositories
-  - io.github.navikt/github-mcp/list_commits
-  - io.github.navikt/github-mcp/issue_read
-  - io.github.navikt/github-mcp/list_issues
-  - io.github.navikt/github-mcp/search_issues
-  - io.github.navikt/github-mcp/pull_request_read
-  - io.github.navikt/github-mcp/search_pull_requests
-  - io.github.navikt/github-mcp/get_latest_release
-  - io.github.navikt/github-mcp/list_releases
 ---
 
 # Aksel Design Agent
 
 Nav's Aksel Design System expert (@navikt/ds-react v7.x). Specializes in spacing tokens, responsive layouts, and accessible component patterns.
 
+## Repo Context (Flexjar Widget)
+
+- This repo is a reusable React widget library (not a NAV app).
+- No Tailwind: use CSS modules for styling.
+- Use the existing `npm` workspace scripts at the repo root (build/test/storybook).
+
 ## Commands
 
 Run with `run_in_terminal`:
 
 ```bash
-# Install Aksel packages
-pnpm add @navikt/ds-react @navikt/ds-css
+# Install dependencies
+npm install
 
 # Run v8 spacing migration codemods
 npx @navikt/aksel codemod v8-primitive-spacing  # React primitives
 npx @navikt/aksel codemod v8-token-spacing      # CSS/SCSS/Less
 
 # Run checks after changes
-cd apps/my-copilot && mise check
+npm run lint
+npm run test
+npm run build
 ```
 
 **Search tools**: Use `grep_search` to find Tailwind conflicts:
@@ -300,7 +296,7 @@ import { Box, VStack, Heading, BodyShort } from '@navikt/ds-react';
 
 export default function Page() {
   return (
-    <main className="max-w-7xl mx-auto">
+    <main>
       <Box
         paddingBlock={{ xs: 'space-8', md: 'space-12' }}
         paddingInline={{ xs: 'space-4', md: 'space-10' }}
@@ -330,7 +326,7 @@ export default function Page() {
 ```typescript
 export default function Dashboard() {
   return (
-    <main className="max-w-7xl mx-auto">
+    <main>
       <Box
         paddingBlock={{ xs: 'space-8', md: 'space-12' }}
         paddingInline={{ xs: 'space-4', md: 'space-10' }}
@@ -823,7 +819,7 @@ const AlertWithCloseButton = ({ children, variant }) => {
 };
 
 // Stacked alerts for system messages
-<VStack gap="4">
+<VStack gap="space-16">
   {messages.map(({ severity, text, id }) => (
     <Alert variant={severity} fullWidth key={id}>
       {text}
@@ -837,17 +833,17 @@ const AlertWithCloseButton = ({ children, variant }) => {
 ```typescript
 // Standard page wrapper
 const DefaultPageLayout = ({ children }) => (
-  <VStack gap="10" className="p-5 max-w-[1128px] mx-auto">
+  <VStack gap="space-40">
     <PageHeader />
     {children}
   </VStack>
 );
 
 // Two-column responsive layout with sidebar
-<Box className="md:flex md:gap-6">
-  <div className="md:grow mb-10 md:mb-0">{mainContent}</div>
-  <div className="shrink-0 md:w-72">{sidebar}</div>
-</Box>
+<HGrid columns={{ xs: 1, md: "1fr auto" }} gap="space-24">
+  <Box>{mainContent}</Box>
+  <Box>{sidebar}</Box>
+</HGrid>
 ```
 
 ### Box.New Patterns (v7.x - from sosialhjelp-innsyn)
@@ -866,7 +862,8 @@ const DefaultPageLayout = ({ children }) => (
 // Info box with background
 <BoxNew
   background="brand-blue-moderateA"
-  className="inline-block rounded-xl p-6"
+  padding="space-24"
+  borderRadius="xlarge"
 >
   {children}
 </BoxNew>
@@ -887,12 +884,10 @@ const DefaultPageLayout = ({ children }) => (
 ```typescript
 // Full-width background section
 <Bleed marginInline="full" marginBlock="space-0 space-64" asChild>
-  <BoxNew background="neutral-soft" padding="space-24" className="flex-1">
-    <div className="max-w-2xl mx-auto">
-      <VStack gap="20">
-        {content}
-      </VStack>
-    </div>
+  <BoxNew background="neutral-soft" padding="space-24">
+    <Box paddingInline={{ xs: "space-16", md: "space-40" }}>
+      <VStack gap="space-80">{content}</VStack>
+    </Box>
   </BoxNew>
 </Bleed>
 ```
@@ -1039,7 +1034,7 @@ Teams commonly use these Aksel CSS variables directly:
 - Include proper `aria-label` on icon-only buttons
 - Use semantic heading levels (`level` prop)
 - Design mobile-first with responsive breakpoints
-- Run `mise check` after component changes
+- Run `npm run lint`, `npm run test`, and `npm run build` after changes
 
 ### ⚠️ Ask First
 
@@ -1051,7 +1046,7 @@ Teams commonly use these Aksel CSS variables directly:
 
 ### 🚫 Never
 
-- Use Tailwind `p-`, `m-`, `px-`, `py-` utilities
+- Use Tailwind classes/utilities (this repo does not use Tailwind)
 - Skip `alt` text on images
 - Use color alone to convey information
 - Create components without keyboard navigation

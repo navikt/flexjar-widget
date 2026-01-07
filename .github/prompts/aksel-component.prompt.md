@@ -11,6 +11,7 @@ You are creating a new React component using Nav's Aksel Design System.
 2. **ALWAYS use Aksel spacing tokens** with `space-` prefix
 3. **Mobile-first responsive design** with breakpoints: `xs`, `sm`, `md`, `lg`, `xl`
 4. **Use Aksel components**: Box, VStack, HGrid, Heading, BodyShort, Button, etc.
+5. **This repo does not use Tailwind at all**. If you need custom styles, use CSS modules.
 
 ## Ask the User
 
@@ -40,7 +41,7 @@ export function {ComponentName}({
       padding={{ xs: "space-16", md: "space-24" }}
       borderRadius="large"
     >
-      <VStack gap="4">
+      <VStack gap="space-16">
         <Heading size="medium" level="2">
           {title}
         </Heading>
@@ -64,9 +65,8 @@ export function {ComponentName}({
   background="surface-subtle"
   padding={{ xs: "space-16", md: "space-24" }}
   borderRadius="large"
-  className="hover:shadow-lg transition-shadow"
 >
-  <VStack gap="4">
+  <VStack gap="space-16">
     <Heading size="medium" level="3">
       {title}
     </Heading>
@@ -78,7 +78,7 @@ export function {ComponentName}({
 ### Responsive Grid Layout
 
 ```tsx
-<HGrid columns={{ xs: 1, md: 2, lg: 3 }} gap="4">
+<HGrid columns={{ xs: 1, md: 2, lg: 3 }} gap="space-16">
   {items.map((item) => (
     <Card key={item.id} {...item} />
   ))}
@@ -127,7 +127,7 @@ export function {ComponentName}({
 ### Page Container
 
 ```tsx
-<main className="max-w-7xl mx-auto">
+<main>
   <Box paddingBlock={{ xs: "space-16", md: "space-24" }} paddingInline={{ xs: "space-16", md: "space-40" }}>
     <VStack gap={{ xs: "space-16", md: "space-24" }}>{/* Page content */}</VStack>
   </Box>
@@ -197,7 +197,7 @@ padding={{ xs: "space-16", md: "space-24" }}         // Mobile + tablet
 padding={{ xs: "space-12", sm: "space-16", md: "space-24" }}  // All breakpoints
 
 columns={{ xs: 1, md: 2, lg: 3 }}  // Responsive grid
-gap={{ xs: "4", md: "6" }}          // Responsive gap
+gap={{ xs: "space-16", md: "space-24" }}          // Responsive gap
 ```
 
 Breakpoints:
