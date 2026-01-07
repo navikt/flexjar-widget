@@ -492,13 +492,6 @@ import { LinkCard, VStack, Heading, BodyShort } from "@navikt/ds-react";
     </VStack>
   </LinkCard>
 </HGrid>
-
-// With Next.js
-import Link from "next/link";
-
-<LinkCard as={Link} href="/dashboard">
-  {/* Content */}
-</LinkCard>
 ```
 
 ### Table with stickyHeader
