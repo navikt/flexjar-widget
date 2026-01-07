@@ -62,6 +62,109 @@ describe("FlexJarDock", () => {
     localStorage.clear();
   });
 
+  it("does not show personal data notice when branching submits before any text question", async () => {
+    const user = userEvent.setup();
+
+    const branchingSurvey: FlexJarSurveyConfig = {
+      type: "custom",
+      questions: [
+        {
+          id: "decision",
+          type: "singleChoice",
+          prompt: "Vil du legge igjen en kommentar?",
+          required: true,
+          options: [
+            { value: "yes", label: "Ja" },
+            { value: "no", label: "Nei" },
+          ],
+          logic: [
+            {
+              condition: { field: "ANSWER", operator: "EQ", value: "yes" },
+              action: { type: "SUBMIT" },
+            },
+            {
+              condition: { field: "ANSWER", operator: "EQ", value: "no" },
+              action: { type: "JUMP_TO", targetId: "feedback" },
+            },
+          ],
+        },
+        {
+          id: "feedback",
+          type: "text",
+          prompt: "Kommentar",
+          required: false,
+        },
+      ],
+    };
+
+    renderDock({ survey: branchingSurvey });
+
+    await waitFor(() => {
+      expect(screen.getByRole("radio", { name: /ja/i })).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("radio", { name: /ja/i }));
+    await user.click(screen.getByRole("button", { name: /neste/i }));
+
+    expect(
+      screen.queryByText(/ikke skriv inn navn eller andre personopplysninger/i),
+    ).not.toBeInTheDocument();
+
+    expect(screen.getByRole("button", { name: /send/i })).toBeInTheDocument();
+  });
+
+  it("shows personal data notice when branching leads to a text question", async () => {
+    const user = userEvent.setup();
+
+    const branchingSurvey: FlexJarSurveyConfig = {
+      type: "custom",
+      questions: [
+        {
+          id: "decision",
+          type: "singleChoice",
+          prompt: "Vil du legge igjen en kommentar?",
+          required: true,
+          options: [
+            { value: "yes", label: "Ja" },
+            { value: "no", label: "Nei" },
+          ],
+          logic: [
+            {
+              condition: { field: "ANSWER", operator: "EQ", value: "yes" },
+              action: { type: "SUBMIT" },
+            },
+            {
+              condition: { field: "ANSWER", operator: "EQ", value: "no" },
+              action: { type: "JUMP_TO", targetId: "feedback" },
+            },
+          ],
+        },
+        {
+          id: "feedback",
+          type: "text",
+          prompt: "Kommentar",
+          required: false,
+        },
+      ],
+    };
+
+    renderDock({ survey: branchingSurvey });
+
+    await waitFor(() => {
+      expect(screen.getByRole("radio", { name: /nei/i })).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("radio", { name: /nei/i }));
+    await user.click(screen.getByRole("button", { name: /neste/i }));
+
+    expect(
+      screen.getByRole("textbox", { name: /kommentar/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/ikke skriv inn navn eller andre personopplysninger/i),
+    ).toBeInTheDocument();
+  });
+
   it("gates follow-up questions until the rating is answered", async () => {
     const user = userEvent.setup();
     renderDock();

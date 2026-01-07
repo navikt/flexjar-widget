@@ -168,6 +168,7 @@ export const FlexJarDock = ({
     isStepMode,
     currentStep,
     currentQuestion: currentStepQuestion,
+    visitedSteps,
     canGoBack,
     canGoNext,
     isLastStep,
@@ -178,6 +179,21 @@ export const FlexJarDock = ({
     questions,
     answers,
   });
+
+  const hasTextQuestionsForNotice = useMemo(() => {
+    if (!isStepMode) {
+      return hasTextQuestions;
+    }
+
+    const indices = new Set<number>([...visitedSteps, currentStep]);
+    for (const index of indices) {
+      if (questions[index]?.type === "text") {
+        return true;
+      }
+    }
+
+    return false;
+  }, [currentStep, hasTextQuestions, isStepMode, questions, visitedSteps]);
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
@@ -332,7 +348,9 @@ export const FlexJarDock = ({
           submitLabel={config.submitLabel}
           submitPendingLabel={config.submitPendingLabel}
           cancelLabel={config.cancelLabel}
-          showPersonalDataNotice={config.showPersonalDataNotice && hasTextQuestions}
+          showPersonalDataNotice={
+            config.showPersonalDataNotice && hasTextQuestionsForNotice
+          }
           personalDataNotice={noticeContent}
           isSubmitBlocked={isSubmitBlocked}
           hasTransportError={Boolean(hasTransportError)}
