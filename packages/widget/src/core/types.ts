@@ -121,11 +121,29 @@ export interface ChoiceOption {
   description?: string;
 }
 
+/**
+ * Display variant for multi-choice questions.
+ * - "checkbox": Traditional checkbox list (default) - better for few options
+ * - "combobox": Searchable dropdown with chips - better for many options (10+)
+ */
+export type MultiChoiceVariant = "checkbox" | "combobox";
+
 export interface ChoiceQuestion extends FlexJarQuestionBase<
   "singleChoice" | "multiChoice"
 > {
   options: ChoiceOption[];
   randomize?: boolean;
+  /**
+   * Display variant for multiChoice questions.
+   * - "checkbox": Traditional checkbox list (default)
+   * - "combobox": Searchable dropdown with chip display (recommended for 10+ options)
+   */
+  variant?: MultiChoiceVariant;
+  /**
+   * Maximum selections allowed for multiChoice.
+   * Use with variant="combobox" for Task Priority surveys.
+   */
+  maxSelections?: number;
 }
 
 export type FlexJarQuestion =

@@ -7,7 +7,7 @@ import type {
 import type { FlexJarDefaultQuestionProps } from "../../../types.js";
 import { RatingQuestionField } from "../rating/index.js";
 import { TextQuestionField } from "../text/index.js";
-import { MultiChoiceField, SingleChoiceField } from "../choice/index.js";
+import { ComboboxMultiChoiceField, MultiChoiceField, SingleChoiceField } from "../choice/index.js";
 
 export const DefaultQuestionRenderer = ({
   question,
@@ -63,6 +63,23 @@ export const DefaultQuestionRenderer = ({
     }
     case "multiChoice": {
       const choiceQuestion: ChoiceQuestion & { type: "multiChoice" } = question;
+
+      // Use Combobox variant for better UX with many options (10+)
+      if (choiceQuestion.variant === "combobox") {
+        return (
+          <ComboboxMultiChoiceField
+            question={choiceQuestion}
+            value={value}
+            onChange={(next: string[]) => onChange(next)}
+            validationErrorMessage={validationErrorMessage}
+            isMissing={isMissing}
+            disabled={disabled}
+            hideLabel={hideLabel}
+          />
+        );
+      }
+
+      // Default: checkbox list
       return (
         <MultiChoiceField
           question={choiceQuestion}

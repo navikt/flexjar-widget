@@ -342,8 +342,16 @@ export function createTaskPrioritySurvey(options: {
   tasks: Array<{ value: string; label: string }>;
   maxSelections?: number;
   randomize?: boolean;
+  /**
+   * Display variant for the task selection.
+   * - "combobox": Searchable dropdown with chips (default, recommended for 10+ tasks)
+   * - "checkbox": Traditional checkbox list
+   */
+  variant?: "checkbox" | "combobox";
 }): FlexJarSurveyConfig {
   const maxSelections = options.maxSelections ?? 5;
+  // Default to combobox for Task Priority (typically has many options)
+  const variant = options.variant ?? "combobox";
 
   const questions: FlexJarQuestion[] = [
     {
@@ -353,6 +361,8 @@ export function createTaskPrioritySurvey(options: {
       options: options.tasks,
       required: true,
       randomize: options.randomize ?? true,
+      variant,
+      maxSelections,
     },
   ];
 
