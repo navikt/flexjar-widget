@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import type { FlexJarAnswerValue, FlexJarQuestion } from "../../../core/types.js";
 import {
+    type BranchingResult,
     evaluateBranching,
     surveyHasBranchingLogic,
 } from "../../../core/branchingEngine.js";
@@ -29,7 +30,7 @@ export interface UseStepNavigationReturn {
     /** Whether the current step should trigger submit (from branching) */
     shouldSubmit: boolean;
     /** Navigate to the next question based on branching logic */
-    goToNext: () => void;
+    goToNext: () => BranchingResult | null;
     /** Navigate to the previous question in history */
     goToPrevious: () => void;
     /** Reset navigation to the first question */
@@ -89,7 +90,7 @@ export function useStepNavigation(
         if (result.nextIndex === -1) {
             // SUBMIT action triggered
             setShouldSubmit(true);
-            return;
+            return result;
         }
 
         // Clamp to valid range
@@ -101,6 +102,8 @@ export function useStepNavigation(
             setVisitedSteps((prev) => [...prev, nextIndex]);
             setShouldSubmit(false);
         }
+
+        return result;
     }, [currentQuestion, currentAnswer, metadata, questions, currentStep]);
 
     const goToPrevious = useCallback(() => {

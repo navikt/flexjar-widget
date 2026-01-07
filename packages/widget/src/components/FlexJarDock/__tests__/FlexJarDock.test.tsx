@@ -9,6 +9,7 @@ import type {
 import type { FlexJarSurveyConfig } from "../../surveyTypes.js";
 
 import { createRatingSurvey } from "../../../presets/index.js";
+import { createTopTasksSurvey } from "../../../presets/index.js";
 
 function createSurvey(): FlexJarSurveyConfig {
   return createRatingSurvey({
@@ -64,6 +65,9 @@ describe("FlexJarDock", () => {
 
   it("does not show personal data notice when branching submits before any text question", async () => {
     const user = userEvent.setup();
+    const transport: FlexJarTransport = {
+      submit: vi.fn().mockResolvedValue(undefined),
+    };
 
     const branchingSurvey: FlexJarSurveyConfig = {
       type: "custom",
@@ -97,7 +101,7 @@ describe("FlexJarDock", () => {
       ],
     };
 
-    renderDock({ survey: branchingSurvey });
+    renderDock({ survey: branchingSurvey, transport });
 
     await waitFor(() => {
       expect(screen.getByRole("radio", { name: /ja/i })).toBeInTheDocument();
@@ -110,7 +114,13 @@ describe("FlexJarDock", () => {
       screen.queryByText(/ikke skriv inn navn eller andre personopplysninger/i),
     ).not.toBeInTheDocument();
 
-    expect(screen.getByRole("button", { name: /send/i })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(transport.submit).toHaveBeenCalledTimes(1);
+    });
+
+    expect(
+      screen.getByRole("heading", { name: /takk for tilbakemeldingen/i }),
+    ).toBeInTheDocument();
   });
 
   it("shows personal data notice when branching leads to a text question", async () => {
@@ -205,6 +215,41 @@ describe("FlexJarDock", () => {
 
     await screen.findByRole("heading", { name: /takk for tilbakemeldingen/i });
     expect(screen.getByRole("button", { name: /lukk/i })).toBeInTheDocument();
+  });
+
+  it("submits immediately when step-mode branching returns SUBMIT (top tasks)", async () => {
+    const transportSubmit = vi.fn().mockResolvedValue(undefined);
+    const user = userEvent.setup();
+
+    const survey = createTopTasksSurvey({
+      tasks: [{ value: "t1", label: "Oppgave 1" }],
+    });
+
+    renderDock({ survey, transport: { submit: transportSubmit } });
+
+    // Step 1: task
+    await waitFor(() => {
+      expect(
+        screen.getByRole("radio", { name: /oppgave 1/i }),
+      ).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("radio", { name: /oppgave 1/i }));
+    await user.click(screen.getByRole("button", { name: /neste/i }));
+
+    // Step 2: taskSuccess
+    await waitFor(() => {
+      expect(screen.getByRole("radio", { name: /^ja$/i })).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("radio", { name: /^ja$/i }));
+    await user.click(screen.getByRole("button", { name: /neste/i }));
+
+    await waitFor(() => {
+      expect(transportSubmit).toHaveBeenCalledTimes(1);
+    });
+
+    await screen.findByRole("heading", { name: /takk for tilbakemeldingen/i });
   });
 
   it("displays validation errors when required questions are missing", async () => {

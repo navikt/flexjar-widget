@@ -195,6 +195,25 @@ export const FlexJarDock = ({
     return false;
   }, [currentStep, hasTextQuestions, isStepMode, questions, visitedSteps]);
 
+  const handleNext = useCallback(async () => {
+    const result = goToNext();
+    if (!result || result.nextIndex !== -1) {
+      return;
+    }
+
+    // If a privacy notice is relevant for this path, keep the existing confirm step:
+    // first click shows the notice + "Send" button, second click submits.
+    if (config.showPersonalDataNotice && hasTextQuestionsForNotice) {
+      return;
+    }
+
+    try {
+      await submit();
+    } catch {
+      // useFlexJar sets error state; avoid unhandled rejections
+    }
+  }, [config.showPersonalDataNotice, hasTextQuestionsForNotice, goToNext, submit]);
+
   const handleSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -364,7 +383,7 @@ export const FlexJarDock = ({
           canGoBack={canGoBack}
           canGoNext={canGoNext}
           isLastStep={isLastStep || shouldSubmit}
-          onNext={goToNext}
+          onNext={handleNext}
           onBack={goToPrevious}
         />
       )}
