@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React from "react";
 import { BodyShort, Box, Heading, HStack, VStack } from "@navikt/ds-react";
 import type { BoxNewProps } from "@navikt/ds-react/Box";
 import type {
@@ -145,12 +145,8 @@ export const RatingQuestionField = ({
   fieldsetPaddingBlock,
   fieldsetPaddingInline,
 }: RatingQuestionFieldProps) => {
-  // Determine variant, defaulting to "emoji" for backward compatibility
-  const variant = question.variant ?? "emoji";
-
   // Props common to all rating types
   const commonProps = {
-    question,
     value,
     onChange,
     validationErrorMessage,
@@ -161,18 +157,20 @@ export const RatingQuestionField = ({
     ariaDescribedBy,
     hidePrompt,
     hideDescription,
+    fieldsetPaddingBlock,
+    fieldsetPaddingInline,
   };
 
   // Dispatch to specialized components based on variant
-  switch (variant) {
+  switch (question.variant) {
     case "thumbs":
-      return <ThumbsRating {...commonProps} question={question as import("../../../core/types.js").ThumbsRatingQuestion} />;
+      return <ThumbsRating {...commonProps} question={question} />;
 
     case "stars":
-      return <StarRating {...commonProps} question={question as import("../../../core/types.js").StarRatingQuestion} />;
+      return <StarRating {...commonProps} question={question} />;
 
     case "nps":
-      return <NpsRating {...commonProps} question={question as import("../../../core/types.js").NpsRatingQuestion} />;
+      return <NpsRating {...commonProps} question={question} />;
 
     case "emoji":
     default:
@@ -194,42 +192,35 @@ export const RatingQuestionField = ({
     ariaDescribedBy ??
     (!hideDescription && question.description ? fallbackDescriptionId : undefined);
   const errorId = `${question.id}-error`;
-  const describedBy = useMemo(() => {
-    const references = [descriptionId, isMissing ? errorId : undefined].filter(Boolean);
-    return references.length > 0 ? references.join(" ") : undefined;
-  }, [descriptionId, errorId, isMissing]);
+  const describedBy =
+    [descriptionId, isMissing ? errorId : undefined].filter(Boolean).join(" ") ||
+    undefined;
 
-  const handleSelect = useCallback(
-    (nextValue: number) => {
-      if (!disabled) {
-        onChange(nextValue);
-      }
-    },
-    [disabled, onChange],
-  );
+  const handleSelect = (nextValue: number) => {
+    if (!disabled) {
+      onChange(nextValue);
+    }
+  };
 
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent) => {
-      const currentIndex = activeState ? activeState - 1 : 0;
-      let nextIndex: number;
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    const currentIndex = activeState ? activeState - 1 : 0;
+    let nextIndex: number;
 
-      switch (event.key) {
-        case "ArrowRight":
-        case "ArrowDown":
-          nextIndex = (currentIndex + 1) % options.length;
-          handleSelect(options[nextIndex]);
-          event.preventDefault();
-          break;
-        case "ArrowLeft":
-        case "ArrowUp":
-          nextIndex = (currentIndex - 1 + options.length) % options.length;
-          handleSelect(options[nextIndex]);
-          event.preventDefault();
-          break;
-      }
-    },
-    [activeState, options, handleSelect],
-  );
+    switch (event.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        nextIndex = (currentIndex + 1) % options.length;
+        handleSelect(options[nextIndex]);
+        event.preventDefault();
+        break;
+      case "ArrowLeft":
+      case "ArrowUp":
+        nextIndex = (currentIndex - 1 + options.length) % options.length;
+        handleSelect(options[nextIndex]);
+        event.preventDefault();
+        break;
+    }
+  };
 
   return (
     <VStack gap="space-8" className={className}>

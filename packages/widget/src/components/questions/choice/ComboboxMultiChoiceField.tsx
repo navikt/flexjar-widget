@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { UNSAFE_Combobox } from "@navikt/ds-react";
 import type {
     ChoiceOption,
@@ -35,7 +35,7 @@ export const ComboboxMultiChoiceField = ({
     hideLabel,
 }: ComboboxMultiChoiceFieldProps) => {
     const options = useChoiceOptions(question);
-    const selected = Array.isArray(value) ? value : [];
+    const selected = useMemo(() => (Array.isArray(value) ? value : []), [value]);
     const maxSelections = question.maxSelections;
 
     // Build a map for quick label lookup

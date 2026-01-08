@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
 import { BodyShort, Box, Heading, HStack, VStack } from "@navikt/ds-react";
+import type { BoxNewProps } from "@navikt/ds-react/Box";
 import type { NpsRatingQuestion, FlexJarAnswerValue } from "../../../core/types.js";
 import styles from "./emo.module.css";
 import "./emo.fallback.css";
@@ -16,6 +17,8 @@ interface NpsRatingProps {
     ariaDescribedBy?: string;
     hidePrompt?: boolean;
     hideDescription?: boolean;
+    fieldsetPaddingBlock?: BoxNewProps["paddingBlock"];
+    fieldsetPaddingInline?: BoxNewProps["paddingInline"];
 }
 
 // NPS color zones: 0-6 detractors (red), 7-8 passives (yellow), 9-10 promoters (green)
@@ -49,6 +52,8 @@ export function NpsRating({
     ariaDescribedBy,
     hidePrompt = false,
     hideDescription = false,
+    fieldsetPaddingBlock,
+    fieldsetPaddingInline,
 }: NpsRatingProps) {
     const activeState = typeof value === "number" ? value : null;
     const fallbackHeadingId = `${question.id}-heading`;
@@ -114,20 +119,23 @@ export function NpsRating({
                     ariaDescribedBy ??
                     (!hideDescription && question.description ? fallbackDescriptionId : undefined)
                 }
-                paddingBlock="space-12"
-                paddingInline="space-16"
+                paddingBlock={fieldsetPaddingBlock ?? "space-8"}
+                paddingInline={fieldsetPaddingInline ?? "space-12"}
             >
                 <legend className={styles.legend ?? "flexjar-rating__legend"}>
                     {question.prompt}
                 </legend>
                 <VStack gap="space-8">
-                    <HStack
-                        gap="space-2"
-                        justify="center"
-                        align="center"
+                    <Box.New
+                        as="div"
                         role="radiogroup"
                         onKeyDown={handleKeyDown}
-                        style={{ flexWrap: "nowrap" }}
+                        style={{
+                            width: "100%",
+                            display: "grid",
+                            gridTemplateColumns: "repeat(11, minmax(0, 1fr))",
+                            gap: "var(--ax-space-2)",
+                        }}
                     >
                         {Array.from({ length: 11 }, (_, index) => {
                             const isActive = activeState === index;
@@ -145,25 +153,27 @@ export function NpsRating({
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        width: "2rem",
-                                        height: "2rem",
+                                        width: "100%",
+                                        minWidth: 0,
+                                        height: "2.25rem",
                                         border: `2px solid ${getNpsBorderColor(index, isActive)}`,
                                         borderRadius: "var(--ax-radius-4)",
                                         background: getNpsColor(index, isActive),
                                         cursor: disabled ? "not-allowed" : "pointer",
                                         opacity: disabled ? 0.5 : 1,
+                                        padding: 0,
                                         fontSize: "0.875rem",
                                         fontWeight: isActive ? 700 : 500,
                                         color: "var(--ax-text-neutral)",
                                         transition: "all 0.15s ease",
-                                        flexShrink: 0,
+                                        fontVariantNumeric: "tabular-nums",
                                     }}
                                 >
                                     {index}
                                 </button>
                             );
                         })}
-                    </HStack>
+                    </Box.New>
                     <HStack justify="space-between" style={{ width: "100%" }}>
                         <BodyShort
                             size="small"

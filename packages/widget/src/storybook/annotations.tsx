@@ -20,7 +20,11 @@ export const previewAnnotations: Preview = {
     },
     options: {
       storySort: {
-        order: ["Welcome", "Components"],
+        order: [
+          "Welcome",
+          "Components",
+          ["FlexJarDock", ["Rating", "Tasks", "Custom"]],
+        ],
       },
     },
   },

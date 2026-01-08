@@ -6,8 +6,6 @@ import type {
   RatingQuestion,
 } from "./types";
 
-const DEFAULT_SCALE = 5;
-
 export function validateAnswers(
   questions: FlexJarQuestion[],
   answers: Record<string, FlexJarAnswerValue>,
@@ -74,12 +72,28 @@ function isValidRatingAnswer(
   question: RatingQuestion,
   rawAnswer: FlexJarAnswerValue,
 ): boolean {
-  const scale = question.scale ?? DEFAULT_SCALE;
+  // Get scale from variant (fixed scales per variant)
+  const variant = question.variant ?? "emoji";
+  let minValue = 1;
+  let maxValue: number;
+
+  switch (variant) {
+    case "thumbs":
+      maxValue = 2;
+      break;
+    case "nps":
+      minValue = 0;
+      maxValue = 10;
+      break;
+    default: // emoji, stars
+      maxValue = 5;
+  }
+
   const numeric = typeof rawAnswer === "number" ? rawAnswer : Number(rawAnswer);
   if (Number.isNaN(numeric)) {
     return false;
   }
-  return numeric >= 1 && numeric <= scale;
+  return numeric >= minValue && numeric <= maxValue;
 }
 
 function isValidSingleChoiceAnswer(

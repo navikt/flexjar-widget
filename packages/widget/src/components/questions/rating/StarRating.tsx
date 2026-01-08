@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { BodyShort, Box, Heading, HStack, VStack } from "@navikt/ds-react";
+import type { BoxNewProps } from "@navikt/ds-react/Box";
 import { StarIcon, StarFillIcon } from "@navikt/aksel-icons";
 import type { StarRatingQuestion, FlexJarAnswerValue } from "../../../core/types.js";
 import styles from "./emo.module.css";
@@ -17,6 +18,8 @@ interface StarRatingProps {
     ariaDescribedBy?: string;
     hidePrompt?: boolean;
     hideDescription?: boolean;
+    fieldsetPaddingBlock?: BoxNewProps["paddingBlock"];
+    fieldsetPaddingInline?: BoxNewProps["paddingInline"];
     /**
      * Controls label display behavior:
      * - 'never': No labels shown (default, no layout jump)
@@ -45,6 +48,8 @@ export function StarRating({
     ariaDescribedBy,
     hidePrompt = false,
     hideDescription = false,
+    fieldsetPaddingBlock,
+    fieldsetPaddingInline,
     showLabels = 'never',
 }: StarRatingProps) {
     const scale = 5; // Fixed 5-star scale
@@ -122,19 +127,21 @@ export function StarRating({
                     ariaDescribedBy ??
                     (!hideDescription && question.description ? fallbackDescriptionId : undefined)
                 }
-                paddingBlock="space-12"
-                paddingInline="space-16"
+                paddingBlock={fieldsetPaddingBlock ?? "space-12"}
+                paddingInline={fieldsetPaddingInline ?? "space-16"}
             >
                 <legend className={styles.legend ?? "flexjar-rating__legend"}>
                     {question.prompt}
                 </legend>
                 <VStack gap="space-4" align="center">
                     <HStack
-                        gap={scale <= 5 ? "space-8" : "space-4"}
-                        justify="center"
+                        gap="space-2"
+                        justify="space-between"
                         align="center"
+                        wrap={false}
                         role="radiogroup"
                         onKeyDown={handleKeyDown}
+                        style={{ width: "100%", flexWrap: "nowrap" }}
                     >
                         {Array.from({ length: scale }, (_, index) => {
                             const starValue = index + 1;
@@ -160,7 +167,7 @@ export function StarRating({
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
-                                        padding: scale <= 5 ? "var(--ax-space-8)" : "var(--ax-space-4)",
+                                        padding: scale <= 5 ? "var(--ax-space-8)" : "var(--ax-space-6)",
                                         border: "none",
                                         borderRadius: "var(--ax-radius-4)",
                                         background: "transparent",
@@ -168,17 +175,25 @@ export function StarRating({
                                         opacity: disabled ? 0.5 : 1,
                                         transition: "transform 0.1s ease",
                                         transform: hoverValue === starValue ? "scale(1.2)" : "scale(1)",
+                                        flex: "1 1 0",
+                                        minWidth: 0,
                                     }}
                                 >
                                     {isFilled ? (
                                         <StarFillIcon
-                                            fontSize={scale <= 5 ? "2rem" : "1.5rem"}
-                                            style={{ color: "var(--ax-text-warning)" }}
+                                            style={{
+                                                width: "2.5rem",
+                                                height: "2.5rem",
+                                                color: "var(--ax-text-warning)",
+                                            }}
                                         />
                                     ) : (
                                         <StarIcon
-                                            fontSize={scale <= 5 ? "2rem" : "1.5rem"}
-                                            style={{ color: "var(--ax-text-neutral-subtle)" }}
+                                            style={{
+                                                width: "2.5rem",
+                                                height: "2.5rem",
+                                                color: "var(--ax-text-neutral-subtle)",
+                                            }}
                                         />
                                     )}
                                 </button>

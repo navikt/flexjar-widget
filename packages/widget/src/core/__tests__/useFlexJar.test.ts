@@ -16,7 +16,6 @@ const requiredQuestions: FlexJarQuestion[] = [
     type: "rating",
     prompt: "Hvor fornøyd er du?",
     required: true,
-    scale: 5,
   },
   {
     id: "feedback",
@@ -40,7 +39,6 @@ const optionalMainQuestionSurvey: FlexJarQuestion[] = [
     type: "rating",
     prompt: "Hvor fornøyd er du?",
     required: true,
-    scale: 5,
   },
   {
     id: "feedback",

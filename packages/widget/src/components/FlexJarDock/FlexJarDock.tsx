@@ -250,11 +250,17 @@ export const FlexJarDock = ({
     zIndex: 1000,
   };
 
+  const isNpsDock =
+    promptQuestion.type === "rating" &&
+    (promptQuestion as RatingQuestion).variant === "nps";
+
+  const openWidthRem = isNpsDock ? 32 : 24;
+
   const containerStyle: React.CSSProperties = dismissed
     ? baseContainerStyle
     : {
       ...baseContainerStyle,
-      width: `min(24rem, calc(100vw - ${config.offset * 2}px))`,
+      width: `min(${openWidthRem}rem, calc(100vw - ${config.offset * 2}px))`,
     };
 
   const panelStyle: React.CSSProperties = {
@@ -271,6 +277,7 @@ export const FlexJarDock = ({
       if (props.question.type === "rating") {
         const rating = props.question as RatingQuestion;
         const isPromptQuestion = props.question.id === promptQuestion.id;
+        const shouldHideInternalHeading = Boolean(props.hideLabel) || isPromptQuestion;
 
         return (
           <div className={CLASS_NAMES.ratingSection}>
@@ -283,12 +290,12 @@ export const FlexJarDock = ({
                 isMissing={props.isMissing}
                 disabled={props.disabled}
                 fieldsetClassName={CLASS_NAMES.ratingFieldset}
-                hidePrompt={isPromptQuestion}
-                hideDescription={isPromptQuestion}
+                hidePrompt={shouldHideInternalHeading}
+                hideDescription={shouldHideInternalHeading}
                 hideValueLabels
                 wrap={false}
-                ariaLabelledBy={isPromptQuestion ? promptHeadingId : undefined}
-                ariaDescribedBy={isPromptQuestion ? promptDescriptionId : undefined}
+                ariaLabelledBy={shouldHideInternalHeading ? promptHeadingId : undefined}
+                ariaDescribedBy={shouldHideInternalHeading ? promptDescriptionId : undefined}
                 rowClassName={CLASS_NAMES.ratingRow}
                 buttonClassName={CLASS_NAMES.ratingButton}
                 fieldsetPaddingBlock="space-8"
