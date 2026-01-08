@@ -49,7 +49,6 @@ export const DEFAULT_SURVEY_RATING: FlexJarSurveyConfig = {
       visibleIf: { field: "ANSWER", questionId: "rating", operator: "EXISTS" },
     } as TextQuestion,
   ],
-  gateQuestionId: "rating",
 };
 
 /**
@@ -79,7 +78,6 @@ export const DEFAULT_SURVEY_SERVICE_FEEDBACK: FlexJarSurveyConfig = {
       visibleIf: { field: "ANSWER", questionId: "rating", operator: "EXISTS" },
     } as TextQuestion,
   ],
-  gateQuestionId: "rating",
 };
 
 // ============================================
@@ -118,7 +116,6 @@ export const DEFAULT_SURVEY_THUMBS: FlexJarSurveyConfig = {
       visibleIf: { field: "ANSWER", questionId: "helpful", operator: "EXISTS" },
     } as TextQuestion,
   ],
-  gateQuestionId: "helpful",
 };
 
 /**
@@ -156,7 +153,6 @@ export const DEFAULT_SURVEY_STARS: FlexJarSurveyConfig = {
       visibleIf: { field: "ANSWER", questionId: "stars", operator: "EXISTS" },
     } as TextQuestion,
   ],
-  gateQuestionId: "stars",
 };
 
 /**
@@ -194,7 +190,6 @@ export const DEFAULT_SURVEY_NPS: FlexJarSurveyConfig = {
       visibleIf: { field: "ANSWER", questionId: "nps", operator: "EXISTS" },
     } as TextQuestion,
   ],
-  gateQuestionId: "nps",
 };
 
 /**
@@ -243,7 +238,6 @@ export const DEFAULT_SURVEY_DISCOVERY: FlexJarSurveyConfig = {
       maxLength: 500,
     } as FlexJarQuestion,
   ],
-  // Note: No gateQuestionId - all questions visible at once
   // This provides a cleaner UX than gate-reveal (where questions appear when typing)
 };
 
@@ -253,6 +247,7 @@ export const DEFAULT_SURVEY_DISCOVERY: FlexJarSurveyConfig = {
 
 /**
  * Creates a rating survey with customizable prompts.
+ * Follow-up questions are automatically hidden until the rating is answered.
  */
 export function createRatingSurvey(options: {
   ratingPrompt: string;
@@ -270,13 +265,21 @@ export function createRatingSurvey(options: {
   ];
 
   if (options.followUpQuestions) {
-    questions.push(...options.followUpQuestions);
+    // Add visibleIf to follow-up questions for progressive disclosure
+    const followUpsWithVisibility = options.followUpQuestions.map((q) => ({
+      ...q,
+      visibleIf: q.visibleIf ?? {
+        field: "ANSWER" as const,
+        questionId: "rating",
+        operator: "EXISTS" as const,
+      },
+    }));
+    questions.push(...followUpsWithVisibility);
   }
 
   return {
     type: "rating",
     questions,
-    gateQuestionId: "rating",
   };
 }
 
@@ -327,7 +330,6 @@ export function createDiscoverySurvey(options?: {
   return {
     type: "discovery",
     questions,
-    // No gateQuestionId - all questions visible at once for cleaner UX
   };
 }
 
@@ -427,7 +429,6 @@ export function createTopTasksSurvey(options: {
   return {
     type: "topTasks",
     questions,
-    gateQuestionId: "task",
   };
 }
 
@@ -485,6 +486,5 @@ export function createTaskPrioritySurvey(options: {
   return {
     type: "taskPriority",
     questions,
-    gateQuestionId: "priorities",
   };
 }

@@ -2,7 +2,6 @@ import React, { useCallback, useMemo } from "react";
 import type { FlexJarEvents, FlexJarTransport, FlexjarContext, RatingQuestion } from "../../core";
 import { useFlexJar, getVisibleQuestions, shouldShowSubmitButton } from "../../core";
 import { DefaultQuestionRenderer, RatingQuestionField } from "../questions";
-import { useQuestionGate } from "./hooks/useQuestionGate.js";
 import { useAutoCloseOnSuccess } from "./hooks/useAutoCloseOnSuccess.js";
 import { useStepNavigation } from "./hooks/useStepNavigation.js";
 import { useEnrichedContext } from "./hooks/useEnrichedContext.js";
@@ -113,10 +112,9 @@ export const FlexJarDock = ({
   /* 
    * Use the new flexible survey builder.
    * "questions" is the full list of questions in display order.
-   * "gateQuestionId" defines which question acts as the visibility gate.
    */
   const canonicalSurvey = useMemo(() => buildCanonicalSurvey(survey), [survey]);
-  const { type: surveyType, questions, gateQuestionId } = canonicalSurvey;
+  const { type: surveyType, questions } = canonicalSurvey;
 
   // Check if survey has any text questions (for personal data notice)
   const hasTextQuestions = useMemo(
@@ -157,25 +155,17 @@ export const FlexJarDock = ({
       storageStrategy: config.storageStrategy,
     });
 
-  const { shouldDeferQuestion, isSubmitBlocked: gateBlocked } = useQuestionGate(
-    questions,
-    answers,
-    gateQuestionId,
-  );
-
   // Filter questions based on visibleIf conditions (progressive disclosure)
   const visibleQuestions = useMemo(
     () => getVisibleQuestions(questions, answers, enrichedContext?.tags),
     [questions, answers, enrichedContext?.tags]
   );
 
-  // Combine gate blocking with progressive disclosure submit logic
-  const isSubmitBlocked = useMemo(() => {
-    // If gate is blocking, submit is blocked
-    if (gateBlocked) return true;
-    // Also block if first required question has no answer yet (progressive disclosure)
-    return !shouldShowSubmitButton(questions, answers);
-  }, [gateBlocked, questions, answers]);
+  // Hide submit until first required question has an answer
+  const isSubmitBlocked = useMemo(
+    () => !shouldShowSubmitButton(questions, answers),
+    [questions, answers]
+  );
 
   // Step navigation for branching logic
   const {
@@ -395,7 +385,6 @@ export const FlexJarDock = ({
           isSubmitBlocked={isSubmitBlocked}
           hasTransportError={Boolean(hasTransportError)}
           transportErrorMessage={config.transportErrorMessage}
-          shouldDeferQuestion={shouldDeferQuestion}
           onQuestionChange={setAnswer}
           // Step mode props for branching
           isStepMode={isStepMode}

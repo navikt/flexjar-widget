@@ -146,7 +146,6 @@ export const ProgressiveDisclosure: Story = {
           },
         },
       ],
-      gateQuestionId: "rating",
     },
   },
   parameters: {

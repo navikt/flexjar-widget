@@ -5,6 +5,7 @@ export { type SurveyType };
 /**
  * Configuration for a Flexjar survey.
  * Questions are displayed in array order.
+ * Use `visibleIf` on individual questions for progressive disclosure.
  */
 export interface FlexJarSurveyConfig {
   /**
@@ -17,15 +18,7 @@ export interface FlexJarSurveyConfig {
   /**
    * All questions to display, in order.
    * The first question is rendered prominently in the dock header.
+   * Use `visibleIf` on subsequent questions for progressive disclosure.
    */
   questions: FlexJarQuestion[];
-
-  /**
-   * Optional ID of a question that must be answered before showing remaining questions.
-   * If not set, all questions are shown at once.
-   * Typically set to the first question's ID to create a progressive disclosure UX.
-   */
-  gateQuestionId?: string;
 }
-
-

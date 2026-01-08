@@ -7,7 +7,6 @@ export const MAIN_ANSWER_KEY = "feedback";
 export interface CanonicalSurvey {
   type: SurveyType;
   questions: FlexJarQuestion[];
-  gateQuestionId: string | undefined;
 }
 
 export function buildCanonicalSurvey(survey: FlexJarSurveyConfig): CanonicalSurvey {
@@ -22,21 +21,8 @@ export function buildCanonicalSurvey(survey: FlexJarSurveyConfig): CanonicalSurv
     }
   }
 
-  // Validate that gateQuestionId exists in questions if provided
-  if (survey.gateQuestionId) {
-    const gateExists = survey.questions.some(q => q.id === survey.gateQuestionId);
-    if (!gateExists) {
-      throw new Error(
-        `FlexJar gateQuestionId "${survey.gateQuestionId}" does not match any question ID`
-      );
-    }
-  }
-
-
-
   return {
     type: survey.type ?? "custom",
     questions: survey.questions,
-    gateQuestionId: survey.gateQuestionId,
   };
 }

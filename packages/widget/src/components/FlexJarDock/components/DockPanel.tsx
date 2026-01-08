@@ -47,7 +47,6 @@ interface DockPanelProps {
   isSubmitBlocked: boolean;
   hasTransportError: boolean;
   transportErrorMessage: string;
-  shouldDeferQuestion: (question: FlexJarQuestion) => boolean;
   onQuestionChange: (
     questionId: string,
     value: FlexJarAnswerValue | null | undefined,
@@ -95,7 +94,6 @@ export const DockPanel = ({
   isSubmitBlocked,
   hasTransportError,
   transportErrorMessage,
-  shouldDeferQuestion,
   onQuestionChange,
   // Step mode props
   isStepMode = false,
@@ -255,13 +253,9 @@ export const DockPanel = ({
                   </HStack>
                 </>
               ) : (
-                // Legacy mode: Show all questions at once
+                // All visible questions mode
                 <>
                   {orderedQuestions.map((question) => {
-                    if (shouldDeferQuestion(question)) {
-                      return null;
-                    }
-
                     const value = answers[question.id];
                     const isMissing = validationMissing.includes(question.id);
                     const handleChange = (

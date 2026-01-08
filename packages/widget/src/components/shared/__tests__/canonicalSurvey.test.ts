@@ -38,25 +38,6 @@ describe("buildCanonicalSurvey", () => {
     ).toThrowError("FlexJar: All questions must have an id");
   });
 
-  it("validates that gateQuestionId exists", () => {
-    expect(() =>
-      buildCanonicalSurvey({
-        questions: [...validQuestions],
-        gateQuestionId: "non-existent",
-      })
-    ).toThrowError('FlexJar gateQuestionId "non-existent" does not match any question ID');
-  });
-
-  it("accepts valid gateQuestionId", () => {
-    const canonical = buildCanonicalSurvey({
-      questions: [...validQuestions],
-      gateQuestionId: "q1",
-    });
-    expect(canonical.gateQuestionId).toBe("q1");
-  });
-
-
-
   it("throws if questions array is empty", () => {
     expect(() =>
       buildCanonicalSurvey({ questions: [] })
