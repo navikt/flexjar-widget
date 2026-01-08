@@ -1,9 +1,16 @@
 import React, { useCallback, useMemo } from "react";
 import { BodyShort, Box, Heading, HStack, VStack } from "@navikt/ds-react";
 import type { BoxNewProps } from "@navikt/ds-react/Box";
-import type { FlexJarAnswerValue, RatingQuestion } from "../../../core/types.js";
+import type {
+  FlexJarAnswerValue,
+  RatingQuestion,
+  EmojiRatingQuestion,
+} from "../../../core/types.js";
 import { EmojiButton } from "./EmojiButton.js";
 import { Glad, Lei, Noytral, Sinna, VeldigGlad } from "./emojies.js";
+import { ThumbsRating } from "./ThumbsRating.js";
+import { StarRating } from "./StarRating.js";
+import { NpsRating } from "./NpsRating.js";
 import styles from "./emo.module.css";
 import "./emo.fallback.css";
 
@@ -138,7 +145,45 @@ export const RatingQuestionField = ({
   fieldsetPaddingBlock,
   fieldsetPaddingInline,
 }: RatingQuestionFieldProps) => {
-  const scale = question.scale ?? 5;
+  // Determine variant, defaulting to "emoji" for backward compatibility
+  const variant = question.variant ?? "emoji";
+
+  // Props common to all rating types
+  const commonProps = {
+    question,
+    value,
+    onChange,
+    validationErrorMessage,
+    isMissing,
+    disabled,
+    className,
+    ariaLabelledBy,
+    ariaDescribedBy,
+    hidePrompt,
+    hideDescription,
+  };
+
+  // Dispatch to specialized components based on variant
+  switch (variant) {
+    case "thumbs":
+      return <ThumbsRating {...commonProps} question={question as import("../../../core/types.js").ThumbsRatingQuestion} />;
+
+    case "stars":
+      return <StarRating {...commonProps} question={question as import("../../../core/types.js").StarRatingQuestion} />;
+
+    case "nps":
+      return <NpsRating {...commonProps} question={question as import("../../../core/types.js").NpsRatingQuestion} />;
+
+    case "emoji":
+    default:
+      // Continue with emoji implementation below
+      break;
+  }
+
+  // ============================================
+  // Emoji rating implementation (5-point: 😡 🙁 😐 😀 😍)
+  // ============================================
+  const scale = 5; // Emoji is always 5-point
   const options = Array.from({ length: scale }, (_, index) => index + 1);
   const activeState = typeof value === "number" ? value : null;
 
@@ -223,7 +268,7 @@ export const RatingQuestionField = ({
         >
           {options.map((option, index) => {
             const variant = resolveVariant(index);
-            const labelText = resolveLabel(question, option);
+            const labelText = resolveLabel(question as EmojiRatingQuestion, option);
             const isActive = activeState === option;
             const buttonClass = joinClassNames(
               CLASS_NAMES.button,

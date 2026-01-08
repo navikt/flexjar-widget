@@ -1,4 +1,11 @@
-import type { FlexJarQuestion, TextQuestion } from "../core/types.js";
+import type {
+  FlexJarQuestion,
+  TextQuestion,
+  EmojiRatingQuestion,
+  ThumbsRatingQuestion,
+  StarRatingQuestion,
+  NpsRatingQuestion,
+} from "../core/types.js";
 import type { FlexJarSurveyConfig } from "../components/surveyTypes.js";
 
 // ============================================
@@ -6,7 +13,7 @@ import type { FlexJarSurveyConfig } from "../components/surveyTypes.js";
 // ============================================
 
 /**
- * Default rating survey: 5-star rating with optional text follow-up.
+ * Default rating survey: 5-point emoji rating with optional text follow-up.
  * 
  * @example
  * ```tsx
@@ -25,12 +32,12 @@ export const DEFAULT_SURVEY_RATING: FlexJarSurveyConfig = {
     {
       id: "rating",
       type: "rating",
+      displayType: "emoji",
       prompt: "Hvordan var opplevelsen din?",
       description:
         "Svarene du sender inn er anonyme, og blir brukt til videreutvikling av tjenesten",
       required: true,
-      scale: 5,
-    } as FlexJarQuestion,
+    } as EmojiRatingQuestion,
     {
       id: "feedback",
       type: "text",
@@ -46,16 +53,6 @@ export const DEFAULT_SURVEY_RATING: FlexJarSurveyConfig = {
 /**
  * Service-oriented rating survey with improved messaging.
  * Emphasizes that feedback is anonymous and used for service development.
- * 
- * @examplezs
- * import { FlexJarDock, DEFAULT_SURVEY_SERVICE_FEEDBACK } from "@navikt/flexjar-widget";
- * 
- * <FlexJarDock
- *   feedbackId="service-feedback"
- *   survey={DEFAULT_SURVEY_SERVICE_FEEDBACK}
- *   transport={transport}
- * />
- * ```
  */
 export const DEFAULT_SURVEY_SERVICE_FEEDBACK: FlexJarSurveyConfig = {
   type: "rating",
@@ -63,12 +60,12 @@ export const DEFAULT_SURVEY_SERVICE_FEEDBACK: FlexJarSurveyConfig = {
     {
       id: "rating",
       type: "rating",
+      variant: "emoji",
       prompt: "Hvordan opplevde du å svare på spørsmålene?",
       description:
         "Svarene du sender inn er anonyme, og blir brukt til videreutvikling av tjenesten",
       required: true,
-      scale: 5,
-    } as FlexJarQuestion,
+    } as EmojiRatingQuestion,
     {
       id: "feedback",
       type: "text",
@@ -79,6 +76,115 @@ export const DEFAULT_SURVEY_SERVICE_FEEDBACK: FlexJarSurveyConfig = {
     } as TextQuestion,
   ],
   gateQuestionId: "rating",
+};
+
+// ============================================
+// New Rating Type Presets
+// ============================================
+
+/**
+ * Quick thumbs up/down survey: 2-point binary rating.
+ * Perfect for "Was this helpful?" type questions.
+ * 
+ * @example
+ * ```tsx
+ * <FlexJarDock
+ *   feedbackId="article-helpful"
+ *   survey={DEFAULT_SURVEY_THUMBS}
+ *   transport={transport}
+ * />
+ * ```
+ */
+export const DEFAULT_SURVEY_THUMBS: FlexJarSurveyConfig = {
+  type: "rating",
+  questions: [
+    {
+      id: "helpful",
+      type: "rating",
+      variant: "thumbs",
+      prompt: "Var dette til hjelp?",
+      required: true,
+    } as ThumbsRatingQuestion,
+    {
+      id: "feedback",
+      type: "text",
+      prompt: "Har du forslag til forbedringer? (valgfritt)",
+      required: false,
+      maxLength: 500,
+    } as TextQuestion,
+  ],
+  gateQuestionId: "helpful",
+};
+
+/**
+ * Star rating survey: 5-point star rating.
+ * Common UX pattern for quality ratings.
+ * 
+ * @example
+ * ```tsx
+ * <FlexJarDock
+ *   feedbackId="content-quality"
+ *   survey={DEFAULT_SURVEY_STARS}
+ *   transport={transport}
+ * />
+ * ```
+ */
+export const DEFAULT_SURVEY_STARS: FlexJarSurveyConfig = {
+  type: "rating",
+  questions: [
+    {
+      id: "stars",
+      type: "rating",
+      variant: "stars",
+      prompt: "Hvordan vil du vurdere denne tjenesten?",
+      required: true,
+    } as StarRatingQuestion,
+    {
+      id: "feedback",
+      type: "text",
+      prompt: "Legg gjerne til en kommentar (valgfritt)",
+      required: false,
+      maxLength: 500,
+    } as TextQuestion,
+  ],
+  gateQuestionId: "stars",
+};
+
+/**
+ * NPS (Net Promoter Score) survey: 0-10 scale.
+ * Standard methodology for measuring customer loyalty.
+ * 
+ * @example
+ * ```tsx
+ * <FlexJarDock
+ *   feedbackId="nps-survey"
+ *   survey={DEFAULT_SURVEY_NPS}
+ *   transport={transport}
+ * />
+ * ```
+ */
+export const DEFAULT_SURVEY_NPS: FlexJarSurveyConfig = {
+  type: "rating",
+  questions: [
+    {
+      id: "nps",
+      type: "rating",
+      variant: "nps",
+      prompt: "Hvor sannsynlig er det at du vil anbefale denne tjenesten til en venn eller kollega?",
+      lowLabel: "Lite sannsynlig",
+      highLabel: "Svært sannsynlig",
+      required: true,
+    } as NpsRatingQuestion,
+    {
+      id: "reason",
+      type: "text",
+      prompt: "Legg gjerne til en begrunnelse (valgfritt)",
+      description: "Alle tilbakemeldinger er til stor nytte for oss",
+      required: false,
+      maxLength: 500,
+    } as TextQuestion,
+  ],
+  gateQuestionId: "nps",
 };
 
 /**

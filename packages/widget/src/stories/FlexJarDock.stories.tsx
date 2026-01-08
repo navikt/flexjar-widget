@@ -8,6 +8,9 @@ import {
   DEFAULT_SURVEY_RATING,
   DEFAULT_SURVEY_SERVICE_FEEDBACK,
   DEFAULT_SURVEY_DISCOVERY,
+  DEFAULT_SURVEY_THUMBS,
+  DEFAULT_SURVEY_STARS,
+  DEFAULT_SURVEY_NPS,
   createTopTasksSurvey,
   createTaskPrioritySurvey,
 } from "../presets/index.js";
@@ -99,7 +102,6 @@ const CUSTOM_SURVEY: FlexJarSurveyConfig = {
       type: "rating",
       prompt: "Hvor enkelt var det å finne frem?",
       required: true,
-      scale: 5,
     },
     {
       id: "comment",
@@ -305,6 +307,122 @@ export const Rating: Story = {
   },
 };
 
+// ============================================
+// Rating Variants (4 types with fixed scales)
+// ============================================
+
+export const Thumbs: Story = {
+  render: (args) => <ExamplePage {...args} />,
+  args: {
+    feedbackId: "storybook-thumbs",
+    survey: DEFAULT_SURVEY_THUMBS,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "**👎 👍 Thumbs (2-point)**\n\nEnkelt binært spørsmål for \"Var dette til hjelp?\". Bruker `variant: 'thumbs'`.",
+      },
+    },
+  },
+};
+
+/**
+ * Same question, different visual: 5-point emoji scale
+ */
+export const Faces: Story = {
+  render: (args) => <ExamplePage {...args} />,
+  args: {
+    feedbackId: "storybook-faces",
+    survey: {
+      type: "rating",
+      questions: [
+        {
+          id: "rating",
+          type: "rating",
+          variant: "emoji", // 😡🙁😐😀😍
+          prompt: "Hvordan vil du vurdere denne tjenesten?",
+          required: true,
+        },
+        {
+          id: "feedback",
+          type: "text",
+          prompt: "Legg gjerne til en kommentar (valgfritt)",
+          required: false,
+          maxLength: 500,
+        },
+      ],
+      gateQuestionId: "rating",
+    } as FlexJarSurveyConfig,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "**😡🙁😐😀😍 Faces (5-point emoji)**\n\nSentiment-rating med emojis. Samme spørsmål som Stars for sammenligning. Bruker `variant: 'emoji'`.",
+      },
+    },
+  },
+};
+
+/**
+ * Same question, different visual: 5-point star scale
+ */
+export const Stars: Story = {
+  render: (args) => <ExamplePage {...args} />,
+  args: {
+    feedbackId: "storybook-stars",
+    survey: {
+      type: "rating",
+      questions: [
+        {
+          id: "rating",
+          type: "rating",
+          variant: "stars", // ⭐⭐⭐⭐⭐
+          prompt: "Hvordan vil du vurdere denne tjenesten?",
+          required: true,
+        },
+        {
+          id: "feedback",
+          type: "text",
+          prompt: "Legg gjerne til en kommentar (valgfritt)",
+          required: false,
+          maxLength: 500,
+        },
+      ],
+      gateQuestionId: "rating",
+    } as FlexJarSurveyConfig,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "**⭐⭐⭐⭐⭐ Stars (5-point stars)**\n\nKlassisk stjerne-rating. Samme spørsmål som Faces for sammenligning. Bruker `variant: 'stars'`.",
+      },
+    },
+  },
+};
+
+export const Nps: Story = {
+  render: (args) => <ExamplePage {...args} />,
+  args: {
+    feedbackId: "storybook-nps",
+    survey: DEFAULT_SURVEY_NPS,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "**0-10 NPS (Net Promoter Score)**\n\nStandard NPS-undersøkelse med fargekodede soner (detractors/passives/promoters). Bruker `variant: 'nps'`.",
+      },
+    },
+  },
+};
+
+// ============================================
+// Task Surveys
+// ============================================
+
 export const Discovery: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
@@ -419,7 +537,6 @@ const BRANCHING_SURVEY: FlexJarSurveyConfig = {
       id: "positive_rating",
       type: "rating",
       prompt: "Hvor fornøyd er du med tjenesten?",
-      scale: 5,
       required: true,
     },
     {

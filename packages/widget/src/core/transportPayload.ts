@@ -6,7 +6,10 @@ import type {
   ChoiceOption,
   TransportAnswer,
   FlexjarContext,
+  RatingVariant,
+  RatingQuestion,
 } from "./types";
+import { RATING_SCALES } from "./types";
 
 /**
  * Infers the survey type from the question structure.
@@ -98,10 +101,20 @@ export function buildTransportPayload(
 
     // Use proper type narrowing based on question.type
     switch (question.type) {
-      case "rating":
+      case "rating": {
         fieldType = "RATING";
-        answerValue = { type: "rating", rating: Number(value) };
+        // Get variant from question config, defaulting to emoji
+        const ratingQ = question as RatingQuestion;
+        const variant: RatingVariant = ratingQ.variant ?? "emoji";
+        const scale = RATING_SCALES[variant];
+        answerValue = {
+          type: "rating",
+          rating: Number(value),
+          ratingVariant: variant,
+          ratingScale: scale,
+        };
         break;
+      }
       case "multiChoice":
         fieldType = "MULTI_CHOICE";
         answerValue = {

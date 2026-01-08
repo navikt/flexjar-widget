@@ -98,15 +98,78 @@ export interface FlexJarQuestionBase<TType extends FlexJarQuestionType> {
   logic?: LogicRule[];
 }
 
+// ============================================
+// Rating Variants (Opinionated, Fixed Scales)
+// ============================================
+
+/**
+ * Rating variant determines both visual style and fixed scale.
+ * - emoji: 5-point (😡🙁😐😀😍)
+ * - thumbs: 2-point (👎👍)
+ * - stars: 5-point (⭐⭐⭐⭐⭐)
+ * - nps: 0-10 number buttons
+ */
+export type RatingVariant = "emoji" | "thumbs" | "stars" | "nps";
+
+/** Maps variant to its fixed scale */
+export const RATING_SCALES: Record<RatingVariant, number> = {
+  emoji: 5,
+  thumbs: 2,
+  stars: 5,
+  nps: 11, // 0-10
+};
+
 export interface RatingScaleLabel {
   value: number;
   label: string;
 }
 
-export interface RatingQuestion extends FlexJarQuestionBase<"rating"> {
-  scale?: number;
+/**
+ * Base interface for all rating question types.
+ */
+interface RatingQuestionBase extends FlexJarQuestionBase<"rating"> {
   labels?: RatingScaleLabel[];
 }
+
+/**
+ * 5-point emoji rating: 😡 🙁 😐 😀 😍
+ */
+export interface EmojiRatingQuestion extends RatingQuestionBase {
+  variant?: "emoji"; // Default, can be omitted
+}
+
+/**
+ * 2-point thumbs rating: 👎 👍
+ */
+export interface ThumbsRatingQuestion extends RatingQuestionBase {
+  variant: "thumbs";
+}
+
+/**
+ * 5-point star rating: ⭐⭐⭐⭐⭐
+ * Fixed at 5 stars (industry standard).
+ */
+export interface StarRatingQuestion extends RatingQuestionBase {
+  variant: "stars";
+}
+
+/**
+ * NPS (Net Promoter Score) rating: 0-10 number buttons
+ */
+export interface NpsRatingQuestion extends RatingQuestionBase {
+  variant: "nps";
+  lowLabel?: string;  // e.g. "Lite sannsynlig"
+  highLabel?: string; // e.g. "Svært sannsynlig"
+}
+
+/**
+ * Union type for all rating question variants.
+ */
+export type RatingQuestion =
+  | EmojiRatingQuestion
+  | ThumbsRatingQuestion
+  | StarRatingQuestion
+  | NpsRatingQuestion;
 
 export interface TextQuestion extends FlexJarQuestionBase<"text"> {
   maxLength?: number;
@@ -181,6 +244,10 @@ export interface TransportAnswer {
   value: {
     type: "rating" | "text" | "singleChoice" | "multiChoice";
     rating?: number;
+    /** Rating variant: emoji, thumbs, stars, nps */
+    ratingVariant?: RatingVariant;
+    /** Scale is fixed per variant: emoji=5, thumbs=2, stars=5, nps=11 */
+    ratingScale?: number;
     text?: string;
     selectedOptionId?: string;
     selectedOptionIds?: string[];
