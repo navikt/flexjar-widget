@@ -243,7 +243,13 @@ export const DockPanel = ({
                         {nextLabel}
                       </Button>
                     )}
-                    <Button variant="tertiary" type="button" onClick={onClose}>
+                    <Button
+                      variant="tertiary"
+                      size="small"
+                      type="button"
+                      onClick={onClose}
+                      style={{ opacity: 0.7 }}
+                    >
                       {cancelLabel}
                     </Button>
                   </HStack>
@@ -291,14 +297,23 @@ export const DockPanel = ({
                   )}
 
                   <HStack gap="space-8" wrap>
+                    {/* Only show Submit button when form is valid (not blocked) */}
+                    {!isSubmitBlocked && (
+                      <Button
+                        type="submit"
+                        loading={isSubmitting}
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? submitPendingLabel : submitLabel}
+                      </Button>
+                    )}
                     <Button
-                      type="submit"
-                      loading={isSubmitting}
-                      disabled={isSubmitting || isSubmitBlocked}
+                      variant="tertiary"
+                      size="small"
+                      type="button"
+                      onClick={onClose}
+                      style={{ opacity: 0.7 }}
                     >
-                      {isSubmitting ? submitPendingLabel : submitLabel}
-                    </Button>
-                    <Button variant="tertiary" type="button" onClick={onClose}>
                       {cancelLabel}
                     </Button>
                   </HStack>

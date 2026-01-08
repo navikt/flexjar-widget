@@ -135,6 +135,7 @@ export function NpsRating({
                             display: "grid",
                             gridTemplateColumns: "repeat(11, minmax(0, 1fr))",
                             gap: "var(--ax-space-2)",
+                            overflow: "hidden",
                         }}
                     >
                         {Array.from({ length: 11 }, (_, index) => {
