@@ -146,6 +146,7 @@ export const ExamplePage = (props: FlexJarDockProps) => {
         {props.survey && (
           <SurveyCodePreview
             survey={props.survey}
+            context={props.context}
             title="Survey-konfigurasjon"
             defaultCollapsed={false}
           />

@@ -7,6 +7,10 @@ interface SurveyCodePreviewProps {
      */
     survey: unknown;
     /**
+     * The context object (tags, etc.) to display
+     */
+    context?: unknown;
+    /**
      * Optional title for the code panel
      * @default "Survey-konfigurasjon"
      */
@@ -24,13 +28,15 @@ interface SurveyCodePreviewProps {
  */
 export function SurveyCodePreview({
     survey,
+    context,
     title = "Survey-konfigurasjon",
     defaultCollapsed = false,
 }: SurveyCodePreviewProps) {
     const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
 
-    // Format the survey object as pretty-printed JSON
-    const formattedCode = JSON.stringify(survey, null, 2);
+    // Format the full configuration object
+    const fullConfig = context ? { survey, context } : { survey };
+    const formattedCode = JSON.stringify(fullConfig, null, 2);
 
     return (
         <div
