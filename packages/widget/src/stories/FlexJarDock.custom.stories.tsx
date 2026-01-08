@@ -9,7 +9,7 @@ const CUSTOM_SURVEY: FlexJarSurveyConfig = {
   type: "custom",
   questions: [
     {
-      id: "role",
+      id: "innsender-rolle",
       type: "singleChoice",
       prompt: "Hvem skriver du på vegne av?",
       required: true,
@@ -20,13 +20,13 @@ const CUSTOM_SURVEY: FlexJarSurveyConfig = {
       ],
     },
     {
-      id: "ease_of_use",
+      id: "opplevelse-brukervennlighet",
       type: "rating",
       prompt: "Hvor enkelt var det å finne frem?",
       required: true,
     },
     {
-      id: "comment",
+      id: "tilleggskommentar",
       type: "text",
       prompt: "Har du andre tilbakemeldinger?",
       required: false,
@@ -67,7 +67,7 @@ type Story = StoryObj<typeof FlexJarDock>;
 export const Custom: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "storybook-custom",
+    feedbackId: "kontakt-oss-skjema-custom",
     survey: CUSTOM_SURVEY,
   },
   parameters: {

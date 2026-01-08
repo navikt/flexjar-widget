@@ -43,7 +43,7 @@ type Story = StoryObj<typeof FlexJarDock>;
 export const Rating: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "storybook-service",
+    feedbackId: "sykepengesoknad-kvittering",
     survey: DEFAULT_SURVEY_SERVICE_FEEDBACK,
     context: {
       tags: {
@@ -65,7 +65,7 @@ export const Rating: Story = {
 export const Stars: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "storybook-stars",
+    feedbackId: "dittnav-modul-rating",
     survey: DEFAULT_SURVEY_STARS,
   },
   parameters: {
@@ -81,7 +81,7 @@ export const Stars: Story = {
 export const Thumbs: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "storybook-thumbs",
+    feedbackId: "am-veiviser-nytteverdi",
     survey: DEFAULT_SURVEY_THUMBS,
   },
   parameters: {
@@ -97,7 +97,7 @@ export const Thumbs: Story = {
 export const Nps: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "storybook-nps",
+    feedbackId: "nav-no-hovedside-nps",
     survey: DEFAULT_SURVEY_NPS,
   },
   parameters: {
@@ -118,7 +118,7 @@ export const Nps: Story = {
 export const ProgressiveDisclosure: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "storybook-progressive",
+    feedbackId: "kontakt-oss-forbedring",
     survey: {
       type: "rating",
       questions: [

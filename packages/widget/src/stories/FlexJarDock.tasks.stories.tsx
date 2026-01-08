@@ -89,7 +89,7 @@ type Story = StoryObj<typeof FlexJarDock>;
 export const Discovery: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "storybook-discovery",
+    feedbackId: "nav-no-forside-discovery",
     survey: DEFAULT_SURVEY_DISCOVERY,
   },
   parameters: {
@@ -105,7 +105,7 @@ export const Discovery: Story = {
 export const TaskPriority: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "storybook-task-priority",
+    feedbackId: "minside-arbeidsgiver-priority",
     survey: TASK_PRIORITY_SURVEY,
   },
   parameters: {
@@ -121,7 +121,7 @@ export const TaskPriority: Story = {
 export const TopTasks: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "storybook-top-tasks",
+    feedbackId: "sykefravaer-oppgaver-toptasks",
     survey: TOP_TASKS_SURVEY,
   },
   parameters: {
