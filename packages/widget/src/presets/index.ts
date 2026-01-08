@@ -369,12 +369,12 @@ export function createTopTasksSurvey(options: {
       prompt: options.taskPrompt ?? "Hva prøvde du å gjøre i dag?",
       options: taskOptions,
       required: true,
-      // If NOT "other", skip to taskSuccess
+      // If NOT "other", skip the next question (otherTask) and go to taskSuccess
       logic: options.includeOtherTask
         ? [
           {
             condition: { field: "ANSWER", operator: "NEQ", value: "other" },
-            action: { type: "JUMP_TO", targetId: "taskSuccess" },
+            action: { type: "SKIP" },
           },
         ]
         : undefined,
