@@ -8,6 +8,7 @@ import {
   HStack,
   VStack,
 } from "@navikt/ds-react";
+import { XMarkIcon } from "@navikt/aksel-icons";
 import type { BoxNewProps } from "@navikt/ds-react/Box";
 import type {
   FlexJarAnswerValue,
@@ -123,11 +124,18 @@ export const DockPanel = ({
         aria-labelledby={isSuccess ? successHeadingId : promptHeadingId}
         id={panelId}
       >
-        <div className={CLASS_NAMES.header}>
+        <HStack
+          className={CLASS_NAMES.header}
+          justify="space-between"
+          align="start"
+          gap="space-8"
+          wrap={false}
+        >
           <div
             className={CLASS_NAMES.headerText}
             role={isSuccess ? "status" : undefined}
             aria-live={isSuccess ? "polite" : undefined}
+            style={{ flex: 1 }}
           >
             {isSuccess ? (
               <Heading
@@ -168,7 +176,23 @@ export const DockPanel = ({
               </>
             )}
           </div>
-        </div>
+          {/* Close button - circular hover effect for better affordance */}
+          <Button
+            variant="tertiary-neutral"
+            size="small"
+            icon={<XMarkIcon aria-hidden />}
+            onClick={onClose}
+            aria-label="Avbryt"
+            style={{
+              borderRadius: "50%",
+              width: "32px",
+              height: "32px",
+              minWidth: "32px",
+              padding: 0,
+              flexShrink: 0,
+            }}
+          />
+        </HStack>
 
         {isSuccess ? (
           <VStack gap="space-16">
@@ -241,15 +265,6 @@ export const DockPanel = ({
                         {nextLabel}
                       </Button>
                     )}
-                    <Button
-                      variant="tertiary"
-                      size="small"
-                      type="button"
-                      onClick={onClose}
-                      style={{ opacity: 0.7 }}
-                    >
-                      {cancelLabel}
-                    </Button>
                   </HStack>
                 </>
               ) : (
@@ -301,15 +316,6 @@ export const DockPanel = ({
                         {isSubmitting ? submitPendingLabel : submitLabel}
                       </Button>
                     )}
-                    <Button
-                      variant="tertiary"
-                      size="small"
-                      type="button"
-                      onClick={onClose}
-                      style={{ opacity: 0.7 }}
-                    >
-                      {cancelLabel}
-                    </Button>
                   </HStack>
                 </>
               )}

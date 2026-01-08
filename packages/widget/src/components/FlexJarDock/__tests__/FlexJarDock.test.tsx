@@ -321,7 +321,7 @@ describe("FlexJarDock", () => {
       expect(initialContainer?.getAttribute("data-state")).toBe("open");
     });
 
-    const closeButton = screen.getByRole("button", { name: /lukk/i });
+    const closeButton = screen.getByRole("button", { name: /avbryt/i });
     await act(async () => {
       await user.click(closeButton);
     });
