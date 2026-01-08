@@ -30,9 +30,8 @@ export function useEnrichedContext(userContext?: FlexjarContext): FlexjarContext
             deviceType: getDeviceType(viewportWidth),
             userAgent: navigator.userAgent,
             // User-provided
-            app: userContext?.app,
             tags: userContext?.tags,
             debug: userContext?.debug,
         };
-    }, [userContext?.app, userContext?.tags, userContext?.debug]);
+    }, [userContext?.tags, userContext?.debug]);
 }

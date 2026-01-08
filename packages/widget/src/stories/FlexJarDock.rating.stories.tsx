@@ -46,7 +46,6 @@ export const Rating: Story = {
     feedbackId: "storybook-service",
     survey: DEFAULT_SURVEY_SERVICE_FEEDBACK,
     context: {
-      app: "syfo-oppfolgingsplan-frontend",
       tags: {
         harAktivSykmelding: "Ja",
         ukeSykefravær: "3",

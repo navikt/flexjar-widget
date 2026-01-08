@@ -311,7 +311,6 @@ export type DeviceType = "mobile" | "tablet" | "desktop";
  * ```tsx
  * <FlexJarDock
  *   context={{
- *     app: "sykepenger",
  *     tags: { harSykmelding: true, rolle: "arbeidsgiver" },
  *     debug: { sessionId: "abc-123" }
  *   }}
@@ -333,13 +332,6 @@ export interface FlexjarContext {
   deviceType?: DeviceType;
   /** Browser user agent */
   userAgent?: string;
-
-  // ============================================
-  // User-provided identification
-  // ============================================
-
-  /** Application identifier */
-  app?: string;
 
   // ============================================
   // Tags (for analytics graphs) - LOW CARDINALITY
