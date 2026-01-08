@@ -13,21 +13,33 @@ export type LogicField = "ANSWER" | "METADATA";
 
 /**
  * Comparison operators for logic conditions.
+ * - EXISTS: Check if an answer exists (is not undefined)
  */
-export type LogicOperator = "EQ" | "NEQ" | "GT" | "LT" | "CONTAINS";
+export type LogicOperator = "EQ" | "NEQ" | "GT" | "LT" | "CONTAINS" | "EXISTS";
 
 /**
  * A condition that determines whether a logic rule should trigger.
  * Uses discriminated unions for type safety.
+ * 
+ * @example Cross-question visibility
+ * ```typescript
+ * visibleIf: {
+ *   field: "ANSWER",
+ *   questionId: "rating",
+ *   operator: "EXISTS"
+ * }
+ * ```
  */
 export type LogicCondition =
   | {
-    /** Compare against the current question's answer */
+    /** Compare against a question's answer */
     field: "ANSWER";
+    /** Reference to another question's answer (required for visibleIf) */
+    questionId?: string;
     /** Comparison operator */
     operator: LogicOperator;
-    /** Value to compare against */
-    value: string | number | boolean;
+    /** Value to compare against (not required for EXISTS) */
+    value?: string | number | boolean;
   }
   | {
     /** Compare against a value in the survey metadata */
@@ -96,6 +108,25 @@ export interface FlexJarQuestionBase<TType extends FlexJarQuestionType> {
    * If no rules match (or logic is undefined), proceeds to next question.
    */
   logic?: LogicRule[];
+  /**
+   * Condition that must be true for this question to be visible.
+   * Use for progressive disclosure (e.g., show text field after rating is set).
+   * 
+   * @example Show text field only after rating is provided
+   * ```typescript
+   * {
+   *   id: "feedback",
+   *   type: "text",
+   *   prompt: "Any additional comments?",
+   *   visibleIf: {
+   *     field: "ANSWER",
+   *     questionId: "rating",
+   *     operator: "EXISTS"
+   *   }
+   * }
+   * ```
+   */
+  visibleIf?: LogicCondition;
 }
 
 // ============================================

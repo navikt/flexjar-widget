@@ -36,6 +36,11 @@ function evaluateCondition(
         actualValue = metadata?.[condition.key];
     }
 
+    // Handle EXISTS operator separately
+    if (condition.operator === "EXISTS") {
+        return actualValue !== undefined && actualValue !== null;
+    }
+
     // Handle undefined/null values
     if (actualValue === undefined || actualValue === null) {
         // Only EQ/NEQ make sense for undefined
@@ -45,6 +50,11 @@ function evaluateCondition(
         if (condition.operator === "NEQ") {
             return condition.value !== undefined && condition.value !== null;
         }
+        return false;
+    }
+
+    // For other operators, value must be defined
+    if (condition.value === undefined) {
         return false;
     }
 
@@ -89,6 +99,9 @@ function compareValues(
                 return actual.includes(expected as string);
             }
             return false;
+
+        case "EXISTS":
+            return actual !== undefined && actual !== null;
 
         default:
             return false;

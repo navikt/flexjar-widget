@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from "react";
 import type { FlexJarEvents, FlexJarTransport, FlexjarContext, RatingQuestion } from "../../core";
-import { useFlexJar } from "../../core";
+import { useFlexJar, getVisibleQuestions, shouldShowSubmitButton } from "../../core";
 import { DefaultQuestionRenderer, RatingQuestionField } from "../questions";
 import { useQuestionGate } from "./hooks/useQuestionGate.js";
 import { useAutoCloseOnSuccess } from "./hooks/useAutoCloseOnSuccess.js";
@@ -157,11 +157,25 @@ export const FlexJarDock = ({
       storageStrategy: config.storageStrategy,
     });
 
-  const { shouldDeferQuestion, isSubmitBlocked } = useQuestionGate(
+  const { shouldDeferQuestion, isSubmitBlocked: gateBlocked } = useQuestionGate(
     questions,
     answers,
     gateQuestionId,
   );
+
+  // Filter questions based on visibleIf conditions (progressive disclosure)
+  const visibleQuestions = useMemo(
+    () => getVisibleQuestions(questions, answers, enrichedContext?.tags),
+    [questions, answers, enrichedContext?.tags]
+  );
+
+  // Combine gate blocking with progressive disclosure submit logic
+  const isSubmitBlocked = useMemo(() => {
+    // If gate is blocking, submit is blocked
+    if (gateBlocked) return true;
+    // Also block if first required question has no answer yet (progressive disclosure)
+    return !shouldShowSubmitButton(questions, answers);
+  }, [gateBlocked, questions, answers]);
 
   // Step navigation for branching logic
   const {
@@ -366,7 +380,7 @@ export const FlexJarDock = ({
           isSuccess={isSuccess}
           onClose={handleCloseDock}
           onSubmit={handleSubmit}
-          orderedQuestions={questions}
+          orderedQuestions={visibleQuestions}
           answers={answers}
           renderQuestion={defaultQuestionRenderer}
           validationMissing={validationMissing}
