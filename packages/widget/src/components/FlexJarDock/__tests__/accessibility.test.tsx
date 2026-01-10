@@ -28,7 +28,7 @@ describe("FlexJarDock Accessibility", () => {
     it("should have no axe violations in open state", async () => {
         const { container } = render(
             <FlexJarDock
-                feedbackId="a11y-test"
+                surveyId="a11y-test"
                 survey={survey}
                 transport={mockTransport}
             />,
@@ -45,7 +45,7 @@ describe("FlexJarDock Accessibility", () => {
     it("should have no axe violations in minimized state", async () => {
         const { container } = render(
             <FlexJarDock
-                feedbackId="a11y-test-min"
+                surveyId="a11y-test-min"
                 survey={survey}
                 transport={mockTransport}
                 behavior={{ initialOpen: false }}
@@ -65,7 +65,7 @@ describe("FlexJarDock Accessibility", () => {
     it("renders widget in aside element", async () => {
         render(
             <FlexJarDock
-                feedbackId="aside-test"
+                surveyId="aside-test"
                 survey={survey}
                 transport={mockTransport}
             />,
@@ -80,7 +80,7 @@ describe("FlexJarDock Accessibility", () => {
         const user = userEvent.setup();
         render(
             <FlexJarDock
-                feedbackId="keyboard-test"
+                surveyId="keyboard-test"
                 survey={survey}
                 transport={mockTransport}
             />,
@@ -106,7 +106,7 @@ describe("FlexJarDock Accessibility", () => {
     it("has proper heading hierarchy", async () => {
         render(
             <FlexJarDock
-                feedbackId="heading-test"
+                surveyId="heading-test"
                 survey={survey}
                 transport={mockTransport}
             />,
@@ -122,7 +122,7 @@ describe("FlexJarDock Accessibility", () => {
         const user = userEvent.setup();
         render(
             <FlexJarDock
-                feedbackId="announce-test"
+                surveyId="announce-test"
                 survey={survey}
                 transport={mockTransport}
             />,
@@ -152,7 +152,7 @@ describe("FlexJarDock Accessibility", () => {
     it("radiogroup has accessible name", async () => {
         render(
             <FlexJarDock
-                feedbackId="radiogroup-test"
+                surveyId="radiogroup-test"
                 survey={survey}
                 transport={mockTransport}
             />,

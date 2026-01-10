@@ -30,7 +30,7 @@ import type {
  * @example
  * ```tsx
  * <FlexJarDock
- *   feedbackId="my-app"
+ *   surveyId="my-app"
  *   survey={NAV_STANDARD_RATING}
  *   transport={transport}
  *   labels={{ submit: "Send", cancel: "Avbryt" }}
@@ -44,7 +44,7 @@ export interface FlexJarDockProps {
    * Unique identifier for this feedback instance. Used for localStorage persistence keys and event tracking.
    * @example "oppfolgingsplan-feedback"
    */
-  feedbackId: string;
+  surveyId: string;
 
   /**
    * Survey configuration defining the questions to display.
@@ -91,7 +91,7 @@ export interface FlexJarDockProps {
 }
 
 export const FlexJarDock = ({
-  feedbackId,
+  surveyId,
   survey,
   transport,
   events,
@@ -129,14 +129,14 @@ export const FlexJarDock = ({
   const promptDescriptionId = promptQuestion.description
     ? `${promptQuestion.id}-dock-description`
     : undefined;
-  const successHeadingId = `${feedbackId}-dock-success-heading`;
-  const panelId = `${feedbackId}-dock-panel`;
+  const successHeadingId = `${surveyId}-dock-success-heading`;
+  const panelId = `${surveyId}-dock-panel`;
 
   // Auto-collect system context and merge with user-provided context
   const enrichedContext = useEnrichedContext(context);
 
   const { answers, status, error, setAnswer, submit, reset } = useFlexJar({
-    feedbackId,
+    surveyId,
     questions,
     transport,
     events,
@@ -146,7 +146,7 @@ export const FlexJarDock = ({
 
   const { dismissed, shouldHideCompletely, isLoading, closeDock, reopenDock } =
     usePersistedDismissal({
-      feedbackId,
+      surveyId,
       initialOpen: config.initialOpen,
       dismissCooldownDays: config.dismissCooldownDays,
       events,
@@ -341,7 +341,7 @@ export const FlexJarDock = ({
     <aside
       className={joinClassNames(CLASS_NAMES.container, config.containerClassName)}
       style={containerStyle}
-      data-feedback-id={feedbackId}
+      data-feedback-id={surveyId}
       data-state={dismissed ? "dismissed" : "open"}
       aria-label="Tilbakemeldingspanel"
     >

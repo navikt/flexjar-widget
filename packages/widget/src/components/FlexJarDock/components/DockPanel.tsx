@@ -182,7 +182,7 @@ export const DockPanel = ({
             size="small"
             icon={<XMarkIcon aria-hidden />}
             onClick={onClose}
-            aria-label="Avbryt"
+            aria-label={cancelLabel ?? "Avbryt"}
             style={{
               borderRadius: "50%",
               width: "32px",

@@ -47,7 +47,7 @@ const meta: Meta<typeof FlexJarDock> = {
     },
   },
   args: {
-    feedbackId: "storybook-dock",
+    surveyId: "storybook-dock",
     survey: DEFAULT_SURVEY_RATING,
     transport: SUCCESS_TRANSPORT,
     behavior: { dismissCooldownDays: 0 },
@@ -67,7 +67,7 @@ type Story = StoryObj<typeof FlexJarDock>;
 export const Custom: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "kontakt-oss-skjema-custom",
+    surveyId: "kontakt-oss-skjema-custom",
     survey: CUSTOM_SURVEY,
   },
   parameters: {

@@ -23,7 +23,7 @@
 - **Styles export**: surface the compiled CSS at `@navikt/flexjar-widget/styles.css` so consuming apps can import the
   widget styles alongside `@navikt/ds-css` without poking at build internals.
 - **Transport injection**: continue to require a `transport` implementation that receives
-  `{ feedbackId, answers, startedAt, submittedAt, transportPayload }` and returns a promise. Reflect loading, success,
+  `{ surveyId, answers, startedAt, submittedAt, transportPayload }` and returns a promise. Reflect loading, success,
   and error states via props/events.
 - **Submission payload**: every submission now includes `question__<id>` entries containing the rendered prompt so
   downstream logs can pair answers with their questions. The rating answer must always resolve to `svar` and the main

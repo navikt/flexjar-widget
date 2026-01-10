@@ -197,7 +197,7 @@ If upgrading from 0.2.13, update your CSS import:
 
 - Remove memory fallback storage to ensure consent compliance—dock now uses `initialOpen` behavior when consent is
   unavailable or denied.
-- Update storage key format from `flexjar-dock-dismissed:${feedbackId}` to `flexjar-dismissed-${feedbackId}` for
+- Update storage key format from `flexjar-dock-dismissed:${surveyId}` to `flexjar-dismissed-${surveyId}` for
   consistency with NAV's allowed storage list.
 - Add comprehensive development logging to help diagnose consent storage availability and permission status.
 - Document the consent-dependent persistence behavior in README, clarifying that `flexjar-*` keys must be in the allowed

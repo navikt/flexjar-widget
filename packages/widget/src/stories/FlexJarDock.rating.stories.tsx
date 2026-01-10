@@ -23,7 +23,7 @@ const meta: Meta<typeof FlexJarDock> = {
     },
   },
   args: {
-    feedbackId: "storybook-dock",
+    surveyId: "storybook-dock",
     survey: DEFAULT_SURVEY_RATING,
     transport: SUCCESS_TRANSPORT,
     behavior: { dismissCooldownDays: 0 },
@@ -43,7 +43,7 @@ type Story = StoryObj<typeof FlexJarDock>;
 export const Rating: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "sykepengesoknad-kvittering",
+    surveyId: "sykepengesoknad-kvittering",
     survey: DEFAULT_SURVEY_SERVICE_FEEDBACK,
     context: {
       tags: {
@@ -65,7 +65,7 @@ export const Rating: Story = {
 export const Stars: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "dittnav-modul-rating",
+    surveyId: "dittnav-modul-rating",
     survey: DEFAULT_SURVEY_STARS,
   },
   parameters: {
@@ -81,7 +81,7 @@ export const Stars: Story = {
 export const Thumbs: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "am-veiviser-nytteverdi",
+    surveyId: "am-veiviser-nytteverdi",
     survey: DEFAULT_SURVEY_THUMBS,
   },
   parameters: {
@@ -97,7 +97,7 @@ export const Thumbs: Story = {
 export const Nps: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "nav-no-hovedside-nps",
+    surveyId: "nav-no-hovedside-nps",
     survey: DEFAULT_SURVEY_NPS,
   },
   parameters: {
@@ -118,7 +118,7 @@ export const Nps: Story = {
 export const ProgressiveDisclosure: Story = {
   render: (args) => <ExamplePage {...args} />,
   args: {
-    feedbackId: "kontakt-oss-forbedring",
+    surveyId: "kontakt-oss-forbedring",
     survey: {
       type: "rating",
       questions: [

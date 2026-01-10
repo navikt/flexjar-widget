@@ -34,10 +34,10 @@ export const ExamplePage = (props: FlexJarDockProps) => {
 
   const handleReset = useCallback(() => {
     void (async () => {
-      await removeConsentValue(`flexjar-dismissed-${props.feedbackId}`);
+      await removeConsentValue(`flexjar-dismissed-${props.surveyId}`);
       setResetToken((token) => token + 1);
     })();
-  }, [props.feedbackId]);
+  }, [props.surveyId]);
 
   const handleGrantConsent = useCallback(() => {
     const mockAPI = window.__FLEXJAR_MOCK_CONSENT__;

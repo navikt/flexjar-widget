@@ -49,7 +49,7 @@ const optionalMainQuestionSurvey: FlexJarQuestion[] = [
   },
 ];
 
-const FEEDBACK_ID = "test-feedback";
+const SURVEY_ID = "test-survey";
 
 const INITIAL_TIME = new Date("2024-01-01T12:00:00.000Z");
 const SUBMIT_TIME = new Date("2024-01-01T12:05:00.000Z");
@@ -87,7 +87,7 @@ describe("useFlexJar", () => {
 
     const { result } = renderHook(() =>
       useFlexJar({
-        feedbackId: FEEDBACK_ID,
+        surveyId: SURVEY_ID,
         questions: requiredQuestions,
         transport,
       }),
@@ -124,7 +124,7 @@ describe("useFlexJar", () => {
 
     const { result } = renderHook(() =>
       useFlexJar({
-        feedbackId: FEEDBACK_ID,
+        surveyId: SURVEY_ID,
         questions: optionalMainQuestionSurvey,
         transport,
       }),
@@ -153,10 +153,28 @@ describe("useFlexJar", () => {
     const payload = submitMock.mock.calls[0][0];
 
     expect(payload.answers).toEqual({ rating: 5 });
-    expect(payload.transportPayload.rating).toBe(5);
+    expect(payload.surveyId).toBe(SURVEY_ID);
+    expect(payload.transportPayload).toMatchObject({
+      schemaVersion: 1,
+      surveyId: SURVEY_ID,
+      surveyType: "rating",
+    });
+    expect(payload.transportPayload).not.toHaveProperty("rating");
     expect(payload.transportPayload).not.toHaveProperty("feedback");
-    // surveyType is now always inferred if not provided
-    expect(payload.transportPayload.surveyType).toBe("rating");
+    expect(payload.transportPayload.answers).toHaveLength(1);
+    expect(payload.transportPayload.answers[0]).toMatchObject({
+      fieldId: "rating",
+      fieldType: "RATING",
+      question: {
+        label: "Hvor fornøyd er du?",
+      },
+      value: {
+        type: "rating",
+        rating: 5,
+        ratingVariant: "emoji",
+        ratingScale: 5,
+      },
+    });
 
     expect(result.current.status).toBe("success");
     expect(result.current.error).toBeNull();
@@ -172,7 +190,7 @@ describe("useFlexJar", () => {
 
     const { result } = renderHook(() =>
       useFlexJar({
-        feedbackId: FEEDBACK_ID,
+        surveyId: SURVEY_ID,
         questions: requiredQuestions,
         transport,
         surveyType: "topTasks",
@@ -202,7 +220,7 @@ describe("useFlexJar", () => {
 
     const { result } = renderHook(() =>
       useFlexJar({
-        feedbackId: FEEDBACK_ID,
+        surveyId: SURVEY_ID,
         questions: requiredQuestions,
         transport,
       }),
@@ -224,23 +242,39 @@ describe("useFlexJar", () => {
     expect(submitMock).toHaveBeenCalledTimes(1);
     const payload = submitMock.mock.calls[0][0];
 
-    expect(payload.feedbackId).toBe(FEEDBACK_ID);
+    expect(payload.surveyId).toBe(SURVEY_ID);
     expect(payload.answers).toEqual({
       rating: 4,
       feedback: "Alt fungerer fint",
       "free-text": "Alt fungerer fint",
     });
-    expect(payload.transportPayload.feedbackId).toBe(FEEDBACK_ID);
-    expect(payload.transportPayload.rating).toBe(4);
-    expect(payload.transportPayload.feedback).toBe("Alt fungerer fint");
-    expect(payload.transportPayload["free-text"]).toBe("Alt fungerer fint");
-    // surveyType is now always inferred if not provided
+    expect(payload.transportPayload).toMatchObject({
+      schemaVersion: 1,
+      surveyId: SURVEY_ID,
+    });
+    expect(payload.transportPayload).not.toHaveProperty("rating");
+    expect(payload.transportPayload).not.toHaveProperty("feedback");
+    expect(payload.transportPayload).not.toHaveProperty("free-text");
     expect(payload.transportPayload.surveyType).toBe("rating");
-    // Structured answers array contains question metadata
     expect(payload.transportPayload.answers).toHaveLength(3);
-    expect(payload.transportPayload.answers![0].question.label).toBe(
-      "Hvor fornøyd er du?",
-    );
+    expect(payload.transportPayload.answers[0]).toMatchObject({
+      fieldId: "rating",
+      fieldType: "RATING",
+      question: { label: "Hvor fornøyd er du?" },
+      value: { type: "rating", rating: 4, ratingVariant: "emoji", ratingScale: 5 },
+    });
+    expect(payload.transportPayload.answers[1]).toMatchObject({
+      fieldId: "feedback",
+      fieldType: "TEXT",
+      question: { label: "Hva kan vi forbedre?" },
+      value: { type: "text", text: "Alt fungerer fint" },
+    });
+    expect(payload.transportPayload.answers[2]).toMatchObject({
+      fieldId: "free-text",
+      fieldType: "TEXT",
+      question: { label: "Andre kommentarer?" },
+      value: { type: "text", text: "Alt fungerer fint" },
+    });
     expect(payload.startedAt).toBe(INITIAL_TIME.toISOString());
     expect(payload.submittedAt).toBe(SUBMIT_TIME.toISOString());
 
@@ -267,7 +301,7 @@ describe("useFlexJar", () => {
 
     const { result } = renderHook(() =>
       useFlexJar({
-        feedbackId: FEEDBACK_ID,
+        surveyId: SURVEY_ID,
         questions: requiredQuestions,
         transport,
         events,
@@ -327,7 +361,7 @@ describe("useFlexJar", () => {
 
     const { result } = renderHook(() =>
       useFlexJar({
-        feedbackId: FEEDBACK_ID,
+        surveyId: SURVEY_ID,
         questions: requiredQuestions,
         transport,
         events,
@@ -379,7 +413,7 @@ describe("useFlexJar", () => {
 
     const { result } = renderHook(() =>
       useFlexJar({
-        feedbackId: FEEDBACK_ID,
+        surveyId: SURVEY_ID,
         questions: requiredQuestions,
         transport,
       }),

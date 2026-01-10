@@ -46,7 +46,7 @@ export function inferSurveyType(questions: FlexJarQuestion[]): SurveyType {
 }
 
 export function buildTransportPayload(
-  feedbackId: string,
+  surveyId: string,
   answers: Record<string, FlexJarAnswerValue>,
   questions: FlexJarQuestion[],
   surveyType?: SurveyType,
@@ -54,21 +54,24 @@ export function buildTransportPayload(
   startedAt?: string,
   submittedAt?: string,
 ): FlexJarTransportPayload {
-  const payload: FlexJarTransportPayload = {
-    feedbackId,
-  };
+  if (!submittedAt) {
+    throw new Error("FlexJar: submittedAt is required to build transport payload");
+  }
 
   // Add survey type - use provided or infer from questions
   const resolvedSurveyType = surveyType ?? inferSurveyType(questions);
-  payload.surveyType = resolvedSurveyType;
-
-  // Add context if provided
-  if (context) {
-    payload.context = context;
-  }
+  const payload: FlexJarTransportPayload = {
+    schemaVersion: 1,
+    surveyId,
+    surveyType: resolvedSurveyType,
+    submittedAt,
+    startedAt,
+    context,
+    answers: [],
+  };
 
   // Calculate and add time to complete if both timestamps are available
-  if (startedAt && submittedAt) {
+  if (startedAt) {
     const startTime = new Date(startedAt).getTime();
     const endTime = new Date(submittedAt).getTime();
     const timeToCompleteMs = endTime - startTime;
@@ -77,15 +80,6 @@ export function buildTransportPayload(
     if (timeToCompleteMs > 1000 && timeToCompleteMs < 1800000) {
       payload.timeToCompleteMs = timeToCompleteMs;
     }
-  }
-
-  // Add all answers as flat keys (legacy format)
-  for (const [questionId, answerValue] of Object.entries(answers)) {
-    // Skip if this would overwrite feedbackId or surveyType
-    if (questionId === "feedbackId" || questionId === "surveyType") {
-      continue;
-    }
-    payload[questionId] = answerValue;
   }
 
   // Add structured answers array (rich metadata for analytics)

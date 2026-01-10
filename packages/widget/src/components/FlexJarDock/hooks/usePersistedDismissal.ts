@@ -100,7 +100,7 @@ const getStorageAdapter = (strategy: StorageStrategy) => {
 };
 
 export interface UsePersistedDismissalOptions {
-  feedbackId: string;
+  surveyId: string;
   initialOpen: boolean;
   dismissCooldownDays: number;
   events?: FlexJarEvents;
@@ -121,7 +121,7 @@ export const usePersistedDismissal = (
   options: UsePersistedDismissalOptions,
 ): UsePersistedDismissalReturn => {
   const {
-    feedbackId,
+    surveyId,
     initialOpen,
     dismissCooldownDays,
     events,
@@ -131,8 +131,8 @@ export const usePersistedDismissal = (
   } = options;
 
   const storageKey = useMemo(
-    () => `flexjar-dismissed-${feedbackId}`,
-    [feedbackId],
+    () => `flexjar-dismissed-${surveyId}`,
+    [surveyId],
   );
 
   const storageAdapter = useMemo(
@@ -203,9 +203,9 @@ export const usePersistedDismissal = (
 
   useEffect(() => {
     if (!dismissed) {
-      events?.onViewDock?.(feedbackId);
+      events?.onViewDock?.(surveyId);
     }
-  }, [dismissed, events, feedbackId]);
+  }, [dismissed, events, surveyId]);
 
   const persistDismissedState = useCallback(
     async (nextDismissed: boolean, hideCompletely?: boolean) => {

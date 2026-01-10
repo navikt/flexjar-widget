@@ -20,7 +20,7 @@ import type { FlexJarSurveyConfig } from "../components/surveyTypes.js";
  * import { FlexJarDock, DEFAULT_SURVEY_RATING } from "@navikt/flexjar-widget";
  * 
  * <FlexJarDock
- *   feedbackId="my-app-feedback"
+ *   surveyId="my-app-feedback"
  *   survey={DEFAULT_SURVEY_RATING}
  *   transport={transport}
  * />
@@ -91,7 +91,7 @@ export const DEFAULT_SURVEY_SERVICE_FEEDBACK: FlexJarSurveyConfig = {
  * @example
  * ```tsx
  * <FlexJarDock
- *   feedbackId="article-helpful"
+ *   surveyId="article-helpful"
  *   survey={DEFAULT_SURVEY_THUMBS}
  *   transport={transport}
  * />
@@ -125,7 +125,7 @@ export const DEFAULT_SURVEY_THUMBS: FlexJarSurveyConfig = {
  * @example
  * ```tsx
  * <FlexJarDock
- *   feedbackId="content-quality"
+ *   surveyId="content-quality"
  *   survey={DEFAULT_SURVEY_STARS}
  *   transport={transport}
  * />
@@ -162,7 +162,7 @@ export const DEFAULT_SURVEY_STARS: FlexJarSurveyConfig = {
  * @example
  * ```tsx
  * <FlexJarDock
- *   feedbackId="nps-survey"
+ *   surveyId="nps-survey"
  *   survey={DEFAULT_SURVEY_NPS}
  *   transport={transport}
  * />
@@ -201,7 +201,7 @@ export const DEFAULT_SURVEY_NPS: FlexJarSurveyConfig = {
  * import { FlexJarDock, DEFAULT_SURVEY_DISCOVERY } from "@navikt/flexjar-widget";
  * 
  * <FlexJarDock
- *   feedbackId="discovery-feedback"
+ *   surveyId="discovery-feedback"
  *   survey={DEFAULT_SURVEY_DISCOVERY}
  *   transport={transport}
  * />

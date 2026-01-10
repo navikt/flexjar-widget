@@ -17,7 +17,7 @@ import { validateAnswers } from "./validation.js";
 import { buildTransportPayload } from "./transportPayload.js";
 
 export interface UseFlexJarOptions {
-  feedbackId: string;
+  surveyId: string;
   questions: FlexJarQuestion[];
   transport: FlexJarTransport;
   events?: FlexJarEvents;
@@ -39,7 +39,7 @@ export interface UseFlexJarReturn {
 
 export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
   const {
-    feedbackId,
+    surveyId,
     questions,
     transport,
     events,
@@ -79,13 +79,13 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     const answerSnapshot = cloneAnswers(answers);
     const submittedAtTimestamp = new Date().toISOString();
     const submission: FlexJarSubmission = {
-      feedbackId,
+      surveyId,
       answers: answerSnapshot,
       startedAt: startedAtRef.current,
       submittedAt: submittedAtTimestamp,
       context: context ? { ...context } : undefined,
       transportPayload: buildTransportPayload(
-        feedbackId,
+        surveyId,
         answerSnapshot,
         questions,
         surveyType,
@@ -114,7 +114,7 @@ export function useFlexJar(options: UseFlexJarOptions): UseFlexJarReturn {
     answers,
     context,
     events,
-    feedbackId,
+    surveyId,
     questions,
     surveyType,
     transport,

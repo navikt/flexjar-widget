@@ -10,7 +10,7 @@ import "@navikt/flexjar-widget/styles.css";
 import { FlexJarDock, DEFAULT_SURVEY_RATING } from "@navikt/flexjar-widget";
 
 <FlexJarDock
-  feedbackId="my-app-feedback"
+  surveyId="my-app-feedback"
   survey={DEFAULT_SURVEY_RATING}
   transport={{
     submit: async (submission) => {
@@ -79,7 +79,7 @@ const taskPriority = createTaskPrioritySurvey({
 
 ```tsx
 <FlexJarDock
-  feedbackId="unique-id"
+  surveyId="unique-id"
   survey={DEFAULT_SURVEY_RATING}
   transport={{ submit: async (data) => { ... } }}
   
@@ -162,8 +162,8 @@ const branchingSurvey = {
 
 | Env | URL |
 |-----|-----|
-| Dev | `https://flexjar-analytics-api.intern.dev.nav.no/api/v2/feedback` |
-| Prod | `https://flexjar-analytics-api.intern.nav.no/api/v2/feedback` |
+| Dev | `https://flexjar-analytics-api.intern.dev.nav.no/api/v1/feedback` |
+| Prod | `https://flexjar-analytics-api.intern.nav.no/api/v1/feedback` |
 
 ### Onboarding
 
@@ -197,7 +197,7 @@ const transport = {
       "api://prod-gcp.team-esyfo.flexjar-analytics-api/.default"
     );
     
-    await fetch("https://flexjar-analytics-api.intern.nav.no/api/v2/feedback", {
+    await fetch("https://flexjar-analytics-api.intern.nav.no/api/v1/feedback", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

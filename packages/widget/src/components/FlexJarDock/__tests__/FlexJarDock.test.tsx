@@ -48,7 +48,7 @@ function renderDock(options?: {
 
   return render(
     <FlexJarDock
-      feedbackId="dock-feedback"
+      surveyId="dock-feedback"
       survey={options?.survey ?? createSurvey()}
       transport={transport}
       events={options?.events}
@@ -211,10 +211,10 @@ describe("FlexJarDock", () => {
     await user.click(submitButton);
 
     expect(transportSubmit).toHaveBeenCalledTimes(1);
-    expect(transportSubmit.mock.calls[0][0].feedbackId).toBe("dock-feedback");
+    expect(transportSubmit.mock.calls[0][0].surveyId).toBe("dock-feedback");
 
     await screen.findByRole("heading", { name: /takk for tilbakemeldingen/i });
-    expect(screen.getByRole("button", { name: /lukk/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /lukk/i }).length).toBeGreaterThan(0);
   });
 
   it("submits immediately when step-mode branching returns SUBMIT (top tasks)", async () => {
@@ -321,7 +321,7 @@ describe("FlexJarDock", () => {
       expect(initialContainer?.getAttribute("data-state")).toBe("open");
     });
 
-    const closeButton = screen.getByRole("button", { name: /lukk/i });
+    const closeButton = screen.getByRole("button", { name: /avbryt|lukk/i });
     await act(async () => {
       await user.click(closeButton);
     });

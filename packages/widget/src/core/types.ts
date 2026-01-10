@@ -285,18 +285,20 @@ export interface TransportAnswer {
   };
 }
 
-export type FlexJarTransportPayload = {
-  feedbackId: string;
-  surveyType?: SurveyType;
-  svar?: number;
-  feedback?: string;
-  /** Structured answers array for analytics */
-  answers?: TransportAnswer[];
-  /** Time to complete the survey in milliseconds */
+/**
+ * Canonical submission payload (schemaVersion=1).
+ * This is the ONLY payload shape that should be sent to analytics backends.
+ */
+export interface FlexJarTransportPayload {
+  schemaVersion: 1;
+  surveyId: string;
+  surveyType: SurveyType;
+  submittedAt: string;
+  startedAt?: string;
   timeToCompleteMs?: number;
-  /** Full context object including system fields (device, viewport) and user tags */
   context?: FlexjarContext;
-} & Record<string, FlexJarAnswerValue | string | TransportAnswer[] | number | Record<string, unknown> | FlexjarContext | undefined>;
+  answers: TransportAnswer[];
+}
 
 
 /**
@@ -360,7 +362,7 @@ export interface FlexjarContext {
 }
 
 export interface FlexJarSubmission {
-  feedbackId: string;
+  surveyId: string;
   answers: Record<string, FlexJarAnswerValue>;
   startedAt: string;
   submittedAt: string;
@@ -373,7 +375,7 @@ export interface FlexJarTransport {
 }
 
 export interface FlexJarEvents {
-  onViewDock?: (feedbackId: string) => void;
+  onViewDock?: (surveyId: string) => void;
   onAnswer?: (questionId: string, value: unknown) => void;
   onSubmitStart?: (submission: FlexJarSubmission) => void;
   onSubmitSuccess?: (submission: FlexJarSubmission) => void;
