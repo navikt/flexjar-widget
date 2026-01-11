@@ -72,7 +72,6 @@ const meta: Meta<typeof FlexJarDock> = {
     surveyId: "storybook-dock",
     survey: DEFAULT_SURVEY_RATING,
     transport: SUCCESS_TRANSPORT,
-    behavior: { dismissCooldownDays: 0 },
   },
   argTypes: {
     transport: { control: false },
@@ -91,12 +90,15 @@ export const Discovery: Story = {
   args: {
     surveyId: "nav-no-forside-discovery",
     survey: DEFAULT_SURVEY_DISCOVERY,
+    behavior: {
+      questionLayout: "steps",
+    },
   },
   parameters: {
     docs: {
       description: {
         story:
-          "Discovery-undersøkelse med `DEFAULT_SURVEY_DISCOVERY` preset. Brukes til å finne hvilke oppgaver brukere kommer for.",
+          "Discovery-undersøkelse med `DEFAULT_SURVEY_DISCOVERY` preset og `questionLayout: 'steps'`. Viser ett spørsmål om gangen med Neste/Tilbake-knapper.",
       },
     },
   },

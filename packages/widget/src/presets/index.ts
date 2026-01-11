@@ -238,7 +238,6 @@ export const DEFAULT_SURVEY_DISCOVERY: FlexJarSurveyConfig = {
       maxLength: 500,
     } as FlexJarQuestion,
   ],
-  // This provides a cleaner UX than gate-reveal (where questions appear when typing)
 };
 
 // ============================================

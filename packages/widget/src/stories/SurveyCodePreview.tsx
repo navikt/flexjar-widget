@@ -11,6 +11,10 @@ interface SurveyCodePreviewProps {
      */
     context?: unknown;
     /**
+     * The behavior configuration to display
+     */
+    behavior?: unknown;
+    /**
      * Optional title for the code panel
      * @default "Survey-konfigurasjon"
      */
@@ -29,13 +33,16 @@ interface SurveyCodePreviewProps {
 export function SurveyCodePreview({
     survey,
     context,
+    behavior,
     title = "Survey-konfigurasjon",
     defaultCollapsed = false,
 }: SurveyCodePreviewProps) {
     const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
 
-    // Format the full configuration object
-    const fullConfig = context ? { survey, context } : { survey };
+    // Format the full configuration object - include all non-undefined props
+    const fullConfig: Record<string, unknown> = { survey };
+    if (context) fullConfig.context = context;
+    if (behavior) fullConfig.behavior = behavior;
     const formattedCode = JSON.stringify(fullConfig, null, 2);
 
     return (

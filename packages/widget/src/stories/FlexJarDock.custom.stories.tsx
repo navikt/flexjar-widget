@@ -50,7 +50,6 @@ const meta: Meta<typeof FlexJarDock> = {
     surveyId: "storybook-dock",
     survey: DEFAULT_SURVEY_RATING,
     transport: SUCCESS_TRANSPORT,
-    behavior: { dismissCooldownDays: 0 },
   },
   argTypes: {
     transport: { control: false },

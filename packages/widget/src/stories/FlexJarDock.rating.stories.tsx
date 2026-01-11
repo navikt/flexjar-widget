@@ -26,7 +26,6 @@ const meta: Meta<typeof FlexJarDock> = {
     surveyId: "storybook-dock",
     survey: DEFAULT_SURVEY_RATING,
     transport: SUCCESS_TRANSPORT,
-    behavior: { dismissCooldownDays: 0 },
   },
   argTypes: {
     transport: { control: false },
@@ -110,49 +109,4 @@ export const Nps: Story = {
   },
 };
 
-/**
- * Progressive Disclosure demo:
- * - Text field is hidden until rating is selected (using visibleIf)
- * - Submit button is hidden until first required question is answered
- */
-export const ProgressiveDisclosure: Story = {
-  render: (args) => <ExamplePage {...args} />,
-  args: {
-    surveyId: "kontakt-oss-forbedring",
-    survey: {
-      type: "rating",
-      questions: [
-        {
-          id: "rating",
-          type: "rating",
-          variant: "stars",
-          prompt: "Hvordan var opplevelsen din?",
-          description: "Klikk på en stjerne for å se tekstfeltet",
-          required: true,
-        },
-        {
-          id: "feedback",
-          type: "text",
-          prompt: "Fortell oss mer (vises etter at du har valgt rating)",
-          description: "Dette feltet dukket opp via visibleIf!",
-          required: false,
-          maxLength: 500,
-          // 👇 This question only appears AFTER rating is answered
-          visibleIf: {
-            field: "ANSWER",
-            questionId: "rating",
-            operator: "EXISTS",
-          },
-        },
-      ],
-    },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "**Progressive Disclosure**\\n\\nDemonstrerer `visibleIf` for å vise spørsmål betinget. Tekstfeltet og send-knappen vises først etter at rating er valgt.",
-      },
-    },
-  },
-};
+
