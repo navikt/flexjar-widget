@@ -63,6 +63,14 @@ export interface FlexJarStyle {
 export type StorageStrategy = "consent" | "localStorage" | "none";
 
 /**
+ * Controls how questions are presented.
+ * - "auto": step mode only when branching logic exists (default)
+ * - "singlePage": always show all visible questions on one page
+ * - "steps": always show one question at a time with Next/Back
+ */
+export type QuestionLayout = "auto" | "singlePage" | "steps";
+
+/**
  * Behavior options for the dock.
  */
 export interface FlexJarBehavior {
@@ -74,6 +82,11 @@ export interface FlexJarBehavior {
     dismissCooldownDays?: number;
     /** Hide completely after successful submit. @default true */
     hideAfterSubmit?: boolean;
+    /**
+     * Question layout mode.
+     * @default "auto"
+     */
+    questionLayout?: QuestionLayout;
     /** Show privacy notice. @default true */
     showPersonalDataNotice?: boolean;
     /** Custom privacy notice content. */

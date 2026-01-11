@@ -40,6 +40,7 @@ function renderDock(options?: {
   survey?: FlexJarSurveyConfig;
   context?: Record<string, unknown>;
   initialOpen?: boolean;
+  behavior?: Record<string, unknown>;
 }) {
   const transport: FlexJarTransport =
     options?.transport ?? {
@@ -53,7 +54,7 @@ function renderDock(options?: {
       transport={transport}
       events={options?.events}
       context={options?.context}
-      behavior={{ initialOpen: options?.initialOpen ?? true }}
+      behavior={{ initialOpen: options?.initialOpen ?? true, ...(options?.behavior ?? {}) }}
     />,
   );
 }
@@ -250,6 +251,27 @@ describe("FlexJarDock", () => {
     });
 
     await screen.findByRole("heading", { name: /takk for tilbakemeldingen/i });
+  });
+
+  it("supports step layout without branching when questionLayout is steps", async () => {
+    const user = userEvent.setup();
+    renderDock({ behavior: { questionLayout: "steps" } });
+
+    await waitFor(() => {
+      expect(screen.getByRole("radio", { name: /5\./i })).toBeInTheDocument();
+    });
+
+    // In step layout we should see Next immediately (submit is only on last step).
+    expect(screen.getByRole("button", { name: /neste/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("radio", { name: /5\./i }));
+    await user.click(screen.getByRole("button", { name: /neste/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("textbox", { name: /hva kan vi forbedre/i })).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole("button", { name: /tilbake/i })).toBeInTheDocument();
   });
 
   it("displays validation errors when required questions are missing", async () => {

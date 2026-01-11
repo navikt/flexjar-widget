@@ -5,6 +5,7 @@ import { DefaultQuestionRenderer, RatingQuestionField } from "../questions";
 import { useAutoCloseOnSuccess } from "./hooks/useAutoCloseOnSuccess.js";
 import { useStepNavigation } from "./hooks/useStepNavigation.js";
 import { useEnrichedContext } from "./hooks/useEnrichedContext.js";
+import { surveyHasBranchingLogic } from "../../core/branchingEngine.js";
 import type { FlexJarRenderQuestionProps } from "../../types.js";
 import { buildCanonicalSurvey } from "../shared/canonicalSurvey.js";
 import type { FlexJarSurveyConfig } from "../surveyTypes.js";
@@ -168,8 +169,16 @@ export const FlexJarDock = ({
   );
 
   // Step navigation for branching logic
+  const hasBranching = useMemo(
+    () => surveyHasBranchingLogic(questions),
+    [questions],
+  );
+
+  const forceStepMode = config.questionLayout === "steps";
+  const forceSinglePage = config.questionLayout === "singlePage";
+
   const {
-    isStepMode,
+    isStepMode: stepModeFromSurvey,
     currentStep,
     currentQuestion: currentStepQuestion,
     visitedSteps,
@@ -182,7 +191,12 @@ export const FlexJarDock = ({
   } = useStepNavigation({
     questions,
     answers,
+    forceStepMode,
   });
+
+  // "singlePage" is only meaningful when there is no branching.
+  // If branching exists we keep step mode to preserve correct navigation.
+  const isStepMode = forceSinglePage ? hasBranching : stepModeFromSurvey;
 
   const hasTextQuestionsForNotice = useMemo(() => {
     if (!isStepMode) {

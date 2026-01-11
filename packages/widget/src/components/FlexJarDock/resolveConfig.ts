@@ -42,6 +42,7 @@ export interface ResolvedConfig {
     resetOnClose: boolean;
     dismissCooldownDays: number;
     hideAfterSubmit: boolean;
+    questionLayout: "auto" | "singlePage" | "steps";
     showPersonalDataNotice: boolean;
     personalDataNotice: ReactNode;
     storageStrategy: "consent" | "localStorage" | "none";
@@ -85,6 +86,7 @@ export function resolveConfig(
         resetOnClose: behavior?.resetOnClose ?? true,
         dismissCooldownDays: behavior?.dismissCooldownDays ?? 30,
         hideAfterSubmit: behavior?.hideAfterSubmit ?? true,
+        questionLayout: behavior?.questionLayout ?? "auto",
         showPersonalDataNotice: behavior?.showPersonalDataNotice ?? true,
         personalDataNotice: behavior?.personalDataNotice ?? DEFAULT_PERSONAL_DATA_NOTICE,
         storageStrategy: behavior?.storageStrategy ?? "consent",

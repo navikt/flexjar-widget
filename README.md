@@ -86,11 +86,13 @@ const taskPriority = createTaskPrioritySurvey({
   labels={{ submit: "Send", cancel: "Avbryt" }}
   success={{ title: "Takk!", autoClose: true }}
   style={{ position: "bottom-left" }}
-  behavior={{ storageStrategy: "localStorage" }}
+  behavior={{ storageStrategy: "localStorage", questionLayout: "auto" }}
   
   events={{ onSubmitSuccess: () => { ... } }}
-  context={{ page: "/soknad" }}
-  metadata={{ team: "esyfo" }}
+  context={{
+    tags: { rolle: "arbeidsgiver", harSykmelding: true },
+    debug: { correlationId: "abc-123" },
+  }}
 />
 ```
 
@@ -101,6 +103,12 @@ const taskPriority = createTaskPrioritySurvey({
 | `"consent"` (default) | Eksterne flater (nav.no) |
 | `"localStorage"` | Interne flater (Modia, Gosys) |
 | `"none"` | Ingen persistering |
+
+### Question Layout (1 side vs flere sider)
+
+- `questionLayout: "auto"` (default): Step-mode kun når survey har branching (logic).
+- `questionLayout: "singlePage"`: All visible spørsmål på én side (ingen Neste/Tilbake).
+- `questionLayout: "steps"`: Ett spørsmål av gangen med Neste/Tilbake (også uten branching).
 
 ---
 
