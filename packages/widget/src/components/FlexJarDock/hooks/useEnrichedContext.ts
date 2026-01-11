@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FlexjarContext, DeviceType } from "../../../core/types.js";
 
 /**
@@ -10,6 +10,38 @@ function getDeviceType(width: number): DeviceType {
     return "desktop";
 }
 
+const NAVIGATION_EVENT = "flexjar:navigation";
+
+let historyPatched = false;
+
+function ensureHistoryPatched(): void {
+    if (historyPatched) return;
+    if (typeof window === "undefined") return;
+
+    historyPatched = true;
+
+    const notify = () => {
+        window.dispatchEvent(new Event(NAVIGATION_EVENT));
+    };
+
+    type PushState = History["pushState"];
+    type ReplaceState = History["replaceState"];
+
+    const originalPushState: PushState = window.history.pushState.bind(window.history);
+    window.history.pushState = (...args: Parameters<PushState>): ReturnType<PushState> => {
+        const result = originalPushState(...args);
+        notify();
+        return result;
+    };
+
+    const originalReplaceState: ReplaceState = window.history.replaceState.bind(window.history);
+    window.history.replaceState = (...args: Parameters<ReplaceState>): ReturnType<ReplaceState> => {
+        const result = originalReplaceState(...args);
+        notify();
+        return result;
+    };
+}
+
 /**
  * Hook that enriches user-provided context with auto-collected browser data.
  * Note: This hook is client-only - the widget is never server-rendered.
@@ -18,20 +50,62 @@ function getDeviceType(width: number): DeviceType {
  * @returns Enriched context with system fields (url, pathname, viewport, deviceType, userAgent)
  */
 export function useEnrichedContext(userContext?: FlexjarContext): FlexjarContext {
-    return useMemo((): FlexjarContext => {
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
+    const [location, setLocation] = useState(() => ({
+        url: window.location.href,
+        pathname: window.location.pathname,
+    }));
 
+    const [viewport, setViewport] = useState(() => ({
+        width: window.innerWidth,
+        height: window.innerHeight,
+    }));
+
+    useEffect(() => {
+        ensureHistoryPatched();
+
+        const updateLocation = () => {
+            setLocation({
+                url: window.location.href,
+                pathname: window.location.pathname,
+            });
+        };
+
+        window.addEventListener(NAVIGATION_EVENT, updateLocation);
+        window.addEventListener("popstate", updateLocation);
+        window.addEventListener("hashchange", updateLocation);
+
+        return () => {
+            window.removeEventListener(NAVIGATION_EVENT, updateLocation);
+            window.removeEventListener("popstate", updateLocation);
+            window.removeEventListener("hashchange", updateLocation);
+        };
+    }, []);
+
+    useEffect(() => {
+        const updateViewport = () => {
+            setViewport({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            });
+        };
+
+        window.addEventListener("resize", updateViewport);
+        return () => {
+            window.removeEventListener("resize", updateViewport);
+        };
+    }, []);
+
+    return useMemo((): FlexjarContext => {
         return {
             // System-collected
-            url: window.location.href,
-            pathname: window.location.pathname,
-            viewport: { width: viewportWidth, height: viewportHeight },
-            deviceType: getDeviceType(viewportWidth),
+            url: location.url,
+            pathname: location.pathname,
+            viewport,
+            deviceType: getDeviceType(viewport.width),
             userAgent: navigator.userAgent,
             // User-provided
             tags: userContext?.tags,
             debug: userContext?.debug,
         };
-    }, [userContext?.tags, userContext?.debug]);
+    }, [location.pathname, location.url, userContext?.debug, userContext?.tags, viewport]);
 }
